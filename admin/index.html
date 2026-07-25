@@ -11,111 +11,55 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   
   <script>
-    // 建立卡片元件
-    var CardPreview = window.createClass({
-      render: function() {
-        var entry = this.props.entry;
-        
-        // 自動嘗試尋找標題、標籤與摘要欄位 (相容各種欄位命名)
-        var title = entry.getIn(['data', 'title']) || entry.getIn(['data', 'name']) || '（請輸入標題）';
-        var tagsStr = entry.getIn(['data', 'tags']) || entry.getIn(['data', 'keywords']) || '';
-        var description = entry.getIn(['data', 'description']) || entry.getIn(['data', 'summary']) || '（請輸入摘要簡述）';
-        var link = entry.getIn(['data', 'link']) || entry.getIn(['data', 'url']);
-
-        // 處理標籤 (以逗號或分號切分)
-        var tags = tagsStr ? tagsStr.split(/[,;]/).map(function(t) { return t.trim(); }).filter(Boolean) : [];
-
-        return window.h('div', { 
-          style: { 
-            padding: '30px 15px', 
-            background: '#f8f9fa', 
-            minHeight: '100vh', 
-            boxSizing: 'border-box',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' 
-          } 
-        },
-          // 卡片本體
-          window.h('div', {
-            style: {
-              background: '#ffffff',
-              borderRadius: '16px',
-              padding: '24px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05)',
-              maxWidth: '360px',
-              margin: '0 auto'
-            }
-          },
-            // 論文標題
-            window.h('h3', { 
-              style: { 
-                fontSize: '1.25rem', 
-                color: '#0f172a', 
-                marginBottom: '12px', 
-                fontWeight: '700', 
-                lineHeight: '1.4' 
-              } 
-            }, title),
-            
-            // 標籤方塊
-            tags.length > 0 ? window.h('div', { 
-              style: { 
-                marginBottom: '14px', 
-                display: 'flex', 
-                flexWrap: 'wrap', 
-                gap: '6px' 
-              } 
-            },
-              tags.map(function(tag, idx) {
-                return window.h('span', {
-                  key: idx,
-                  style: {
-                    background: '#eff6ff',
-                    color: '#2563eb',
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    fontSize: '0.8rem',
-                    fontWeight: '600'
-                  }
-                }, tag);
-              })
-            ) : null,
-
-            // 摘要內文 (自動折行、絕對不破版)
-            window.h('p', { 
-              style: { 
-                color: '#475569', 
-                fontSize: '0.9rem', 
-                lineHeight: '1.6', 
-                marginBottom: '16px', 
-                whiteSpace: 'pre-wrap', 
-                wordBreak: 'break-word' 
-              } 
-            }, description),
-
-            // 連結按鈕
-            (link && link !== '000000') ? window.h('div', {
-              style: {
-                textAlign: 'center',
-                background: '#2563eb',
-                color: '#ffffff',
-                padding: '8px 14px',
-                borderRadius: '6px',
-                fontSize: '0.85rem',
-                fontWeight: '600'
-              }
-            }, '查看論文 / PDF') : null
-          )
-        );
+    // 直接用 CSS 強制覆蓋預覽區 (iframe) 的所有樣式
+    CMS.registerPreviewStyle(`
+      /* 1. 鋪滿背景底色 */
+      body {
+        background-color: #f8f9fa !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        padding: 30px 15px !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
       }
-    });
 
-    // 註冊給 research 集合
-    CMS.registerPreviewTemplate('research', CardPreview);
-    
-    // 如果 config.yml 的名稱不同，這裡一併註冊常見名稱進行雙重保險
-    CMS.registerPreviewTemplate('posts', CardPreview);
-    CMS.registerPreviewTemplate('blog', CardPreview);
+      /* 2. 把整份預覽內容強制包裹成「獨立白色卡片」 */
+      div[class*="nc-widgetPreview"],
+      div[class*="PreviewPaneFrame"] > div,
+      body > div {
+        background: #ffffff !important;
+        border-radius: 16px !important;
+        padding: 24px !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05) !important;
+        max-width: 380px !important;
+        margin: 0 auto 20px auto !important;
+      }
+
+      /* 3. 標題樣式（論文標題） */
+      h1, h2, h3 {
+        font-size: 1.25rem !important;
+        color: #0f172a !important;
+        font-weight: 700 !important;
+        line-height: 1.4 !important;
+        margin-top: 0 !important;
+        margin-bottom: 12px !important;
+      }
+
+      /* 4. 內文與摘要：解決超長文字破版、消失的問題 */
+      p, div, span {
+        color: #475569 !important;
+        font-size: 0.9rem !important;
+        line-height: 1.6 !important;
+        word-break: break-all !important; /* 強制超長文字自動換行 */
+        white-space: pre-wrap !important;
+      }
+
+      /* 5. 欄位標籤文字加粗（例如：摘要簡述:） */
+      strong, b {
+        color: #1e293b !important;
+        font-weight: 600 !important;
+      }
+    `, { raw: true });
   </script>
 </body>
 </html>
