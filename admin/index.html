@@ -95,7 +95,12 @@
 
         // 嚴格判斷：必須是非空值且符合完整 http:// 或 https:// 網址格式
         var hasLink = isValidUrl(link);
-
+        if (link && typeof link === 'string') {
+          var cleanLink = link.trim();
+          var urlPattern = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
+          hasLink = urlPattern.test(cleanLink);
+        }
+        
         return h('div', { className: 'card' },
           h('div', {},
             h('h3', {}, title),
