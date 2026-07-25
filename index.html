@@ -213,20 +213,24 @@
   <script>
     const USERNAME = "YuYiFang0323"; 
     const REPO = "MyWeb"; 
+    const BRANCH = "main"; // GitHub 預設分支
 
-    // 新增：圖片路徑修復函式，解決前台找不到照片問題
+    // 修正：將路徑轉換為 GitHub Raw 直連網址
     function getImageUrl(path) {
       if (!path) return '';
-      if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:')) {
-        return path;
+      
+      let cleanPath = path.trim().replace(/^['"]|['"]$/g, '');
+
+      // 若本身已是完整 URL 則直接回傳
+      if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://') || cleanPath.startsWith('blob:')) {
+        return cleanPath;
       }
-      // 移除 public/ 或 static/ 前綴
-      let cleanPath = path.replace(/^public\//, '/').replace(/^static\//, '/');
-      // 補齊開頭斜線
-      if (!cleanPath.startsWith('/')) {
-        cleanPath = '/' + cleanPath;
-      }
-      return cleanPath;
+
+      // 移除開頭多餘的斜線與 public/ static/ 前綴
+      cleanPath = cleanPath.replace(/^\//, '').replace(/^public\//, '').replace(/^static\//, '');
+
+      // 拼湊 GitHub Raw URL
+      return `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${cleanPath}`;
     }
 
     function parseFrontMatter(text) {
@@ -298,12 +302,11 @@
       const tags = data.tags ? data.tags.split(/[,;]/).map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
       const hasLink = isValidUrl(data.link);
       
-      // 同時讀取 X 與 Y 軸焦點
       const focalX = data.focal_x || '50%';
       const focalY = data.focal_y || '50%';
       
       const coverUrl = getImageUrl(data.cover);
-      const coverHtml = coverUrl ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面">` : '';
+      const coverHtml = coverUrl ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` : '';
 
       return `
         <div class="card">
@@ -324,7 +327,7 @@
       const focalX = data.focal_x || '50%';
       const focalY = data.focal_y || '50%';
       const coverUrl = getImageUrl(data.cover);
-      const coverHtml = coverUrl ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面">` : '';
+      const coverHtml = coverUrl ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` : '';
       return `
         <div class="card">
           ${coverHtml}
@@ -343,7 +346,7 @@
       const focalX = data.focal_x || '50%';
       const focalY = data.focal_y || '50%';
       const coverUrl = getImageUrl(data.cover);
-      const coverHtml = coverUrl ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面">` : '';
+      const coverHtml = coverUrl ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` : '';
       return `
         <div class="card">
           ${coverHtml}
