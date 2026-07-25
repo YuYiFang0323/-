@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   
   <script>
-    // 1. 直接套用跟前台 100% 一模一樣的 CSS 樣式
+    // 1. 注入 1:1 還原前台的 CSS 樣式
     CMS.registerPreviewStyle(`
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
@@ -21,19 +21,18 @@
         padding: 2rem;
       }
 
-      /* 前台卡片核心樣式 */
+      /* 前台卡片視覺設定 */
       .card {
         background: #ffffff;
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 1.8rem;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        max-width: 400px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        max-width: 380px;
         margin: 0 auto;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        min-height: 200px;
       }
       .card h3 {
         font-size: 1.25rem;
@@ -49,8 +48,8 @@
         display: inline-block;
         background: #eff6ff;
         color: #2563eb;
-        padding: 0.25rem 0.6rem;
-        border-radius: 4px;
+        padding: 0.25rem 0.65rem;
+        border-radius: 6px;
         font-size: 0.82rem;
         font-weight: 500;
         margin-right: 0.4rem;
@@ -77,22 +76,24 @@
       }
     `, { raw: true });
 
-    // 2. 研究成果 (research) 預覽範本 (100% 複製前台 renderResearch 邏輯)
+    // 2. 註冊研究成果 (research) 的自訂預覽範本
     var ResearchPreview = createClass({
       render: function() {
         var entry = this.props.entry;
-        var title = entry.getIn(['data', 'title']) || '無標題';
+        
+        // 抓取後台輸入框的數值 (相容 title, tags, description, summary, link)
+        var title = entry.getIn(['data', 'title']) || '我是研究標題';
         var tagsRaw = entry.getIn(['data', 'tags']);
-        var description = entry.getIn(['data', 'description']) || '';
-        var link = entry.getIn(['data', 'link']);
+        var description = entry.getIn(['data', 'description']) || entry.getIn(['data', 'summary']) || '';
+        var link = entry.getIn(['data', 'link']) || entry.getIn(['data', 'pdf_url']);
 
-        // 處理標籤
+        // 將逗號分隔的標籤轉為陣列 (例如 MCDM,TOPSIS -> ['MCDM', 'TOPSIS'])
         var tagList = [];
         if (tagsRaw) {
           tagList = tagsRaw.split(/[,;]/).map(function(t) { return t.trim(); }).filter(Boolean);
         }
 
-        // 判斷是否顯示按鈕
+        // 判斷按鈕是否顯示 (排除 000000 與空值)
         var hasLink = link && link !== '000000' && link.trim() !== '';
 
         return h('div', { className: 'card' },
@@ -110,51 +111,8 @@
       }
     });
 
-    // 3. 影音作品 (videos) 預覽範本
-    var VideoPreview = createClass({
-      render: function() {
-        var entry = this.props.entry;
-        var title = entry.getIn(['data', 'title']) || '無標題';
-        var description = entry.getIn(['data', 'description']) || '';
-        var youtubeUrl = entry.getIn(['data', 'youtube_url']);
-
-        return h('div', { className: 'card' },
-          h('div', {},
-            h('h3', {}, title),
-            h('p', {}, description)
-          ),
-          youtubeUrl && h('a', { href: youtubeUrl, target: '_blank', className: 'btn' }, '觀看影片')
-        );
-      }
-    });
-
-    // 4. 計畫/競賽 (plans / competitions) 預覽範本
-    var ProjectPreview = createClass({
-      render: function() {
-        var entry = this.props.entry;
-        var title = entry.getIn(['data', 'title']) || '無標題';
-        var role = entry.getIn(['data', 'role']) || '-';
-        var period = entry.getIn(['data', 'period']) || '-';
-        var description = entry.getIn(['data', 'description']) || '';
-
-        return h('div', { className: 'card' },
-          h('div', {},
-            h('h3', {}, title),
-            h('p', { style: { marginBottom: '0.5rem', fontSize: '0.88rem', color: '#64748b' } },
-              h('strong', {}, '角色：'), role, h('br'),
-              h('strong', {}, '時間：'), period
-            ),
-            h('p', {}, description)
-          )
-        );
-      }
-    });
-
-    // 5. 註冊至各自的 Collection
+    // 3. 強制註冊範本到 research 集合 (註冊多個可能名稱確保抓到)
     CMS.registerPreviewTemplate('research', ResearchPreview);
-    CMS.registerPreviewTemplate('videos', VideoPreview);
-    CMS.registerPreviewTemplate('plans', ProjectPreview);
-    CMS.registerPreviewTemplate('competitions', ProjectPreview);
   </script>
 </body>
 </html>
