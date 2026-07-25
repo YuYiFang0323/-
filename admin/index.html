@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,55 +10,151 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   
   <script>
-    // 直接用 CSS 強制覆蓋預覽區 (iframe) 的所有樣式
+    // 1. 直接套用跟前台 100% 一模一樣的 CSS 樣式
     CMS.registerPreviewStyle(`
-      /* 1. 鋪滿背景底色 */
+      * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
-        background-color: #f8f9fa !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        padding: 30px 15px !important;
-        margin: 0 !important;
-        box-sizing: border-box !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+        color: #2c3e50;
+        background-color: #f8f9fa;
+        padding: 2rem;
       }
 
-      /* 2. 把整份預覽內容強制包裹成「獨立白色卡片」 */
-      div[class*="nc-widgetPreview"],
-      div[class*="PreviewPaneFrame"] > div,
-      body > div {
-        background: #ffffff !important;
-        border-radius: 16px !important;
-        padding: 24px !important;
-        border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05) !important;
-        max-width: 380px !important;
-        margin: 0 auto 20px auto !important;
+      /* 前台卡片核心樣式 */
+      .card {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 1.8rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        max-width: 400px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 200px;
       }
-
-      /* 3. 標題樣式（論文標題） */
-      h1, h2, h3 {
-        font-size: 1.25rem !important;
-        color: #0f172a !important;
-        font-weight: 700 !important;
-        line-height: 1.4 !important;
-        margin-top: 0 !important;
-        margin-bottom: 12px !important;
+      .card h3 {
+        font-size: 1.25rem;
+        color: #0f172a;
+        margin-bottom: 0.8rem;
+        line-height: 1.4;
+        font-weight: 700;
       }
-
-      /* 4. 內文與摘要：解決超長文字破版、消失的問題 */
-      p, div, span {
-        color: #475569 !important;
-        font-size: 0.9rem !important;
-        line-height: 1.6 !important;
-        word-break: break-all !important; /* 強制超長文字自動換行 */
-        white-space: pre-wrap !important;
+      .card .tags-wrapper {
+        margin-bottom: 0.8rem;
       }
-
-      /* 5. 欄位標籤文字加粗（例如：摘要簡述:） */
-      strong, b {
-        color: #1e293b !important;
-        font-weight: 600 !important;
+      .card .tag {
+        display: inline-block;
+        background: #eff6ff;
+        color: #2563eb;
+        padding: 0.25rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        margin-right: 0.4rem;
+        margin-bottom: 0.4rem;
+      }
+      .card p {
+        color: #475569;
+        font-size: 0.95rem;
+        margin-bottom: 1.2rem;
+        white-space: pre-line;
+        word-break: break-all;
+      }
+      .card a.btn {
+        display: inline-block;
+        text-align: center;
+        background: #3b82f6;
+        color: #ffffff;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-top: auto;
       }
     `, { raw: true });
+
+    // 2. 研究成果 (research) 預覽範本 (100% 複製前台 renderResearch 邏輯)
+    var ResearchPreview = createClass({
+      render: function() {
+        var entry = this.props.entry;
+        var title = entry.getIn(['data', 'title']) || '無標題';
+        var tagsRaw = entry.getIn(['data', 'tags']);
+        var description = entry.getIn(['data', 'description']) || '';
+        var link = entry.getIn(['data', 'link']);
+
+        // 處理標籤
+        var tagList = [];
+        if (tagsRaw) {
+          tagList = tagsRaw.split(/[,;]/).map(function(t) { return t.trim(); }).filter(Boolean);
+        }
+
+        // 判斷是否顯示按鈕
+        var hasLink = link && link !== '000000' && link.trim() !== '';
+
+        return h('div', { className: 'card' },
+          h('div', {},
+            h('h3', {}, title),
+            tagList.length > 0 && h('div', { className: 'tags-wrapper' },
+              tagList.map(function(tag, i) {
+                return h('span', { key: i, className: 'tag' }, tag);
+              })
+            ),
+            h('p', {}, description)
+          ),
+          hasLink && h('a', { href: link, target: '_blank', className: 'btn' }, '查看論文/連結')
+        );
+      }
+    });
+
+    // 3. 影音作品 (videos) 預覽範本
+    var VideoPreview = createClass({
+      render: function() {
+        var entry = this.props.entry;
+        var title = entry.getIn(['data', 'title']) || '無標題';
+        var description = entry.getIn(['data', 'description']) || '';
+        var youtubeUrl = entry.getIn(['data', 'youtube_url']);
+
+        return h('div', { className: 'card' },
+          h('div', {},
+            h('h3', {}, title),
+            h('p', {}, description)
+          ),
+          youtubeUrl && h('a', { href: youtubeUrl, target: '_blank', className: 'btn' }, '觀看影片')
+        );
+      }
+    });
+
+    // 4. 計畫/競賽 (plans / competitions) 預覽範本
+    var ProjectPreview = createClass({
+      render: function() {
+        var entry = this.props.entry;
+        var title = entry.getIn(['data', 'title']) || '無標題';
+        var role = entry.getIn(['data', 'role']) || '-';
+        var period = entry.getIn(['data', 'period']) || '-';
+        var description = entry.getIn(['data', 'description']) || '';
+
+        return h('div', { className: 'card' },
+          h('div', {},
+            h('h3', {}, title),
+            h('p', { style: { marginBottom: '0.5rem', fontSize: '0.88rem', color: '#64748b' } },
+              h('strong', {}, '角色：'), role, h('br'),
+              h('strong', {}, '時間：'), period
+            ),
+            h('p', {}, description)
+          )
+        );
+      }
+    });
+
+    // 5. 註冊至各自的 Collection
+    CMS.registerPreviewTemplate('research', ResearchPreview);
+    CMS.registerPreviewTemplate('videos', VideoPreview);
+    CMS.registerPreviewTemplate('plans', ProjectPreview);
+    CMS.registerPreviewTemplate('competitions', ProjectPreview);
   </script>
 </body>
 </html>
