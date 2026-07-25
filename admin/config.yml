@@ -31,10 +31,10 @@ collections:
       - { label: "YouTube 影片連結", name: "youtube_url", widget: "string" }
       - { label: "作品說明", name: "description", widget: "text" }
 
-  - name: "projects"
-    label: "計畫"
+  - name: "plans"
+    label: "計畫實施"
     label_singular: "計畫項目"
-    folder: "content/projects"
+    folder: "content/plans"
     create: true
     slug: "{{slug}}"
     fields:
@@ -43,10 +43,10 @@ collections:
       - { label: "執行時間", name: "period", widget: "string" }
       - { label: "詳細說明", name: "description", widget: "text" }
 
-  - name: "projects"
-    label: "競賽"
+  - name: "competitions"
+    label: "競賽獲獎"
     label_singular: "競賽項目"
-    folder: "content/projects"
+    folder: "content/competitions"
     create: true
     slug: "{{slug}}"
     fields:
