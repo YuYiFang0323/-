@@ -7,22 +7,12 @@
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
+  <!-- 載入 Decap CMS -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+
   <script>
-    // 設定後台預設語言為繁體中文
-    window.CMS_CONFIG = window.CMS_CONFIG || {};
-    window.CMS_CONFIG.locale = 'zh_Hant';
-
-    // -------------------------------------------------------------
-    // 安全註冊預覽範本 (使用 React 原生語法，解決凍結問題)
-    // -------------------------------------------------------------
-    CMS.registerEventListener({
-      name: 'preSave',
-      handler: () => {}
-    });
-
-    // 1. 研究成果 (Research) 卡片預覽
-    var ResearchPreview = createClass({
+    // 註冊「研究成果」自訂卡片預覽
+    CMS.registerPreviewTemplate('research', createClass({
       render: function() {
         var entry = this.props.entry;
         var title = entry.getIn(['data', 'title']) || '我是研究標題';
@@ -35,20 +25,22 @@
 
         var h = window.React.createElement;
 
-        return h('div', { style: { padding: '20px', background: '#f1f5f9', minHeight: '100vh', fontFamily: 'sans-serif' } },
+        return h('div', { style: { padding: '20px', background: '#f8f9fa', minHeight: '100vh', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' } },
           h('div', {
             style: {
               background: '#ffffff',
               borderRadius: '12px',
               padding: '24px',
               border: '1px solid #e2e8f0',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)',
               maxWidth: '380px',
               margin: '0 auto'
             }
           },
+            // 標題
             h('h3', { style: { fontSize: '1.25rem', color: '#0f172a', marginBottom: '12px', fontWeight: 'bold', lineHeight: '1.3' } }, title),
             
+            // 標籤
             tags.length > 0 ? h('div', { style: { marginBottom: '14px', display: 'flex', flexWrap: 'wrap', gap: '6px' } },
               tags.map(function(tag, idx) {
                 return h('span', {
@@ -65,8 +57,10 @@
               })
             ) : null,
 
+            // 摘要
             h('p', { style: { color: '#475569', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '16px', whiteSpace: 'pre-wrap' } }, description),
 
+            // 查看連結按鈕
             hasLink ? h('a', {
               href: link,
               target: '_blank',
@@ -85,10 +79,7 @@
           )
         );
       }
-    });
-
-    // 註冊至 research 集合
-    CMS.registerPreviewTemplate('research', ResearchPreview);
+    }));
   </script>
 </body>
 </html>
