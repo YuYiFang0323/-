@@ -1,219 +1,301 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>個人作品集 Portfolio</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <style>
-        :root {
-            --primary-color: #2b3a4a;
-            --accent-color: #3b82f6;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-color: #334155;
-            --text-light: #64748b;
-            --nav-bg: #ffffff;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>個人作品集 Portfolio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      color: #2c3e50;
+      background-color: #f8f9fa;
+    }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; scroll-behavior: smooth; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
-        section { padding: 80px 20px; max-width: 1100px; margin: 0 auto; }
+    /* 頂部導覽列 */
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid #e9ecef;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    nav {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 2rem;
+    }
+    .logo {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1a252f;
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.8rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: #495057;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: #3b82f6;
+    }
 
-        .section-title { text-align: center; font-size: 2rem; color: var(--primary-color); margin-bottom: 40px; position: relative; }
-        .section-title::after { content: ''; display: block; width: 50px; height: 3px; background: var(--accent-color); margin: 10px auto 0; border-radius: 2px; }
+    /* 主要內容區域 */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
 
-        /* Navbar */
-        header { position: fixed; top: 0; left: 0; width: 100%; background: var(--nav-bg); box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 1000; }
-        .nav-container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }
-        .logo { font-size: 1.25rem; font-weight: bold; color: var(--primary-color); text-decoration: none; }
-        .nav-links { display: flex; list-style: none; gap: 25px; }
-        .nav-links a { text-decoration: none; color: var(--text-color); font-weight: 500; transition: color 0.3s; }
-        .nav-links a:hover { color: var(--accent-color); }
-        .hamburger { display: none; font-size: 1.5rem; cursor: pointer; color: var(--primary-color); }
+    /* 各區塊標題設計 */
+    section {
+      margin-bottom: 4rem;
+      text-align: center;
+    }
+    section h2 {
+      font-size: 2rem;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+      position: relative;
+    }
+    section h2::after {
+      content: '';
+      display: block;
+      width: 45px;
+      height: 4px;
+      background: #3b82f6;
+      margin: 8px auto 0 auto;
+      border-radius: 2px;
+    }
 
-        /* Hero */
-        .hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 140px; padding-bottom: 60px; }
-        .profile-img { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; border: 4px solid var(--card-bg); }
-        .hero h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 8px; }
-        .hero p { font-size: 1.1rem; color: var(--text-light); max-width: 600px; margin-bottom: 20px; }
+    /* 卡片網格與樣式 */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.8rem;
+      margin-top: 2rem;
+      text-align: left;
+    }
 
-        /* Grid & Cards */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: transform 0.3s; }
-        .card:hover { transform: translateY(-5px); }
-        .card h3 { color: var(--primary-color); margin-bottom: 10px; }
-        .card p { color: var(--text-light); font-size: 0.95rem; margin-bottom: 15px; }
-        .tag { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; margin-right: 5px; margin-bottom: 10px; }
-        .card-link { display: inline-flex; align-items: center; gap: 5px; color: var(--accent-color); text-decoration: none; font-weight: 500; font-size: 0.9rem; }
+    .card {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 1.8rem;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    .card h3 {
+      font-size: 1.25rem;
+      color: #0f172a;
+      margin-bottom: 0.8rem;
+      line-height: 1.4;
+    }
+    .card .tags-wrapper {
+      margin-bottom: 0.8rem;
+    }
+    .card .tag {
+      display: inline-block;
+      background: #eff6ff;
+      color: #2563eb;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      margin-right: 0.4rem;
+      margin-bottom: 0.4rem;
+    }
+    .card p {
+      color: #475569;
+      font-size: 0.95rem;
+      margin-bottom: 1.2rem;
+      white-space: pre-line;
+      flex-grow: 1;
+    }
+    .card a.btn {
+      display: inline-block;
+      text-align: center;
+      background: #3b82f6;
+      color: #ffffff;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .card a.btn:hover {
+      background: #2563eb;
+    }
 
-        /* Footer & Buttons */
-        footer { background: var(--primary-color); color: #ffffff; text-align: center; padding: 50px 20px 30px; }
-        .social-links { display: flex; justify-content: center; gap: 20px; margin: 20px 0; }
-        .social-links a { color: #ffffff; font-size: 1.5rem; }
-        #backToTop { position: fixed; bottom: 30px; right: 30px; width: 45px; height: 45px; background-color: var(--accent-color); color: white; border: none; border-radius: 50%; cursor: pointer; display: none; justify-content: center; align-items: center; font-size: 1.2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 999; }
-
-        @media (max-width: 768px) {
-            .hamburger { display: block; }
-            .nav-links { position: absolute; top: 100%; left: 0; width: 100%; background: var(--nav-bg); flex-direction: column; align-items: center; padding: 20px 0; gap: 20px; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-            .nav-links.active { display: flex; }
-        }
-    </style>
+    /* 空資料提示文字 */
+    .empty-msg {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 1rem;
+      padding: 2rem 0;
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <div class="nav-container">
-            <a href="#" class="logo">My Portfolio</a>
-            <div class="hamburger" id="hamburger"><i class="fa-solid fa-bars"></i></div>
-            <ul class="nav-links" id="navLinks">
-                <li><a href="#about">關於我</a></li>
-                <li><a href="#research">研究成果</a></li>
-                <li><a href="#videos">影音作品</a></li>
-                <li><a href="#projects">競賽與計畫</a></li>
-                <li><a href="#contact">聯絡方式</a></li>
-            </ul>
-        </div>
-    </header>
+  <header>
+    <nav>
+      <a href="#" class="logo">My Portfolio</a>
+      <ul class="nav-links">
+        <li><a href="#research">研究成果</a></li>
+        <li><a href="#videos">影音作品</a></li>
+        <li><a href="#plans">計畫作品</a></li>
+        <li><a href="#competitions">競賽獲獎</a></li>
+      </ul>
+    </nav>
+  </header>
 
-    <section id="about" class="hero">
-        <img src="https://via.placeholder.com/160" alt="個人照片" class="profile-img">
-        <h1>個人姓名 / Title</h1>
-        <p>歡迎來到我的個人網站，這裡紀錄了我的學術研究、影音作品與計畫成果。</p>
-    </section>
-
+  <div class="container">
     <section id="research">
-        <h2 class="section-title">研究成果</h2>
-        <div class="grid" id="research-list">
-            <p style="text-align: center; grid-column: 1/-1; color: var(--text-light);">尚無研究成果，請至後台新增。</p>
-        </div>
+      <h2>研究成果</h2>
+      <div id="research-list" class="grid"><p class="empty-msg">正在讀取研究成果...</p></div>
     </section>
 
     <section id="videos">
-        <h2 class="section-title">影音作品</h2>
-        <div class="grid" id="videos-list">
-            <p style="text-align: center; grid-column: 1/-1; color: var(--text-light);">尚無影音作品，請至後台新增。</p>
-        </div>
+      <h2>影音作品</h2>
+      <div id="videos-list" class="grid"><p class="empty-msg">正在讀取影音作品...</p></div>
     </section>
 
-    <section id="projects">
-        <h2 class="section-title">競賽與計畫</h2>
-        <div class="grid" id="projects-list">
-            <p style="text-align: center; grid-column: 1/-1; color: var(--text-light);">尚無競賽與計畫，請至後台新增。</p>
-        </div>
+    <section id="plans">
+      <h2>計畫作品</h2>
+      <div id="plans-list" class="grid"><p class="empty-msg">正在讀取計畫作品...</p></div>
     </section>
 
-    <footer id="contact">
-        <h2>聯絡資訊</h2>
-        <p style="margin-top: 10px;"><i class="fa-regular fa-envelope"></i> your.email@example.com</p>
-        <div class="social-links">
-            <a href="#"><i class="fa-brands fa-github"></i></a>
-            <a href="#"><i class="fa-brands fa-linkedin"></i></a>
-        </div>
-        <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 20px;">© Portfolio. All Rights Reserved.</p>
-    </footer>
+    <section id="competitions">
+      <h2>競賽獲獎</h2>
+      <div id="competitions-list" class="grid"><p class="empty-msg">正在讀取競賽獲獎...</p></div>
+    </section>
+  </div>
 
-    <button id="backToTop"><i class="fa-solid fa-chevron-up"></i></button>
-
-    <script>
-      // 解析 Decap CMS 產生的 Markdown Front Matter
-      function parseFrontMatter(text) {
-        const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-        if (!match) return {};
-        const yamlText = match[1];
-        const data = {};
-        yamlText.split('\n').forEach(line => {
-          const colonIndex = line.indexOf(':');
-          if (colonIndex !== -1) {
-            const key = line.slice(0, colonIndex).trim();
-            let value = line.slice(colonIndex + 1).trim();
-            if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-              value = value.slice(1, -1);
-            }
-            data[key] = value;
+  <script>
+    // 解析 YAML Front Matter (Markdown 檔案開頭區塊)
+    function parseFrontMatter(text) {
+      const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+      if (!match) return {};
+      const yamlText = match[1];
+      const data = {};
+      yamlText.split('\n').forEach(line => {
+        const colonIndex = line.indexOf(':');
+        if (colonIndex !== -1) {
+          const key = line.slice(0, colonIndex).trim();
+          let value = line.slice(colonIndex + 1).trim();
+          if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+            value = value.slice(1, -1);
           }
-        });
-        return data;
-      }
+          data[key] = value;
+        }
+      });
+      return data;
+    }
 
-      // 讀取資料並保持你的原有樣式結構
-      async function loadCollection(folder, containerId, cardHTMLFn) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-    
-        try {
-          // 指向你的 GitHub 專案資料夾
-          const apiUrl = `https://api.github.com/repos/wanglong51314225/my-portfolio/contents/content/${folder}`;
-          const res = await fetch(apiUrl);
-      
-          if (res.ok) {
-            const files = await res.json();
-            const mdFiles = files.filter(f => f.name.endsWith('.md'));
+    // 抓取 Collection 資料
+    async function fetchCollection(folder, containerId, renderFn) {
+      const container = document.getElementById(containerId);
+      try {
+        const apiUrl = `https://api.github.com/repos/wanglong51314225/my-portfolio/contents/content/${folder}`;
+        const res = await fetch(apiUrl);
         
-            if (mdFiles.length === 0) {
-              container.innerHTML = '<p class="empty-msg">尚無內容，請至後台新增。</p>';
-              return;
-            }
-
-            container.innerHTML = '';
-            for (const file of mdFiles) {
-              const rawRes = await fetch(file.download_url);
-              const content = await rawRes.text();
-              const data = parseFrontMatter(content);
-              container.innerHTML += cardHTMLFn(data);
-            }
-          } else {
+        if (res.ok) {
+          const files = await res.json();
+          const mdFiles = files.filter(f => f.name.endsWith('.md'));
+          
+          if (mdFiles.length === 0) {
             container.innerHTML = '<p class="empty-msg">尚無內容，請至後台新增。</p>';
+            return;
           }
-        } catch (err) {
-          console.error('Fetch error:', err);
+
+          container.innerHTML = '';
+          for (const file of mdFiles) {
+            const rawRes = await fetch(file.download_url);
+            const content = await rawRes.text();
+            const data = parseFrontMatter(content);
+            container.innerHTML += renderFn(data);
+          }
+        } else {
           container.innerHTML = '<p class="empty-msg">尚無內容，請至後台新增。</p>';
         }
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = '<p class="empty-msg">讀取資料時發生錯誤。</p>';
       }
+    }
 
-      // 卡片 HTML 渲染（搭配你原本的 CSS 類別名稱）
-      function renderResearchCard(data) {
-        const tagsArr = data.tags ? data.tags.split(/[,;]/).map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
-        const hasLink = data.link && data.link !== '000000' && data.link.trim() !== '';
-    
-        return `
-          <div class="card">
-            <h3>${data.title || '未命名項目'}</h3>
-            ${tagsArr ? `<div class="tags-wrapper">${tagsArr}</div>` : ''}
-            <p>${data.description || ''}</p>
-            ${hasLink ? `<a href="${data.link}" target="_blank" class="btn">查看連結</a>` : ''}
-          </div>
-        `;
-      }
-
-      function renderVideoCard(data) {
-        return `
-          <div class="card">
-            <h3>${data.title || '未命名作品'}</h3>
-            <p>${data.description || ''}</p>
-            ${data.youtube_url ? `<a href="${data.youtube_url}" target="_blank" class="btn">觀看影片</a>` : ''}
-          </div>
-        `;
-      }
-
-      function renderProjectCard(data) {
-        return `
-          <div class="card">
-            <h3>${data.title || '未命名項目'}</h3>
-            <p><strong>角色：</strong>${data.role || '-'}<br><strong>時間：</strong>${data.period || '-'}</p>
+    // 各類別卡片 HTML 產生函式
+    function renderResearch(data) {
+      const tags = data.tags ? data.tags.split(/[,;]/).map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
+      const hasLink = data.link && data.link !== '000000' && data.link.trim() !== '';
+      return `
+        <div class="card">
+          <div>
+            <h3>${data.title || '無標題'}</h3>
+            ${tags ? `<div class="tags-wrapper">${tags}</div>` : ''}
             <p>${data.description || ''}</p>
           </div>
-        `;
-      }
+          ${hasLink ? `<a href="${data.link}" target="_blank" class="btn">查看論文/連結</a>` : ''}
+        </div>
+      `;
+    }
 
-      // 網頁載入後自動執行
-      document.addEventListener('DOMContentLoaded', () => {
-        loadCollection('research', 'research-list', renderResearchCard);
-        loadCollection('videos', 'videos-list', renderVideoCard);
-        loadCollection('plans', 'plans-list', renderProjectCard);
-        loadCollection('competitions', 'competitions-list', renderProjectCard);
-      });
-    </script>   
+    function renderVideo(data) {
+      return `
+        <div class="card">
+          <div>
+            <h3>${data.title || '無標題'}</h3>
+            <p>${data.description || ''}</p>
+          </div>
+          ${data.youtube_url ? `<a href="${data.youtube_url}" target="_blank" class="btn">觀看影片</a>` : ''}
+        </div>
+      `;
+    }
+
+    function renderProject(data) {
+      return `
+        <div class="card">
+          <div>
+            <h3>${data.title || '無標題'}</h3>
+            <p style="margin-bottom:0.5rem; font-size:0.88rem; color:#64748b;">
+              <strong>角色：</strong>${data.role || '-'}<br>
+              <strong>時間：</strong>${data.period || '-'}
+            </p>
+            <p>${data.description || ''}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // 頁面載入完成後執行
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchCollection('research', 'research-list', renderResearch);
+      fetchCollection('videos', 'videos-list', renderVideo);
+      fetchCollection('plans', 'plans-list', renderProject);
+      fetchCollection('competitions', 'competitions-list', renderProject);
+    });
+  </script>
 </body>
 </html>
