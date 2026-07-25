@@ -98,7 +98,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      overflow: hidden; /* 確保頂部圖片圓角不溢出 */
+      overflow: hidden;
     }
     .card:hover {
       transform: translateY(-4px);
@@ -214,6 +214,21 @@
     const USERNAME = "YuYiFang0323"; 
     const REPO = "MyWeb"; 
 
+    // 新增：圖片路徑修復函式，解決前台找不到照片問題
+    function getImageUrl(path) {
+      if (!path) return '';
+      if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:')) {
+        return path;
+      }
+      // 移除 public/ 或 static/ 前綴
+      let cleanPath = path.replace(/^public\//, '/').replace(/^static\//, '/');
+      // 補齊開頭斜線
+      if (!cleanPath.startsWith('/')) {
+        cleanPath = '/' + cleanPath;
+      }
+      return cleanPath;
+    }
+
     function parseFrontMatter(text) {
       const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
       if (!match) return { description: text };
@@ -282,10 +297,13 @@
     function renderResearch(data) {
       const tags = data.tags ? data.tags.split(/[,;]/).map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
       const hasLink = isValidUrl(data.link);
+      
+      // 同時讀取 X 與 Y 軸焦點
+      const focalX = data.focal_x || '50%';
       const focalY = data.focal_y || '50%';
       
-      // 處理圖片路徑
-      const coverHtml = data.cover ? `<img src="${data.cover}" class="card-cover" style="object-position: center ${focalY};" alt="封面">` : '';
+      const coverUrl = getImageUrl(data.cover);
+      const coverHtml = coverUrl ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面">` : '';
 
       return `
         <div class="card">
@@ -303,8 +321,10 @@
     }
 
     function renderVideo(data) {
+      const focalX = data.focal_x || '50%';
       const focalY = data.focal_y || '50%';
-      const coverHtml = data.cover ? `<img src="${data.cover}" class="card-cover" style="object-position: center ${focalY};" alt="封面">` : '';
+      const coverUrl = getImageUrl(data.cover);
+      const coverHtml = coverUrl ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面">` : '';
       return `
         <div class="card">
           ${coverHtml}
@@ -320,8 +340,10 @@
     }
 
     function renderProject(data) {
+      const focalX = data.focal_x || '50%';
       const focalY = data.focal_y || '50%';
-      const coverHtml = data.cover ? `<img src="${data.cover}" class="card-cover" style="object-position: center ${focalY};" alt="封面">` : '';
+      const coverUrl = getImageUrl(data.cover);
+      const coverHtml = coverUrl ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面">` : '';
       return `
         <div class="card">
           ${coverHtml}
