@@ -7,8 +7,8 @@ backend:
   
 locale: 'zh_Hant' # 設定系統語系為繁體中文
 
-media_folder: "static/uploads"
-public_folder: "static/uploads"
+media_folder: "assets/uploads"
+public_folder: "assets/uploads"
 
 collections:
   - name: "research"
