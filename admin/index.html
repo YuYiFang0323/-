@@ -93,13 +93,8 @@
           tagList = tagsRaw.split(/[,;]/).map(function(t) { return t.trim(); }).filter(Boolean);
         }
 
-        // 嚴格判斷：必須是非空值且符合完整 http:// 或 https:// 網址格式
-        var hasLink = isValidUrl(link);
-        if (link && typeof link === 'string') {
-          var cleanLink = link.trim();
-          var urlPattern = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
-          hasLink = urlPattern.test(cleanLink);
-        }
+        // 判斷按鈕是否顯示 (排除 000000 與空值)
+        var hasLink = link && link !== '000000' && link.trim() !== '';
         
         return h('div', { className: 'card' },
           h('div', {},
