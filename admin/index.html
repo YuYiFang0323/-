@@ -109,7 +109,7 @@
       }
     `, { raw: true });
 
-    // 2. 註冊研究成果預覽組件（修復拖曳與即時同步問題）
+    // 2. 註冊研究成果預覽組件（修復彈回 50% 問題）
     var ResearchPreview = createClass({
       getInitialState: function() {
         return { 
@@ -122,15 +122,16 @@
       },
 
       handleMouseDown: function(e) {
-        // 防止瀏覽器預設觸發圖片拖動行為
+        // 防止瀏覽器預設觸發圖片拖放行為
         e.preventDefault();
 
         var entry = this.props.entry;
         var rawX = entry.getIn(['data', 'focal_x']);
         var rawY = entry.getIn(['data', 'focal_y']);
         
-        var curX = rawX ? parseInt(rawX, 10) : 50;
-        var curY = rawY ? parseInt(rawY, 10) : 50;
+        // 優先讀取 entry 數值，若沒有則維持目前 state 的位置
+        var curX = rawX ? parseInt(rawX, 10) : this.state.posX;
+        var curY = rawY ? parseInt(rawY, 10) : this.state.posY;
 
         this.setState({
           isDragging: true,
@@ -150,7 +151,7 @@
         var newX = Math.min(Math.max(this.state.posX - (deltaX * 0.25), 0), 100);
         var newY = Math.min(Math.max(this.state.posY - (deltaY * 0.25), 0), 100);
 
-        // 拖曳中僅即時更新內部元件 State，保證畫面流暢不卡頓
+        // 拖曳中僅更新內部 State，維持滑順度
         this.setState({
           posX: newX,
           posY: newY,
@@ -163,7 +164,7 @@
         if (this.state.isDragging) {
           this.setState({ isDragging: false });
 
-          // 放開滑鼠時才將新座標一次寫入左側表單，避免中途中斷拖曳
+          // 放開滑鼠時才一次將新座標寫入左側表單
           if (this.props.onChange) {
             var roundX = Math.round(this.state.posX) + '%';
             var roundY = Math.round(this.state.posY) + '%';
@@ -187,15 +188,12 @@
         var link = entry.getIn(['data', 'link']) || entry.getIn(['data', 'pdf_url']);
         var cover = entry.getIn(['data', 'cover']);
 
-        // 拖曳中優先使用即時位置，放開後讀取 entry 的資料
-        var focalX, focalY;
-        if (this.state.isDragging) {
-          focalX = Math.round(this.state.posX) + '%';
-          focalY = Math.round(this.state.posY) + '%';
-        } else {
-          focalX = entry.getIn(['data', 'focal_x']) || (Math.round(this.state.posX) + '%');
-          focalY = entry.getIn(['data', 'focal_y']) || (Math.round(this.state.posY) + '%');
-        }
+        // 核心修復：優先讀取 entry 內的設定，若 entry 尚未更新則顯示最後的 state 座標，不強制彈回 50%
+        var rawFocalX = entry.getIn(['data', 'focal_x']);
+        var rawFocalY = entry.getIn(['data', 'focal_y']);
+
+        var focalX = rawFocalX ? rawFocalX : (Math.round(this.state.posX) + '%');
+        var focalY = rawFocalY ? rawFocalY : (Math.round(this.state.posY) + '%');
 
         var tagList = [];
         if (tagsRaw) {
