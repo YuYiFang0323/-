@@ -11,21 +11,23 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   
   <script>
-    // 註冊自訂預覽範本
-    CMS.registerPreviewTemplate('research', window.createClass({
+    // 建立卡片元件
+    var CardPreview = window.createClass({
       render: function() {
         var entry = this.props.entry;
-        var title = entry.getIn(['data', 'title']) || '（請輸入標題）';
-        var tagsStr = entry.getIn(['data', 'tags']) || '';
-        var description = entry.getIn(['data', 'description']) || '（請輸入摘要簡述）';
-        var link = entry.getIn(['data', 'link']);
+        
+        // 自動嘗試尋找標題、標籤與摘要欄位 (相容各種欄位命名)
+        var title = entry.getIn(['data', 'title']) || entry.getIn(['data', 'name']) || '（請輸入標題）';
+        var tagsStr = entry.getIn(['data', 'tags']) || entry.getIn(['data', 'keywords']) || '';
+        var description = entry.getIn(['data', 'description']) || entry.getIn(['data', 'summary']) || '（請輸入摘要簡述）';
+        var link = entry.getIn(['data', 'link']) || entry.getIn(['data', 'url']);
 
-        // 處理標籤 (以逗號切分)
+        // 處理標籤 (以逗號或分號切分)
         var tags = tagsStr ? tagsStr.split(/[,;]/).map(function(t) { return t.trim(); }).filter(Boolean) : [];
 
         return window.h('div', { 
           style: { 
-            padding: '40px 20px', 
+            padding: '30px 15px', 
             background: '#f8f9fa', 
             minHeight: '100vh', 
             boxSizing: 'border-box',
@@ -91,7 +93,7 @@
               } 
             }, description),
 
-            // 按鈕
+            // 連結按鈕
             (link && link !== '000000') ? window.h('div', {
               style: {
                 textAlign: 'center',
@@ -106,7 +108,14 @@
           )
         );
       }
-    }));
+    });
+
+    // 註冊給 research 集合
+    CMS.registerPreviewTemplate('research', CardPreview);
+    
+    // 如果 config.yml 的名稱不同，這裡一併註冊常見名稱進行雙重保險
+    CMS.registerPreviewTemplate('posts', CardPreview);
+    CMS.registerPreviewTemplate('blog', CardPreview);
   </script>
 </body>
 </html>
