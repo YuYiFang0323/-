@@ -255,9 +255,20 @@
       }
     }
 
+    // 前台增加網址格式檢查
+    function isValidUrl(string) {
+      if (!string || typeof string !== 'string' || string.trim() === '') return false;
+      try {
+        const url = new URL(string.trim());
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch (_) {
+        return false;
+      }
+    }
+    
     function renderResearch(data) {
       const tags = data.tags ? data.tags.split(/[,;]/).map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
-      const hasLink = data.link && data.link !== '000000' && data.link.trim() !== '';
+      const hasLink = isValidUrl(data.link);
       return `
         <div class="card">
           <div>
