@@ -1,318 +1,448 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>後台內容管理系統</title>
-</head>
-<body>
-  <!-- 載入 Decap CMS -->
-  <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  
-  <script>
-    // 1. 注入預覽區樣式
-    CMS.registerPreviewStyle(`    
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-        line-height: 1.6;
-        color: #2c3e50;
-        background-color: #f8f9fa;
-        padding: 2rem;
-      }
-      .card {
-        background: #ffffff;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-        max-width: 380px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        overflow: hidden;
-      }
-      .card-cover-wrapper {
-        position: relative;
-        width: 100%;
-        aspect-ratio: 16 / 9;
-        overflow: hidden;
-        background-color: #f1f5f9;
-        cursor: grab;
-        user-select: none;
-      }
-      .card-cover-wrapper:active {
-        cursor: grabbing;
-      }
-      .card-cover-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        pointer-events: none;
-      }
-      .focal-point-marker {
-        position: absolute;
-        width: 14px;
-        height: 14px;
-        background-color: #ef4444;
-        border: 2px solid #ffffff;
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        box-shadow: 0 0 4px rgba(0,0,0,0.4);
-        pointer-events: none;
-      }
-      .drag-hint {
-        position: absolute;
-        bottom: 8px;
-        right: 8px;
-        background: rgba(0,0,0,0.6);
-        color: white;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 11px;
-        pointer-events: none;
-      }
-      .card-body {
-        padding: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-      }
-      .card h3 {
-        font-size: 1.25rem;
-        color: #0f172a;
-        margin-bottom: 0.8rem;
-        line-height: 1.4;
-        font-weight: 700;
-      }
-      .card .tags-wrapper {
-        margin-bottom: 0.8rem;
-      }
-      .card .tag {
-        display: inline-block;
-        background: #eff6ff;
-        color: #2563eb;
-        padding: 0.25rem 0.65rem;
-        border-radius: 6px;
-        font-size: 0.82rem;
-        font-weight: 500;
-        margin-right: 0.4rem;
-        margin-bottom: 0.4rem;
-      }
-      .card p {
-        color: #475569;
-        font-size: 0.95rem;
-        margin-bottom: 1.2rem;
-        white-space: pre-line;
-        word-break: break-all;
-      }
-      .card a.btn {
-        display: inline-block;
-        text-align: center;
-        background: #3b82f6;
-        color: #ffffff;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        text-decoration: none;
-        font-size: 0.9rem;
-        font-weight: 500;
-        margin-top: auto;
-      }
-    `, { raw: true });
-
-    // 解析數值為純數字 (0~100)
-    function parseFocalValue(val) {
-      if (val === undefined || val === null || val === '') return 50;
-      var num = parseInt(String(val).replace(/[^0-9]/g, ''), 10);
-      return isNaN(num) ? 50 : Math.min(Math.max(num, 0), 100);
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>個人作品集 Portfolio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      color: #2c3e50;
+      background-color: #f8f9fa;
     }
 
-    // 2. 註冊研究成果預覽組件
-    var ResearchPreview = createClass({
-      getInitialState: function() {
-        return { 
-          isDragging: false, 
-          startX: 0, 
-          startY: 0, 
-          posX: 50, 
-          posY: 50 
-        };
-      },
+    /* 頂部導覽列 */
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid #e9ecef;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    nav {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 2rem;
+    }
+    .logo {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1a252f;
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.8rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: #495057;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: #3b82f6;
+    }
 
-      handleMouseDown: function(e) {
-        e.preventDefault();
+    /* 主要內容區域 */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
 
-        var entry = this.props.entry;
-        var curX = parseFocalValue(entry.getIn(['data', 'focal_x']));
-        var curY = parseFocalValue(entry.getIn(['data', 'focal_y']));
+    /* 各區塊標題設計 */
+    section {
+      margin-bottom: 4rem;
+      text-align: center;
+    }
+    section h2 {
+      font-size: 2rem;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+      position: relative;
+    }
+    section h2::after {
+      content: '';
+      display: block;
+      width: 45px;
+      height: 4px;
+      background: #3b82f6;
+      margin: 8px auto 0 auto;
+      border-radius: 2px;
+    }
 
-        this.setState({
-          isDragging: true,
-          startX: e.clientX,
-          startY: e.clientY,
-          posX: curX,
-          posY: curY
-        });
-      },
+    /* 卡片網格與樣式 */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.8rem;
+      margin-top: 2rem;
+      text-align: left;
+    }
 
-      handleMouseMove: function(e) {
-        if (!this.state.isDragging) return;
-        
-        var deltaX = e.clientX - this.state.startX;
-        var deltaY = e.clientY - this.state.startY;
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
 
-        // 調整靈敏度，計算 0 ~ 100 的百分比點
-        var newX = Math.min(Math.max(this.state.posX - (deltaX * 0.3), 0), 100);
-        var newY = Math.min(Math.max(this.state.posY - (deltaY * 0.3), 0), 100);
+    /* 封面圖片等寬與裁切設定 */
+    .card-cover {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      display: block;
+      background-color: #f1f5f9;
+    }
 
-        var roundX = Math.round(newX);
-        var roundY = Math.round(newY);
+    .card-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
 
-        this.setState({
-          posX: newX,
-          posY: newY,
-          startX: e.clientX,
-          startY: e.clientY
-        });
+    .card h3 {
+      font-size: 1.25rem;
+      color: #0f172a;
+      margin-bottom: 0.8rem;
+      line-height: 1.4;
+    }
+    .card .tags-wrapper {
+      margin-bottom: 0.8rem;
+    }
+    .card .tag {
+      display: inline-block;
+      background: #eff6ff;
+      color: #2563eb;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      margin-right: 0.4rem;
+      margin-bottom: 0.4rem;
+    }
+    .card p {
+      color: #475569;
+      font-size: 0.95rem;
+      margin-bottom: 1.2rem;
+      white-space: pre-line;
+      flex-grow: 1;
+    }
+    .card a.btn {
+      display: inline-block;
+      text-align: center;
+      background: #3b82f6;
+      color: #ffffff;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background 0.2s;
+      margin-top: auto;
+    }
+    .card a.btn:hover {
+      background: #2563eb;
+    }
 
-        // 核心修正：拖曳途中即時更新 CMS 表單 DOM 中的對應數字輸入框，實現零延遲自動填寫
-        this.updateCmsInputs(roundX, roundY);
-      },
+    .empty-msg {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 1rem;
+      padding: 2rem 0;
+    }
+  </style>
+</head>
+<body>
 
-      handleMouseUp: function() {
-        if (this.state.isDragging) {
-          this.setState({ isDragging: false });
-          var roundX = Math.round(this.state.posX);
-          var roundY = Math.round(this.state.posY);
-          
-          // 放開時確認將純數字填入輸入框並觸發 input/change 事件
-          this.updateCmsInputs(roundX, roundY);
-        }
-      },
+  <header>
+    <nav>
+      <a href="#" class="logo">My Portfolio</a>
+      <ul class="nav-links">
+        <li><a href="#research">研究成果</a></li>
+        <li><a href="#videos">影音作品</a></li>
+        <li><a href="#plans">計畫作品</a></li>
+        <li><a href="#competitions">競賽獲獎</a></li>
+      </ul>
+    </nav>
+  </header>
 
-      // 關鍵函數：直接定位並安全輸入純數字（解決數字鎖死與連動失敗問題）
-      updateCmsInputs: function(x, y) {
-        try {
-          var inputs = window.parent.document.querySelectorAll('input[type="number"], input[id*="focal"]');
-          var inputX, inputY;
+  <div class="container">
+    <section id="research">
+      <h2>研究成果</h2>
+      <div id="research-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
+    </section>
 
-          inputs.forEach(function(input) {
-            var id = (input.id || '').toLowerCase();
-            var name = (input.name || '').toLowerCase();
-            if (id.includes('focal_x') || name.includes('focal_x') || id.endsWith('-x')) inputX = input;
-            if (id.includes('focal_y') || name.includes('focal_y') || id.endsWith('-y')) inputY = input;
-          });
+    <section id="videos">
+      <h2>影音作品</h2>
+      <div id="videos-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
+    </section>
 
-          // 如果沒比對到，依序指派前兩個數字輸入框
-          if (!inputX && inputs[0]) inputX = inputs[0];
-          if (!inputY && inputs[1]) inputY = inputs[1];
+    <section id="plans">
+      <h2>計畫作品</h2>
+      <div id="plans-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
+    </section>
 
-          var setNativeValue = function(element, value) {
-            var valueSetter = Object.getOwnPropertyDescriptor(element, 'value').set;
-            var prototype = Object.getPrototypeOf(element);
-            var prototypeValueSetter = Object.getOwnPropertyDescriptor(prototype, 'value').set;
+    <section id="competitions">
+      <h2>競賽獲獎</h2>
+      <div id="competitions-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
+    </section>
+  </div>
 
-            if (prototypeValueSetter && valueSetter !== prototypeValueSetter) {
-              prototypeValueSetter.call(element, value);
-            } else if (valueSetter) {
-              valueSetter.call(element, value);
-            } else {
-              element.value = value;
-            }
-            element.dispatchEvent(new Event('input', { bubbles: true }));
-            element.dispatchEvent(new Event('change', { bubbles: true }));
-          };
+  <script>
+    const USERNAME = "YuYiFang0323"; 
+    const REPO = "MyWeb"; 
+    const BRANCH = "main";
 
-          if (inputX) setNativeValue(inputX, x);
-          if (inputY) setNativeValue(inputY, y);
-        } catch (err) {
-          console.warn('自動同步 XY 欄位時發生警告:', err);
-        }
-      },
+    // 取得 YouTube ID 的輔助函數
+    function getYoutubeId(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
 
-      render: function() {
-        var entry = this.props.entry;
-        var getAsset = this.props.getAsset;
-        
-        var title = entry.getIn(['data', 'title']) || '我是研究標題';
-        var tagsRaw = entry.getIn(['data', 'tags']);
-        var description = entry.getIn(['data', 'description']) || entry.getIn(['data', 'summary']) || '';
-        var link = entry.getIn(['data', 'link']) || entry.getIn(['data', 'pdf_url']);
-        var cover = entry.getIn(['data', 'cover']);
+    // 核心修正 1：轉譯圖片網址，嚴謹適應 static/、assets/ 與絕對路徑
+    function getImageUrl(path) {
+      if (!path) return '';
+      
+      let cleanPath = String(path).trim().replace(/^['"]|['"]$/g, '');
 
-        // 讀取當前 XY 數值（確保轉為純數字）
-        var numX = this.state.isDragging 
-          ? Math.round(this.state.posX) 
-          : parseFocalValue(entry.getIn(['data', 'focal_x']));
-        var numY = this.state.isDragging 
-          ? Math.round(this.state.posY) 
-          : parseFocalValue(entry.getIn(['data', 'focal_y']));
-
-        var focalX = numX + '%';
-        var focalY = numY + '%';
-
-        var tagList = [];
-        if (tagsRaw) {
-          tagList = tagsRaw.split(/[,;]/).map(function(t) { return t.trim(); }).filter(Boolean);
-        }
-
-        var hasLink = false;
-        if (link && typeof link === 'string') {
-          var cleanLink = link.trim();
-          var urlPattern = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
-          hasLink = urlPattern.test(cleanLink);
-        }
-
-        var coverElement = null;
-        if (cover) {
-          var coverAsset = getAsset(cover);
-          var coverUrl = coverAsset ? coverAsset.toString() : cover;
-
-          coverElement = h('div', {
-            className: 'card-cover-wrapper',
-            onMouseDown: this.handleMouseDown,
-            onMouseMove: this.handleMouseMove,
-            onMouseUp: this.handleMouseUp,
-            onMouseLeave: this.handleMouseUp,
-            style: { cursor: this.state.isDragging ? 'grabbing' : 'grab' }
-          },
-            h('img', {
-              src: coverUrl,
-              style: { 
-                objectPosition: focalX + ' ' + focalY,
-                transform: 'scale(1.2)',
-                userSelect: 'none',
-                pointerEvents: 'none'
-              }
-            }),
-            // 紅點標記：直觀顯示當前焦點所在之處
-            h('div', {
-              className: 'focal-point-marker',
-              style: { left: focalX, top: focalY }
-            }),
-            h('span', { className: 'drag-hint' }, '✢ 按住拖曳挪動焦點 (X:' + numX + ' Y:' + numY + ')')
-          );
-        }
-
-        return h('div', { className: 'card' },
-          coverElement,
-          h('div', { className: 'card-body' },
-            h('div', {},
-              h('h3', {}, title),
-              tagList.length > 0 && h('div', { className: 'tags-wrapper' },
-                tagList.map(function(tag, i) {
-                  return h('span', { key: i, className: 'tag' }, tag);
-                })
-              ),
-              h('p', {}, description)
-            ),
-            hasLink && h('a', { href: link, target: '_blank', className: 'btn' }, '查看論文/連結')
-          )
-        );
+      // 完整外連或 blob 網址直接回傳
+      if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://') || cleanPath.startsWith('blob:')) {
+        return cleanPath;
       }
-    });
 
-    CMS.registerPreviewTemplate('research', ResearchPreview);
+      // 移除開頭斜線與 public/
+      cleanPath = cleanPath.replace(/^\//, '').replace(/^public\//, '');
+
+      // 如果路徑已經包含 assets/ 或 static/，直接拼接 Github raw 網址
+      if (cleanPath.startsWith('assets/') || cleanPath.startsWith('static/')) {
+        return `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${cleanPath}`;
+      }
+
+      // 預設補充 static/ 前綴（配合 Decap CMS 預設上傳目錄）
+      return `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/static/${cleanPath}`;
+    }
+
+    // 核心修正 2：格式化 XY 焦點數值
+    function formatFocal(val) {
+      if (val === undefined || val === null || val === '') return '50%';
+      let strVal = String(val).trim();
+      if (!strVal.endsWith('%')) {
+        strVal += '%';
+      }
+      return strVal;
+    }
+
+    // 增強型 Front Matter 解析器（避免網址與多號出錯）
+    function parseFrontMatter(text) {
+      const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+      if (!match) return { description: text };
+      const yamlText = match[1];
+      const data = {};
+      
+      yamlText.split('\n').forEach(line => {
+        const colonIndex = line.indexOf(':');
+        if (colonIndex !== -1) {
+          const key = line.slice(0, colonIndex).trim();
+          let value = line.slice(colonIndex + 1).trim();
+          if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+            value = value.slice(1, -1);
+          }
+          data[key] = value;
+        }
+      });
+
+      // 解析 Markdown 本文作為長描述（若有）
+      const body = text.replace(/^---\r?\n[\s\S]*?\r?\n---/, '').trim();
+      if (body && !data.description) {
+        data.description = body;
+      }
+
+      return data;
+    }
+
+    async function loadDirectoryFiles(folder, containerId, renderFn) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      try {
+        const apiUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/content/${folder}`;
+        const res = await fetch(apiUrl);
+
+        if (res.status === 404) {
+          container.innerHTML = '<p class="empty-msg">尚無內容，請至後台新增。</p>';
+          return;
+        }
+
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+        const files = await res.json();
+        const mdFiles = files.filter(f => f.name.endsWith('.md'));
+
+        if (mdFiles.length === 0) {
+          container.innerHTML = '<p class="empty-msg">尚無內容，請至後台新增。</p>';
+          return;
+        }
+
+        container.innerHTML = '';
+        for (const file of mdFiles) {
+          // 快取消除參數
+          const rawRes = await fetch(file.download_url + '?t=' + new Date().getTime());
+          const text = await rawRes.text();
+          const data = parseFrontMatter(text);
+          container.innerHTML += renderFn(data);
+        }
+      } catch (err) {
+        console.warn(`[${folder}] 讀取狀態:`, err);
+        container.innerHTML = `<p class="empty-msg">尚無內容，請至後台新增。</p>`;
+      }
+    }
+
+    function isValidUrl(string) {
+      if (!string || typeof string !== 'string' || string.trim() === '') return false;
+      try {
+        const url = new URL(string.trim());
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function renderResearch(data) {
+      const tags = data.tags ? data.tags.split(/[,;]/).map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
+      const hasLink = isValidUrl(data.link);
+      
+      const focalX = formatFocal(data.focal_x);
+      const focalY = formatFocal(data.focal_y);
+      
+      const coverUrl = getImageUrl(data.cover);
+      const coverHtml = coverUrl 
+        ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` 
+        : '';
+
+      return `
+        <div class="card">
+          ${coverHtml}
+          <div class="card-body">
+            <div>
+              <h3>${data.title || '無標題'}</h3>
+              ${tags ? `<div class="tags-wrapper">${tags}</div>` : ''}
+              <p>${data.description || ''}</p>
+            </div>
+            ${hasLink ? `<a href="${data.link}" target="_blank" class="btn">查看論文/連結</a>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVideo(data) {
+      const focalX = formatFocal(data.focal_x);
+      const focalY = formatFocal(data.focal_y);
+      let coverUrl = getImageUrl(data.cover);
+
+      // 自動備援：若無封面但有 YouTube 連結，自動抓取 YouTube 高清預覽圖
+      if (!coverUrl && data.youtube_url) {
+        const ytId = getYoutubeId(data.youtube_url);
+        if (ytId) coverUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+      }
+
+      const coverHtml = coverUrl 
+        ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` 
+        : '';
+
+      return `
+        <div class="card">
+          ${coverHtml}
+          <div class="card-body">
+            <div>
+              <h3>${data.title || '無標題'}</h3>
+              <p>${data.description || ''}</p>
+            </div>
+            ${data.youtube_url ? `<a href="${data.youtube_url}" target="_blank" class="btn">觀看影片</a>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderProject(data) {
+      const focalX = formatFocal(data.focal_x);
+      const focalY = formatFocal(data.focal_y);
+      const coverUrl = getImageUrl(data.cover);
+      const coverHtml = coverUrl 
+        ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` 
+        : '';
+
+      return `
+        <div class="card">
+          ${coverHtml}
+          <div class="card-body">
+            <div>
+              <h3>${data.title || '無標題'}</h3>
+              <p style="margin-bottom:0.5rem; font-size:0.88rem; color:#64748b;">
+                <strong>角色：</strong>${data.role || '-'}<br>
+                <strong>時間：</strong>${data.period || '-'}
+              </p>
+              <p>${data.description || ''}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCompetition(data) {
+      const focalX = formatFocal(data.focal_x);
+      const focalY = formatFocal(data.focal_y);
+      const coverUrl = getImageUrl(data.cover);
+      const coverHtml = coverUrl 
+        ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` 
+        : '';
+
+      return `
+        <div class="card">
+          ${coverHtml}
+          <div class="card-body">
+            <div>
+              <h3>${data.title || '無標題'}</h3>
+              <p style="margin-bottom:0.5rem; font-size:0.88rem; color:#64748b;">
+                <strong>獎項：</strong>${data.award || data.role || '-'}<br>
+                <strong>時間：</strong>${data.period || data.date || '-'}
+              </p>
+              <p>${data.description || ''}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDirectoryFiles('research', 'research-list', renderResearch);
+      loadDirectoryFiles('videos', 'videos-list', renderVideo);
+      loadDirectoryFiles('plans', 'plans-list', renderProject);
+      loadDirectoryFiles('competitions', 'competitions-list', renderCompetition);
+    });
   </script>
 </body>
 </html>
