@@ -10,18 +10,16 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   
   <script>
-    // 1. 注入與前台 1:1 還原的 CSS 樣式
+    // 1. 注入樣式
     CMS.registerPreviewStyle(`    
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
         line-height: 1.6;
         color: #2c3e50;
         background-color: #f8f9fa;
         padding: 2rem;
       }
-
-      /* 前台卡片視覺設定 */
       .card {
         background: #ffffff;
         border-radius: 12px;
@@ -34,8 +32,6 @@
         justify-content: space-between;
         overflow: hidden;
       }
-
-      /* 封面圖可拖拽挪動樣式 (16:9) */
       .card-cover-wrapper {
         position: relative;
         width: 100%;
@@ -65,14 +61,12 @@
         font-size: 11px;
         pointer-events: none;
       }
-
       .card-body {
         padding: 1.5rem;
         display: flex;
         flex-direction: column;
         flex-grow: 1;
       }
-
       .card h3 {
         font-size: 1.25rem;
         color: #0f172a;
@@ -115,41 +109,31 @@
       }
     `, { raw: true });
 
-    // 2. 註冊研究成果 (research) 的自訂預覽範本（全方向拖曳與輸入框同步修復版）
+    // 2. 註冊研究成果預覽組件
     var ResearchPreview = createClass({
       getInitialState: function() {
         return { 
           isDragging: false, 
           startX: 0, 
           startY: 0, 
-          currentPosX: null, 
-          currentPosY: null 
+          posX: 50, 
+          posY: 50 
         };
-      },
-
-      // 解析數值字串 (例如 "45%" -> 45)
-      parsePercent: function(val, defaultVal) {
-        if (!val) return defaultVal;
-        var parsed = parseInt(val, 10);
-        return isNaN(parsed) ? defaultVal : parsed;
       },
 
       handleMouseDown: function(e) {
         var entry = this.props.entry;
         
-        // 按下點擊時，優先從後台欄位抓取現有百分比，若無則預設為 50
-        var rawX = entry.getIn(['data', 'focal_x']);
-        var rawY = entry.getIn(['data', 'focal_y']);
-        
-        var initX = this.state.currentPosX !== null ? this.state.currentPosX : this.parsePercent(rawX, 50);
-        var initY = this.state.currentPosY !== null ? this.state.currentPosY : this.parsePercent(rawY, 50);
+        // 抓取現有數值或設為 50
+        var curX = parseInt(entry.getIn(['data', 'focal_x']), 10);
+        var curY = parseInt(entry.getIn(['data', 'focal_y']), 10);
 
         this.setState({
           isDragging: true,
           startX: e.clientX,
           startY: e.clientY,
-          currentPosX: initX,
-          currentPosY: initY
+          posX: isNaN(curX) ? 50 : curX,
+          posY: isNaN(curY) ? 50 : curY
         });
       },
 
@@ -159,25 +143,25 @@
         var deltaX = e.clientX - this.state.startX;
         var deltaY = e.clientY - this.state.startY;
 
-        // 計算 X 與 Y 軸新位置（限制在 0% ~ 100% 之間）
-        var newPosX = Math.min(Math.max(this.state.currentPosX - (deltaX * 0.3), 0), 100);
-        var newPosY = Math.min(Math.max(this.state.currentPosY - (deltaY * 0.3), 0), 100);
+        var newX = Math.min(Math.max(this.state.posX - (deltaX * 0.2), 0), 100);
+        var newY = Math.min(Math.max(this.state.posY - (deltaY * 0.2), 0), 100);
         
+        var roundedX = Math.round(newX) + '%';
+        var roundedY = Math.round(newY) + '%';
+
         this.setState({
-          currentPosX: newPosX,
-          currentPosY: newPosY,
+          posX: newX,
+          posY: newY,
           startX: e.clientX,
           startY: e.clientY
         });
 
-        // 強制更新資料並觸發 React 狀態同步回左側輸入框
+        // 即時將值更新回 Decap CMS 資料模型
         if (this.props.onChange) {
-          var data = this.props.entry.get('data');
-          var updatedData = data
-            .set('focal_x', Math.round(newPosX) + '%')
-            .set('focal_y', Math.round(newPosY) + '%');
-          
-          this.props.onChange(updatedData);
+          var data = this.props.entry.get('data')
+            .set('focal_x', roundedX)
+            .set('focal_y', roundedY);
+          this.props.onChange(data);
         }
       },
 
@@ -195,26 +179,15 @@
         var link = entry.getIn(['data', 'link']) || entry.getIn(['data', 'pdf_url']);
         var cover = entry.getIn(['data', 'cover']);
 
-        // 欄位值讀取邏輯
-        var rawFocalX = entry.getIn(['data', 'focal_x']);
-        var rawFocalY = entry.getIn(['data', 'focal_y']);
+        // 讀取 Front-matter 內的焦點數值（若無則預設 50%）
+        var focalX = entry.getIn(['data', 'focal_x']) || '50%';
+        var focalY = entry.getIn(['data', 'focal_y']) || '50%';
 
-        // 如果拖曳中以 state 為主，否則讀取輸入框/資料檔案中的數值
-        var focalX = (this.state.isDragging || this.state.currentPosX !== null) 
-          ? Math.round(this.state.currentPosX) + '%' 
-          : (rawFocalX || '50%');
-
-        var focalY = (this.state.isDragging || this.state.currentPosY !== null) 
-          ? Math.round(this.state.currentPosY) + '%' 
-          : (rawFocalY || '50%');
-
-        // 將逗號分隔的標籤轉為陣列
         var tagList = [];
         if (tagsRaw) {
           tagList = tagsRaw.split(/[,;]/).map(function(t) { return t.trim(); }).filter(Boolean);
         }
 
-        // 嚴格網址格式判斷 (必須包含完整 http:// 或 https://)
         var hasLink = false;
         if (link && typeof link === 'string') {
           var cleanLink = link.trim();
@@ -222,7 +195,6 @@
           hasLink = urlPattern.test(cleanLink);
         }
 
-        // 安全解析封面圖片 Blob / URL
         var coverElement = null;
         if (cover) {
           var coverAsset = getAsset(cover);
@@ -239,7 +211,7 @@
               src: coverUrl,
               style: { 
                 objectPosition: focalX + ' ' + focalY,
-                transform: 'scale(1.2)' // 微放大 1.2 倍，確保左右挪動時不會露白
+                transform: 'scale(1.2)'
               }
             }),
             h('span', { className: 'drag-hint' }, '✢ 按住拖曳挪動焦點')
@@ -264,7 +236,6 @@
       }
     });
 
-    // 3. 強制註冊範本到 research 集合
     CMS.registerPreviewTemplate('research', ResearchPreview);
   </script>
 </body>
