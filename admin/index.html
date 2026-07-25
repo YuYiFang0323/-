@@ -9,9 +9,158 @@
 <body>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   <script>
-    // 設定後台預設語言為繁體中文 (zh_Hant)
+    // 設定後台預設語言為繁體中文
     window.CMS_CONFIG = window.CMS_CONFIG || {};
     window.CMS_CONFIG.locale = 'zh_Hant';
+
+    // -------------------------------------------------------------
+    // 自訂卡片預覽元件（使右側預覽畫面與前台一模一樣）
+    // -------------------------------------------------------------
+
+    // 1. 研究成果 (Research) 預覽範本
+    const ResearchPreview = createClass({
+      render: function() {
+        const entry = this.props.entry;
+        const title = entry.getIn(['data', 'title']) || '我是研究標題';
+        const tagsStr = entry.getIn(['data', 'tags']) || '';
+        const description = entry.getIn(['data', 'description']) || '';
+        const link = entry.getIn(['data', 'link']);
+
+        // 將逗號或分號隔開的標籤轉為陣列
+        const tags = tagsStr ? tagsStr.split(/[,;]/).map(t => t.trim()).filter(Boolean) : [];
+        const hasLink = link && link !== '000000' && link.trim() !== '';
+
+        return h('div', { style: { padding: '30px', background: '#f8f9fa', minHeight: '100vh', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' } },
+          h('div', {
+            style: {
+              background: '#ffffff',
+              borderRadius: '12px',
+              padding: '24px',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+              maxWidth: '380px',
+              margin: '0 auto'
+            }
+          },
+            // 標題
+            h('h3', { style: { fontSize: '1.35rem', color: '#0f172a', marginBottom: '14px', fontWeight: '700', lineHeight: '1.3' } }, title),
+            
+            // 標籤群組
+            tags.length > 0 ? h('div', { style: { marginBottom: '14px', display: 'flex', flexWrap: 'wrap', gap: '6px' } },
+              tags.map(tag => h('span', {
+                style: {
+                  background: '#eff6ff',
+                  color: '#2563eb',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  fontSize: '0.85rem',
+                  fontWeight: '600'
+                }
+              }, tag))
+            ) : null,
+
+            // 摘要說明
+            h('p', { style: { color: '#475569', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '16px', whiteSpace: 'pre-line' } }, description),
+
+            // 按鈕
+            hasLink ? h('a', {
+              href: link,
+              target: '_blank',
+              style: {
+                display: 'block',
+                textAlign: 'center',
+                background: '#3b82f6',
+                color: '#ffffff',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: '500'
+              }
+            }, '查看論文/連結') : null
+          )
+        );
+      }
+    });
+
+    // 2. 影音作品 (Videos) 預覽範本
+    const VideoPreview = createClass({
+      render: function() {
+        const entry = this.props.entry;
+        const title = entry.getIn(['data', 'title']) || '作品名稱';
+        const description = entry.getIn(['data', 'description']) || '';
+        const youtubeUrl = entry.getIn(['data', 'youtube_url']);
+
+        return h('div', { style: { padding: '30px', background: '#f8f9fa', minHeight: '100vh', fontFamily: 'sans-serif' } },
+          h('div', {
+            style: {
+              background: '#ffffff',
+              borderRadius: '12px',
+              padding: '24px',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+              maxWidth: '380px',
+              margin: '0 auto'
+            }
+          },
+            h('h3', { style: { fontSize: '1.25rem', color: '#0f172a', marginBottom: '12px', fontWeight: '700' } }, title),
+            h('p', { style: { color: '#475569', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '16px', whiteSpace: 'pre-line' } }, description),
+            youtubeUrl ? h('a', {
+              href: youtubeUrl,
+              target: '_blank',
+              style: {
+                display: 'block',
+                textAlign: 'center',
+                background: '#3b82f6',
+                color: '#ffffff',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }
+            }, '觀看影片') : null
+          )
+        );
+      }
+    });
+
+    // 3. 計畫與競賽 (Plans & Competitions) 預覽範本
+    const ProjectPreview = createClass({
+      render: function() {
+        const entry = this.props.entry;
+        const title = entry.getIn(['data', 'title']) || '項目名稱';
+        const role = entry.getIn(['data', 'role']) || '-';
+        const period = entry.getIn(['data', 'period']) || '-';
+        const description = entry.getIn(['data', 'description']) || '';
+
+        return h('div', { style: { padding: '30px', background: '#f8f9fa', minHeight: '100vh', fontFamily: 'sans-serif' } },
+          h('div', {
+            style: {
+              background: '#ffffff',
+              borderRadius: '12px',
+              padding: '24px',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+              maxWidth: '380px',
+              margin: '0 auto'
+            }
+          },
+            h('h3', { style: { fontSize: '1.25rem', color: '#0f172a', marginBottom: '10px', fontWeight: '700' } }, title),
+            h('p', { style: { fontSize: '0.88rem', color: '#64748b', marginBottom: '10px', lineHeight: '1.5' } },
+              h('strong', {}, '角色：'), role, h('br'),
+              h('strong', {}, '時間：'), period
+            ),
+            h('p', { style: { color: '#475569', fontSize: '0.95rem', lineHeight: '1.6', whiteSpace: 'pre-line' } }, description)
+          )
+        );
+      }
+    });
+
+    // 註冊範本到對應的 Collection
+    CMS.registerPreviewTemplate('research', ResearchPreview);
+    CMS.registerPreviewTemplate('videos', VideoPreview);
+    CMS.registerPreviewTemplate('plans', ProjectPreview);
+    CMS.registerPreviewTemplate('competitions', ProjectPreview);
   </script>
 </body>
 </html>
