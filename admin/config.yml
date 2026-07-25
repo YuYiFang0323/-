@@ -32,13 +32,26 @@ collections:
       - { label: "作品說明", name: "description", widget: "text" }
 
   - name: "projects"
-    label: "競賽與計畫"
-    label_singular: "競賽與計畫項目"
+    label: "計畫"
+    label_singular: "計畫項目"
     folder: "content/projects"
     create: true
     slug: "{{slug}}"
     fields:
-      - { label: "計畫/競賽名稱", name: "title", widget: "string" }
+      - { label: "計畫名稱", name: "title", widget: "string" }
       - { label: "擔任角色", name: "role", widget: "string" }
       - { label: "執行時間", name: "period", widget: "string" }
       - { label: "詳細說明", name: "description", widget: "text" }
+
+  - name: "projects"
+    label: "競賽"
+    label_singular: "競賽項目"
+    folder: "content/projects"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "競賽名稱", name: "title", widget: "string" }
+      - { label: "擔任角色", name: "role", widget: "string" }
+      - { label: "執行時間", name: "period", widget: "string" }
+      - { label: "詳細說明", name: "description", widget: "text" }
+
