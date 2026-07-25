@@ -6,6 +6,28 @@
   <title>後台內容管理系統</title>
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
+<script>
+  // 自訂「研究成果」後台預覽卡片
+  CMS.registerPreviewTemplate('research', createClass({
+    render: function() {
+      const entry = this.props.entry;
+      const title = entry.getIn(['data', 'title']);
+      const tags = entry.getIn(['data', 'tags']);
+      const description = entry.getIn(['data', 'description']);
+      const link = entry.getIn(['data', 'link']);
+
+      return h('div', { style: { padding: '20px', fontFamily: 'sans-serif' } },
+        h('h2', { style: { color: '#0f172a', marginBottom: '8px' } }, title || '無標題'),
+        tags ? h('div', { style: { color: '#2563eb', marginBottom: '12px', fontSize: '14px' } }, `標籤: ${tags}`) : null,
+        h('div', { style: { background: '#f8f9fa', padding: '12px', borderRadius: '6px', marginBottom: '12px' } },
+          h('strong', {}, '摘要簡述：'),
+          h('p', { style: { marginTop: '4px', whiteSpace: 'pre-line' } }, description || '')
+        ),
+        link ? h('a', { href: link, target: '_blank', style: { color: '#3b82f6' } }, '查看論文/連結') : null
+      );
+    }
+  }));
+</script>
 <body>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   <script>
