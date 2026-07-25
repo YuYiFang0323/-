@@ -20,7 +20,8 @@ collections:
     fields:
       - { label: "論文/研究標題", name: "title", widget: "string" }
       - { label: "封面圖片", name: "cover", widget: "image", required: false }
-      - { label: "封面焦點Y軸(%)", name: "focal_y", widget: "string", default: "50%", required: false }
+      - { name: "focal_x", label: "封面焦點 X軸", widget: "string", required: false, default: "50%" }
+      - { name: "focal_y", label: "封面焦點 Y軸", widget: "string", required: false, default: "50%" }
       - { label: "關鍵字標籤 (逗號隔開)", name: "tags", widget: "string" }
       - { label: "摘要簡述", name: "description", widget: "text" }
       - { label: "論文連結/PDF URL", name: "link", widget: "string", required: false }
