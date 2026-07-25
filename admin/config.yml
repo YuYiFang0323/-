@@ -1,0 +1,39 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "assets/uploads"
+public_folder: "/assets/uploads"
+
+collections:
+  - name: "research"
+    label: "研究成果"
+    folder: "content/research"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "論文/研究標題", name: "title", widget: "string" }
+      - { label: "關鍵字標籤 (逗號隔開)", name: "tags", widget: "string" }
+      - { label: "摘要簡述", name: "description", widget: "text" }
+      - { label: "論文連結/PDF URL", name: "link", widget: "string", required: false }
+
+  - name: "videos"
+    label: "影音作品"
+    folder: "content/videos"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "作品名稱", name: "title", widget: "string" }
+      - { label: "YouTube 影片連結", name: "youtube_url", widget: "string" }
+      - { label: "作品說明", name: "description", widget: "text" }
+
+  - name: "projects"
+    label: "競賽與計畫"
+    folder: "content/projects"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "計畫/競賽名稱", name: "title", widget: "string" }
+      - { label: "擔任角色", name: "role", widget: "string" }
+      - { label: "執行時間", name: "period", widget: "string" }
+      - { label: "詳細說明", name: "description", widget: "text" }
