@@ -4,35 +4,24 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>後台內容管理系統</title>
+  
+  <style>
+    /* 精準隱藏：只針對右上方那塊預覽切換控制區，絕不影響整體畫面 */
+    a[href*="preview"],
+    button[title*="preview"],
+    button[title*="Preview"],
+    [class*="PaneHeader"] a,
+    [class*="PaneHeader"] button {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
   <!-- 載入 Decap CMS -->
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   
   <script>
-    // 1. 強效 JavaScript 隱藏機制：即時監控並移除右上角的預覽按鈕
-    var hidePreviewButtonObserver = new MutationObserver(function() {
-      // 搜尋所有可能包含「預覽」或重新整理圖示的按鈕/連結元素
-      var elements = document.querySelectorAll('a, button, span, div');
-      elements.forEach(function(el) {
-        if (el.textContent && (el.textContent.includes('點擊來進行預覽') || el.textContent.includes('點擊進行預覽'))) {
-          // 找到該按鈕父節點或元素本身直接隱藏
-          var container = el.closest('a') || el.closest('button') || el;
-          container.style.display = 'none';
-          container.style.visibility = 'hidden';
-          container.style.opacity = '0';
-          container.style.pointerEvents = 'none';
-        }
-      });
-    });
-
-    // 開始監控 DOM 變化
-    hidePreviewButtonObserver.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-
-    // 2. 注入 1:1 還原前台的 CSS 樣式
+    // 1. 注入 1:1 還原前台的 CSS 樣式
     CMS.registerPreviewStyle(`    
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
@@ -98,7 +87,7 @@
       }
     `, { raw: true });
 
-    // 3. 註冊研究成果 (research) 的自訂預覽範本
+    // 2. 註冊研究成果 (research) 的自訂預覽範本
     var ResearchPreview = createClass({
       render: function() {
         var entry = this.props.entry;
@@ -133,7 +122,7 @@
       }
     });
 
-    // 4. 強制註冊範本到 research 集合
+    // 3. 強制註冊範本到 research 集合
     CMS.registerPreviewTemplate('research', ResearchPreview);
   </script>
 </body>
