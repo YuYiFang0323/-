@@ -3,6 +3,7 @@ backend:
   repo: YuYiFang0323/MyWeb  # 👈 這裡必須跟 GitHub 上的 Repo 名稱一模一樣！
   branch: main
   auth_type: pkce # 👈 加上這一行！告訴 Decap CMS 直接用原生 PKCE 驗證
+  base_url: https://auth.decapcms.org
 
 locale: 'zh_Hant' # 設定系統語系為繁體中文
 
