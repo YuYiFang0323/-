@@ -50,6 +50,17 @@
         object-fit: cover;
         pointer-events: none;
       }
+      .focal-point-marker {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        background-color: #ef4444;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 4px rgba(0,0,0,0.4);
+        pointer-events: none;
+      }
       .drag-hint {
         position: absolute;
         bottom: 8px;
@@ -109,19 +120,22 @@
       }
     `, { raw: true });
 
-    // 2. 註冊研究成果預覽組件（修正拖曳與自動填寫邏輯）
+    // 解析數值為純數字 (0~100)
+    function parseFocalValue(val) {
+      if (val === undefined || val === null || val === '') return 50;
+      var num = parseInt(String(val).replace(/[^0-9]/g, ''), 10);
+      return isNaN(num) ? 50 : Math.min(Math.max(num, 0), 100);
+    }
+
+    // 2. 註冊研究成果預覽組件
     var ResearchPreview = createClass({
       getInitialState: function() {
-        var entry = this.props.entry;
-        var fx = parseInt(entry.getIn(['data', 'focal_x']), 10);
-        var fy = parseInt(entry.getIn(['data', 'focal_y']), 10);
-
         return { 
           isDragging: false, 
           startX: 0, 
           startY: 0, 
-          posX: isNaN(fx) ? 50 : fx, 
-          posY: isNaN(fy) ? 50 : fy 
+          posX: 50, 
+          posY: 50 
         };
       },
 
@@ -129,18 +143,15 @@
         e.preventDefault();
 
         var entry = this.props.entry;
-        var rawX = entry.getIn(['data', 'focal_x']);
-        var rawY = entry.getIn(['data', 'focal_y']);
-        
-        var curX = rawX ? parseInt(rawX, 10) : this.state.posX;
-        var curY = rawY ? parseInt(rawY, 10) : this.state.posY;
+        var curX = parseFocalValue(entry.getIn(['data', 'focal_x']));
+        var curY = parseFocalValue(entry.getIn(['data', 'focal_y']));
 
         this.setState({
           isDragging: true,
           startX: e.clientX,
           startY: e.clientY,
-          posX: isNaN(curX) ? 50 : curX,
-          posY: isNaN(curY) ? 50 : curY
+          posX: curX,
+          posY: curY
         });
       },
 
@@ -150,8 +161,12 @@
         var deltaX = e.clientX - this.state.startX;
         var deltaY = e.clientY - this.state.startY;
 
-        var newX = Math.min(Math.max(this.state.posX - (deltaX * 0.25), 0), 100);
-        var newY = Math.min(Math.max(this.state.posY - (deltaY * 0.25), 0), 100);
+        // 調整靈敏度，計算 0 ~ 100 的百分比點
+        var newX = Math.min(Math.max(this.state.posX - (deltaX * 0.3), 0), 100);
+        var newY = Math.min(Math.max(this.state.posY - (deltaY * 0.3), 0), 100);
+
+        var roundX = Math.round(newX);
+        var roundY = Math.round(newY);
 
         this.setState({
           posX: newX,
@@ -159,23 +174,59 @@
           startX: e.clientX,
           startY: e.clientY
         });
+
+        // 核心修正：拖曳途中即時更新 CMS 表單 DOM 中的對應數字輸入框，實現零延遲自動填寫
+        this.updateCmsInputs(roundX, roundY);
       },
 
       handleMouseUp: function() {
         if (this.state.isDragging) {
           this.setState({ isDragging: false });
+          var roundX = Math.round(this.state.posX);
+          var roundY = Math.round(this.state.posY);
+          
+          // 放開時確認將純數字填入輸入框並觸發 input/change 事件
+          this.updateCmsInputs(roundX, roundY);
+        }
+      },
 
-          // 放開滑鼠時，寫入最新座標至左側表單
-          if (this.props.onChange) {
-            var roundX = Math.round(this.state.posX) + '%';
-            var roundY = Math.round(this.state.posY) + '%';
+      // 關鍵函數：直接定位並安全輸入純數字（解決數字鎖死與連動失敗問題）
+      updateCmsInputs: function(x, y) {
+        try {
+          var inputs = window.parent.document.querySelectorAll('input[type="number"], input[id*="focal"]');
+          var inputX, inputY;
 
-            var updatedData = this.props.entry.get('data')
-              .set('focal_x', roundX)
-              .set('focal_y', roundY);
-              
-            this.props.onChange(updatedData);
-          }
+          inputs.forEach(function(input) {
+            var id = (input.id || '').toLowerCase();
+            var name = (input.name || '').toLowerCase();
+            if (id.includes('focal_x') || name.includes('focal_x') || id.endsWith('-x')) inputX = input;
+            if (id.includes('focal_y') || name.includes('focal_y') || id.endsWith('-y')) inputY = input;
+          });
+
+          // 如果沒比對到，依序指派前兩個數字輸入框
+          if (!inputX && inputs[0]) inputX = inputs[0];
+          if (!inputY && inputs[1]) inputY = inputs[1];
+
+          var setNativeValue = function(element, value) {
+            var valueSetter = Object.getOwnPropertyDescriptor(element, 'value').set;
+            var prototype = Object.getPrototypeOf(element);
+            var prototypeValueSetter = Object.getOwnPropertyDescriptor(prototype, 'value').set;
+
+            if (prototypeValueSetter && valueSetter !== prototypeValueSetter) {
+              prototypeValueSetter.call(element, value);
+            } else if (valueSetter) {
+              valueSetter.call(element, value);
+            } else {
+              element.value = value;
+            }
+            element.dispatchEvent(new Event('input', { bubbles: true }));
+            element.dispatchEvent(new Event('change', { bubbles: true }));
+          };
+
+          if (inputX) setNativeValue(inputX, x);
+          if (inputY) setNativeValue(inputY, y);
+        } catch (err) {
+          console.warn('自動同步 XY 欄位時發生警告:', err);
         }
       },
 
@@ -189,17 +240,16 @@
         var link = entry.getIn(['data', 'link']) || entry.getIn(['data', 'pdf_url']);
         var cover = entry.getIn(['data', 'cover']);
 
-        // 關鍵點：拖曳中優先使用 state 數值，沒拖曳時才讀取 entry 設定
-        var focalX, focalY;
-        if (this.state.isDragging) {
-          focalX = Math.round(this.state.posX) + '%';
-          focalY = Math.round(this.state.posY) + '%';
-        } else {
-          var rawFocalX = entry.getIn(['data', 'focal_x']);
-          var rawFocalY = entry.getIn(['data', 'focal_y']);
-          focalX = rawFocalX || (Math.round(this.state.posX) + '%');
-          focalY = rawFocalY || (Math.round(this.state.posY) + '%');
-        }
+        // 讀取當前 XY 數值（確保轉為純數字）
+        var numX = this.state.isDragging 
+          ? Math.round(this.state.posX) 
+          : parseFocalValue(entry.getIn(['data', 'focal_x']));
+        var numY = this.state.isDragging 
+          ? Math.round(this.state.posY) 
+          : parseFocalValue(entry.getIn(['data', 'focal_y']));
+
+        var focalX = numX + '%';
+        var focalY = numY + '%';
 
         var tagList = [];
         if (tagsRaw) {
@@ -235,7 +285,12 @@
                 pointerEvents: 'none'
               }
             }),
-            h('span', { className: 'drag-hint' }, '✢ 按住拖曳挪動焦點')
+            // 紅點標記：直觀顯示當前焦點所在之處
+            h('div', {
+              className: 'focal-point-marker',
+              style: { left: focalX, top: focalY }
+            }),
+            h('span', { className: 'drag-hint' }, '✢ 按住拖曳挪動焦點 (X:' + numX + ' Y:' + numY + ')')
           );
         }
 
