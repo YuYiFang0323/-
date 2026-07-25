@@ -33,7 +33,7 @@ collections:
 
   - name: "plans"
     label: "計畫實施"
-    label_singular: "計畫項目"
+    label_singular: "計畫實施項目"
     folder: "content/plans"
     create: true
     slug: "{{slug}}"
@@ -45,7 +45,7 @@ collections:
 
   - name: "competitions"
     label: "競賽獲獎"
-    label_singular: "競賽項目"
+    label_singular: "競賽獲獎項目"
     folder: "content/competitions"
     create: true
     slug: "{{slug}}"
