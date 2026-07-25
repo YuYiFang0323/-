@@ -12,6 +12,15 @@
   <script>
     // 1. 注入 1:1 還原前台的 CSS 樣式
     CMS.registerPreviewStyle(`
+      /* 隱藏右上角的「點擊進行預覽」按鈕與圖示 */
+      [class*="PaneHeader"],
+      [class*="PreviewPaneHeader"],
+      button[title*="Toggle preview"],
+      a[class*="PreviewToggle"] {
+        display: none !important;
+      }
+    `, { raw: true });
+    
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
