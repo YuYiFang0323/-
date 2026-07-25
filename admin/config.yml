@@ -1,5 +1,5 @@
 backend:
-  name: git-gateway
+  name: github
   repo: YuYiFang0323/MyWeb  # 👈 這裡必須跟 GitHub 上的 Repo 名稱一模一樣！
   branch: main
 
