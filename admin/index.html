@@ -115,32 +115,49 @@
       }
     `, { raw: true });
 
-    // 2. 註冊研究成果 (research) 的自訂預覽範本
+    // 2. 註冊研究成果 (research) 的自訂預覽範本（全方向拖曳版）
     var ResearchPreview = createClass({
       getInitialState: function() {
-        return { isDragging: false, startY: 0, currentPos: 50 };
+        return { 
+          isDragging: false, 
+          startX: 0, 
+          startY: 0, 
+          currentPosX: 50, 
+          currentPosY: 50 
+        };
       },
 
       handleMouseDown: function(e) {
         this.setState({
           isDragging: true,
+          startX: e.clientX,
           startY: e.clientY
         });
       },
 
       handleMouseMove: function(e) {
         if (!this.state.isDragging) return;
+        
+        var deltaX = e.clientX - this.state.startX;
         var deltaY = e.clientY - this.state.startY;
-        var newPos = Math.min(Math.max(this.state.currentPos - (deltaY * 0.3), 0), 100);
+
+        // 計算 X 與 Y 軸新位置（限制在 0% ~ 100% 之間）
+        var newPosX = Math.min(Math.max(this.state.currentPosX - (deltaX * 0.3), 0), 100);
+        var newPosY = Math.min(Math.max(this.state.currentPosY - (deltaY * 0.3), 0), 100);
         
         this.setState({
-          currentPos: newPos,
+          currentPosX: newPosX,
+          currentPosY: newPosY,
+          startX: e.clientX,
           startY: e.clientY
         });
 
-        // 將拖動挪動後的值即時寫入後台資料欄位 focal_y
+        // 將拖動挪動後的焦點即時寫入後台資料欄位 focal_x 與 focal_y
         if (this.props.onChange) {
-          this.props.onChange(this.props.entry.get('data').set('focal_y', Math.round(newPos) + '%'));
+          var updatedData = this.props.entry.get('data')
+            .set('focal_x', Math.round(newPosX) + '%')
+            .set('focal_y', Math.round(newPosY) + '%');
+          this.props.onChange(updatedData);
         }
       },
 
@@ -157,7 +174,10 @@
         var description = entry.getIn(['data', 'description']) || entry.getIn(['data', 'summary']) || '';
         var link = entry.getIn(['data', 'link']) || entry.getIn(['data', 'pdf_url']);
         var cover = entry.getIn(['data', 'cover']);
-        var focalY = entry.getIn(['data', 'focal_y']) || (this.state.currentPos + '%');
+
+        // 讀取 X 與 Y 焦點（預設 50% 50%）
+        var focalX = entry.getIn(['data', 'focal_x']) || (Math.round(this.state.currentPosX) + '%');
+        var focalY = entry.getIn(['data', 'focal_y']) || (Math.round(this.state.currentPosY) + '%');
 
         // 將逗號分隔的標籤轉為陣列
         var tagList = [];
@@ -188,9 +208,12 @@
           },
             h('img', {
               src: coverUrl,
-              style: { objectPosition: 'center ' + focalY }
+              style: { 
+                objectPosition: focalX + ' ' + focalY,
+                transform: 'scale(1.2)' // 微放大 1.2 倍，確保左右挪動時不會露白
+              }
             }),
-            h('span', { className: 'drag-hint' }, '↕ 按住拖曳挪動封面')
+            h('span', { className: 'drag-hint' }, '✢ 按住拖曳挪動焦點')
           );
         }
 
