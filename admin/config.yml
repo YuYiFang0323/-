@@ -5,7 +5,7 @@ backend:
 
 locale: 'zh_Hant' # 設定系統語系為繁體中文
 
-media_folder: "static/assets/uploads"
+media_folder: "assets/uploads"
 public_folder: "/assets/uploads"
 
 collections:
