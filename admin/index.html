@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   
   <script>
-    // 1. 注入 1:1 還原前台的 CSS 樣式
+    // 1. 注入與前台 1:1 還原的 CSS 樣式
     CMS.registerPreviewStyle(`    
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
@@ -25,7 +25,6 @@
       .card {
         background: #ffffff;
         border-radius: 12px;
-        padding: 1.8rem;
         border: 1px solid #e2e8f0;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         max-width: 380px;
@@ -33,7 +32,47 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        overflow: hidden;
       }
+
+      /* 封面圖可拖拽挪動樣式 */
+      .card-cover-wrapper {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        background-color: #f1f5f9;
+        cursor: grab;
+        user-select: none;
+      }
+      .card-cover-wrapper:active {
+        cursor: grabbing;
+      }
+      .card-cover-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        pointer-events: none;
+      }
+      .drag-hint {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        pointer-events: none;
+      }
+
+      .card-body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+      }
+
       .card h3 {
         font-size: 1.25rem;
         color: #0f172a;
@@ -78,35 +117,92 @@
 
     // 2. 註冊研究成果 (research) 的自訂預覽範本
     var ResearchPreview = createClass({
+      getInitialState: function() {
+        return { isDragging: false, startY: 0, currentPos: 50 };
+      },
+
+      handleMouseDown: function(e) {
+        this.setState({
+          isDragging: true,
+          startY: e.clientY
+        });
+      },
+
+      handleMouseMove: function(e) {
+        if (!this.state.isDragging) return;
+        var deltaY = e.clientY - this.state.startY;
+        var newPos = Math.min(Math.max(this.state.currentPos - (deltaY * 0.3), 0), 100);
+        
+        this.setState({
+          currentPos: newPos,
+          startY: e.clientY
+        });
+
+        // 自動將挪動後的新焦點百分比寫入後台資料欄位 focal_y
+        this.props.onChange(this.props.entry.get('data').set('focal_y', Math.round(newPos) + '%'));
+      },
+
+      handleMouseUp: function() {
+        this.setState({ isDragging: false });
+      },
+
       render: function() {
         var entry = this.props.entry;
         
-        // 抓取後台輸入框的數值 (相容 title, tags, description, summary, link)
         var title = entry.getIn(['data', 'title']) || '我是研究標題';
         var tagsRaw = entry.getIn(['data', 'tags']);
         var description = entry.getIn(['data', 'description']) || entry.getIn(['data', 'summary']) || '';
         var link = entry.getIn(['data', 'link']) || entry.getIn(['data', 'pdf_url']);
+        var cover = entry.getIn(['data', 'cover']);
+        var focalY = entry.getIn(['data', 'focal_y']) || (this.state.currentPos + '%');
 
-        // 將逗號分隔的標籤轉為陣列 (例如 MCDM,TOPSIS -> ['MCDM', 'TOPSIS'])
+        // 將逗號分隔的標籤轉為陣列
         var tagList = [];
         if (tagsRaw) {
           tagList = tagsRaw.split(/[,;]/).map(function(t) { return t.trim(); }).filter(Boolean);
         }
 
-        // 判斷按鈕是否顯示 (排除 000000 與空值)
-        var hasLink = link && link !== '000000' && link.trim() !== '';
-        
+        // 嚴格網址格式判斷
+        var hasLink = false;
+        if (link && typeof link === 'string') {
+          var cleanLink = link.trim();
+          var urlPattern = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
+          hasLink = urlPattern.test(cleanLink);
+        }
+
+        // 處理封面圖片與拖拽手勢監聽
+        var coverElement = null;
+        if (cover) {
+          var coverUrl = this.props.getAsset(cover).toString();
+          coverElement = h('div', {
+            className: 'card-cover-wrapper',
+            onMouseDown: this.handleMouseDown,
+            onMouseMove: this.handleMouseMove,
+            onMouseUp: this.handleMouseUp,
+            onMouseLeave: this.handleMouseUp
+          },
+            h('img', {
+              src: coverUrl,
+              style: { objectPosition: 'center ' + focalY }
+            }),
+            h('span', { className: 'drag-hint' }, '↕ 按住拖曳挪動封面')
+          );
+        }
+
         return h('div', { className: 'card' },
-          h('div', {},
-            h('h3', {}, title),
-            tagList.length > 0 && h('div', { className: 'tags-wrapper' },
-              tagList.map(function(tag, i) {
-                return h('span', { key: i, className: 'tag' }, tag);
-              })
+          coverElement,
+          h('div', { className: 'card-body' },
+            h('div', {},
+              h('h3', {}, title),
+              tagList.length > 0 && h('div', { className: 'tags-wrapper' },
+                tagList.map(function(tag, i) {
+                  return h('span', { key: i, className: 'tag' }, tag);
+                })
+              ),
+              h('p', {}, description)
             ),
-            h('p', {}, description)
-          ),
-          hasLink && h('a', { href: link, target: '_blank', className: 'btn' }, '查看論文/連結')
+            hasLink && h('a', { href: link, target: '_blank', className: 'btn' }, '查看論文/連結')
+          )
         );
       }
     });
