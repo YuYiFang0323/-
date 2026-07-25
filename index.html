@@ -213,25 +213,40 @@
   <script>
     const USERNAME = "YuYiFang0323"; 
     const REPO = "MyWeb"; 
-    const BRANCH = "main"; // 如果您的 Git 預設分支是 master，請改為 "master"
+    const BRANCH = "main";
 
-    // 核心修正 1：轉譯圖片網址，確保正確取得 GitHub 原始檔案
+    // 取得 YouTube ID 的輔助函數
+    function getYoutubeId(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    // 核心修正 1：轉譯圖片網址，嚴謹適應 static/、assets/ 與絕對路徑
     function getImageUrl(path) {
       if (!path) return '';
       
       let cleanPath = String(path).trim().replace(/^['"]|['"]$/g, '');
 
+      // 完整外連或 blob 網址直接回傳
       if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://') || cleanPath.startsWith('blob:')) {
         return cleanPath;
       }
 
-      // 剔除開頭斜線與常見目錄前綴
-      cleanPath = cleanPath.replace(/^\//, '').replace(/^public\//, '').replace(/^static\//, '');
+      // 移除開頭斜線與 public/
+      cleanPath = cleanPath.replace(/^\//, '').replace(/^public\//, '');
 
-      return `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${cleanPath}`;
+      // 如果路徑已經包含 assets/ 或 static/，直接拼接 Github raw 網址
+      if (cleanPath.startsWith('assets/') || cleanPath.startsWith('static/')) {
+        return `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${cleanPath}`;
+      }
+
+      // 預設補充 static/ 前綴（配合 Decap CMS 預設上傳目錄）
+      return `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/static/${cleanPath}`;
     }
 
-    // 核心修正 2：格式化 XY 焦點數值，避免出現 50%% 或純數字缺少 % 的問題
+    // 核心修正 2：格式化 XY 焦點數值
     function formatFocal(val) {
       if (val === undefined || val === null || val === '') return '50%';
       let strVal = String(val).trim();
@@ -241,11 +256,13 @@
       return strVal;
     }
 
+    // 增強型 Front Matter 解析器（避免網址與多號出錯）
     function parseFrontMatter(text) {
       const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
       if (!match) return { description: text };
       const yamlText = match[1];
       const data = {};
+      
       yamlText.split('\n').forEach(line => {
         const colonIndex = line.indexOf(':');
         if (colonIndex !== -1) {
@@ -257,6 +274,13 @@
           data[key] = value;
         }
       });
+
+      // 解析 Markdown 本文作為長描述（若有）
+      const body = text.replace(/^---\r?\n[\s\S]*?\r?\n---/, '').trim();
+      if (body && !data.description) {
+        data.description = body;
+      }
+
       return data;
     }
 
@@ -285,7 +309,7 @@
 
         container.innerHTML = '';
         for (const file of mdFiles) {
-          // 加入快取消除參數 (?t=timestamp)，確保每次重新載入時抓到的都是最新的圖片與文章
+          // 快取消除參數
           const rawRes = await fetch(file.download_url + '?t=' + new Date().getTime());
           const text = await rawRes.text();
           const data = parseFrontMatter(text);
@@ -337,7 +361,14 @@
     function renderVideo(data) {
       const focalX = formatFocal(data.focal_x);
       const focalY = formatFocal(data.focal_y);
-      const coverUrl = getImageUrl(data.cover);
+      let coverUrl = getImageUrl(data.cover);
+
+      // 自動備援：若無封面但有 YouTube 連結，自動抓取 YouTube 高清預覽圖
+      if (!coverUrl && data.youtube_url) {
+        const ytId = getYoutubeId(data.youtube_url);
+        if (ytId) coverUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+      }
+
       const coverHtml = coverUrl 
         ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` 
         : '';
@@ -381,11 +412,36 @@
       `;
     }
 
+    function renderCompetition(data) {
+      const focalX = formatFocal(data.focal_x);
+      const focalY = formatFocal(data.focal_y);
+      const coverUrl = getImageUrl(data.cover);
+      const coverHtml = coverUrl 
+        ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` 
+        : '';
+
+      return `
+        <div class="card">
+          ${coverHtml}
+          <div class="card-body">
+            <div>
+              <h3>${data.title || '無標題'}</h3>
+              <p style="margin-bottom:0.5rem; font-size:0.88rem; color:#64748b;">
+                <strong>獎項：</strong>${data.award || data.role || '-'}<br>
+                <strong>時間：</strong>${data.period || data.date || '-'}
+              </p>
+              <p>${data.description || ''}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       loadDirectoryFiles('research', 'research-list', renderResearch);
       loadDirectoryFiles('videos', 'videos-list', renderVideo);
       loadDirectoryFiles('plans', 'plans-list', renderProject);
-      loadDirectoryFiles('competitions', 'competitions-list', renderProject);
+      loadDirectoryFiles('competitions', 'competitions-list', renderCompetition);
     });
   </script>
 </body>
