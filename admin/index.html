@@ -115,23 +115,41 @@
       }
     `, { raw: true });
 
-    // 2. 註冊研究成果 (research) 的自訂預覽範本（全方向拖曳版）
+    // 2. 註冊研究成果 (research) 的自訂預覽範本（全方向拖曳與輸入框同步修復版）
     var ResearchPreview = createClass({
       getInitialState: function() {
         return { 
           isDragging: false, 
           startX: 0, 
           startY: 0, 
-          currentPosX: 50, 
-          currentPosY: 50 
+          currentPosX: null, 
+          currentPosY: null 
         };
       },
 
+      // 解析數值字串 (例如 "45%" -> 45)
+      parsePercent: function(val, defaultVal) {
+        if (!val) return defaultVal;
+        var parsed = parseInt(val, 10);
+        return isNaN(parsed) ? defaultVal : parsed;
+      },
+
       handleMouseDown: function(e) {
+        var entry = this.props.entry;
+        
+        // 按下點擊時，優先從後台欄位抓取現有百分比，若無則預設為 50
+        var rawX = entry.getIn(['data', 'focal_x']);
+        var rawY = entry.getIn(['data', 'focal_y']);
+        
+        var initX = this.state.currentPosX !== null ? this.state.currentPosX : this.parsePercent(rawX, 50);
+        var initY = this.state.currentPosY !== null ? this.state.currentPosY : this.parsePercent(rawY, 50);
+
         this.setState({
           isDragging: true,
           startX: e.clientX,
-          startY: e.clientY
+          startY: e.clientY,
+          currentPosX: initX,
+          currentPosY: initY
         });
       },
 
@@ -152,11 +170,13 @@
           startY: e.clientY
         });
 
-        // 將拖動挪動後的焦點即時寫入後台資料欄位 focal_x 與 focal_y
+        // 強制更新資料並觸發 React 狀態同步回左側輸入框
         if (this.props.onChange) {
-          var updatedData = this.props.entry.get('data')
+          var data = this.props.entry.get('data');
+          var updatedData = data
             .set('focal_x', Math.round(newPosX) + '%')
             .set('focal_y', Math.round(newPosY) + '%');
+          
           this.props.onChange(updatedData);
         }
       },
@@ -175,9 +195,18 @@
         var link = entry.getIn(['data', 'link']) || entry.getIn(['data', 'pdf_url']);
         var cover = entry.getIn(['data', 'cover']);
 
-        // 讀取 X 與 Y 焦點（預設 50% 50%）
-        var focalX = entry.getIn(['data', 'focal_x']) || (Math.round(this.state.currentPosX) + '%');
-        var focalY = entry.getIn(['data', 'focal_y']) || (Math.round(this.state.currentPosY) + '%');
+        // 欄位值讀取邏輯
+        var rawFocalX = entry.getIn(['data', 'focal_x']);
+        var rawFocalY = entry.getIn(['data', 'focal_y']);
+
+        // 如果拖曳中以 state 為主，否則讀取輸入框/資料檔案中的數值
+        var focalX = (this.state.isDragging || this.state.currentPosX !== null) 
+          ? Math.round(this.state.currentPosX) + '%' 
+          : (rawFocalX || '50%');
+
+        var focalY = (this.state.isDragging || this.state.currentPosY !== null) 
+          ? Math.round(this.state.currentPosY) + '%' 
+          : (rawFocalY || '50%');
 
         // 將逗號分隔的標籤轉為陣列
         var tagList = [];
