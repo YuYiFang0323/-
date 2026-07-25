@@ -35,7 +35,7 @@
         overflow: hidden;
       }
 
-      /* 封面圖可拖拽挪動樣式 */
+      /* 封面圖可拖拽挪動樣式 (16:9) */
       .card-cover-wrapper {
         position: relative;
         width: 100%;
@@ -138,8 +138,10 @@
           startY: e.clientY
         });
 
-        // 自動將挪動後的新焦點百分比寫入後台資料欄位 focal_y
-        this.props.onChange(this.props.entry.get('data').set('focal_y', Math.round(newPos) + '%'));
+        // 將拖動挪動後的值即時寫入後台資料欄位 focal_y
+        if (this.props.onChange) {
+          this.props.onChange(this.props.entry.get('data').set('focal_y', Math.round(newPos) + '%'));
+        }
       },
 
       handleMouseUp: function() {
@@ -148,6 +150,7 @@
 
       render: function() {
         var entry = this.props.entry;
+        var getAsset = this.props.getAsset;
         
         var title = entry.getIn(['data', 'title']) || '我是研究標題';
         var tagsRaw = entry.getIn(['data', 'tags']);
@@ -162,7 +165,7 @@
           tagList = tagsRaw.split(/[,;]/).map(function(t) { return t.trim(); }).filter(Boolean);
         }
 
-        // 嚴格網址格式判斷
+        // 嚴格網址格式判斷 (必須包含完整 http:// 或 https://)
         var hasLink = false;
         if (link && typeof link === 'string') {
           var cleanLink = link.trim();
@@ -170,10 +173,12 @@
           hasLink = urlPattern.test(cleanLink);
         }
 
-        // 處理封面圖片與拖拽手勢監聽
+        // 安全解析封面圖片 Blob / URL
         var coverElement = null;
         if (cover) {
-          var coverUrl = this.props.getAsset(cover).toString();
+          var coverAsset = getAsset(cover);
+          var coverUrl = coverAsset ? coverAsset.toString() : cover;
+
           coverElement = h('div', {
             className: 'card-cover-wrapper',
             onMouseDown: this.handleMouseDown,
