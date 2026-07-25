@@ -2,8 +2,8 @@ backend:
   name: github
   repo: YuYiFang0323/MyWeb  # 👈 這裡必須跟 GitHub 上的 Repo 名稱一模一樣！
   branch: main
-  base_url: https://decap-cms-oauth-provider.vercel.app # 👈 改為社群維護的公用閘道
-  auth_endpoint: auth
+  base_url: https://my-web-jade.vercel.app  # 不需要加 /api/auth
+  auth_endpoint: api/auth
   
 locale: 'zh_Hant' # 設定系統語系為繁體中文
 
