@@ -3,6 +3,9 @@
 # https://yuyifang0323.github.io/MyWeb/admin/
 # 前台
 # https://yuyifang.netlify.app/#research
+# Vercel (外掛網址)
+# npx plugins add vercel/vercel-plugin
+
 
 # 暫放
 # https://github.com/imsyy/home?tab=readme-ov-file
