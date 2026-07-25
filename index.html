@@ -174,37 +174,33 @@
   <div class="container">
     <section id="research">
       <h2>研究成果</h2>
-      <div id="research-list" class="grid"><p class="empty-msg">正在讀取研究成果...</p></div>
+      <div id="research-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
     </section>
 
     <section id="videos">
       <h2>影音作品</h2>
-      <div id="videos-list" class="grid"><p class="empty-msg">正在讀取影音作品...</p></div>
+      <div id="videos-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
     </section>
 
     <section id="plans">
       <h2>計畫作品</h2>
-      <div id="plans-list" class="grid"><p class="empty-msg">正在讀取計畫作品...</p></div>
+      <div id="plans-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
     </section>
 
     <section id="competitions">
       <h2>競賽獲獎</h2>
-      <div id="competitions-list" class="grid"><p class="empty-msg">正在讀取競賽獲獎...</p></div>
+      <div id="competitions-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
     </section>
   </div>
- 
-  <script>
-    // -------------------------------------------------------------
-    // 請在此處填入你真實的 GitHub 帳號與專案名稱 (Repo Name)
-    // -------------------------------------------------------------
-    const GITHUB_USERNAME = "YOUR_GITHUB_USERNAME"; // 例如: "alex123"
-    const REPO_NAME = "YOUR_REPO_NAME";             // 例如: "my-portfolio"
-    // -------------------------------------------------------------
 
-    // 解析 YAML Front Matter (Markdown 檔案開頭區塊)
+  <script>
+    // 正確的 GitHub 帳號與儲存庫名稱
+    const USERNAME = "YuYiFang0323"; 
+    const REPO = "MyWeb"; 
+
     function parseFrontMatter(text) {
       const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-      if (!match) return {};
+      if (!match) return { description: text };
       const yamlText = match[1];
       const data = {};
       yamlText.split('\n').forEach(line => {
@@ -221,40 +217,44 @@
       return data;
     }
 
-    // 抓取 Collection 資料
-    async function fetchCollection(folder, containerId, renderFn) {
+    async function loadDirectoryFiles(folder, containerId, renderFn) {
       const container = document.getElementById(containerId);
-      try {
-        // 動態組出正確的 GitHub API 網址
-        const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/content/${folder}`;
-        const res = await fetch(apiUrl);
-      
-        if (res.ok) {
-          const files = await res.json();
-          const mdFiles = files.filter(f => f.name.endsWith('.md'));
-        
-          if (mdFiles.length === 0) {
-            container.innerHTML = '<p class="empty-msg">尚無內容，請至後台新增。</p>';
-            return;
-          }
+      if (!container) return;
 
-          container.innerHTML = '';
-          for (const file of mdFiles) {
-            const rawRes = await fetch(file.download_url);
-            const content = await rawRes.text();
-            const data = parseFrontMatter(content);
-            container.innerHTML += renderFn(data);
-          }
-        } else {
+      try {
+        const apiUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/content/${folder}`;
+        const res = await fetch(apiUrl);
+
+        if (res.status === 404) {
           container.innerHTML = '<p class="empty-msg">尚無內容，請至後台新增。</p>';
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
+        const files = await res.json();
+        const mdFiles = files.filter(f => f.name.endsWith('.md'));
+
+        if (mdFiles.length === 0) {
+          container.innerHTML = '<p class="empty-msg">尚無內容，請至後台新增。</p>';
+          return;
+        }
+
+        container.innerHTML = '';
+        for (const file of mdFiles) {
+          const rawRes = await fetch(file.download_url);
+          const text = await rawRes.text();
+          const data = parseFrontMatter(text);
+          container.innerHTML += renderFn(data);
         }
       } catch (err) {
-        console.error(err);
-        container.innerHTML = '<p class="empty-msg">讀取資料時發生錯誤。</p>';
+        console.warn(`[${folder}] 讀取狀態:`, err);
+        container.innerHTML = `<p class="empty-msg">尚無內容，請至後台新增。</p>`;
       }
     }
 
-    // 各類別卡片 HTML 產生函式
     function renderResearch(data) {
       const tags = data.tags ? data.tags.split(/[,;]/).map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
       const hasLink = data.link && data.link !== '000000' && data.link.trim() !== '';
@@ -297,12 +297,11 @@
       `;
     }
 
-    // 頁面載入完成後執行
     document.addEventListener('DOMContentLoaded', () => {
-      fetchCollection('research', 'research-list', renderResearch);
-      fetchCollection('videos', 'videos-list', renderVideo);
-      fetchCollection('plans', 'plans-list', renderProject);
-      fetchCollection('competitions', 'competitions-list', renderProject);
+      loadDirectoryFiles('research', 'research-list', renderResearch);
+      loadDirectoryFiles('videos', 'videos-list', renderVideo);
+      loadDirectoryFiles('plans', 'plans-list', renderProject);
+      loadDirectoryFiles('competitions', 'competitions-list', renderProject);
     });
   </script>
 </body>
