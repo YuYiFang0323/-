@@ -6,12 +6,12 @@
   <title>後台內容管理系統</title>
   
   <style>
-    /* 精準隱藏：只針對右上方那塊預覽切換控制區，絕不影響整體畫面 */
-    a[href*="preview"],
-    button[title*="preview"],
-    button[title*="Preview"],
-    [class*="PaneHeader"] a,
-    [class*="PaneHeader"] button {
+    /* 隱藏 Decap CMS 後台右上角的「點擊進行預覽」文字與圖示 */
+    button[class*="Toggle"], 
+    span[class*="Toggle"],
+    a[class*="PreviewToggle"],
+    div[class*="PaneHeader"] button,
+    div[class*="PaneHeader"] a {
       display: none !important;
     }
   </style>
