@@ -109,7 +109,7 @@
       }
     `, { raw: true });
 
-    // 2. 註冊研究成果預覽組件
+    // 2. 註冊研究成果預覽組件（修復拖曳與即時同步問題）
     var ResearchPreview = createClass({
       getInitialState: function() {
         return { 
@@ -122,11 +122,15 @@
       },
 
       handleMouseDown: function(e) {
+        // 防止瀏覽器預設觸發圖片拖動行為
+        e.preventDefault();
+
         var entry = this.props.entry;
+        var rawX = entry.getIn(['data', 'focal_x']);
+        var rawY = entry.getIn(['data', 'focal_y']);
         
-        // 抓取現有數值或設為 50
-        var curX = parseInt(entry.getIn(['data', 'focal_x']), 10);
-        var curY = parseInt(entry.getIn(['data', 'focal_y']), 10);
+        var curX = rawX ? parseInt(rawX, 10) : 50;
+        var curY = rawY ? parseInt(rawY, 10) : 50;
 
         this.setState({
           isDragging: true,
@@ -143,30 +147,34 @@
         var deltaX = e.clientX - this.state.startX;
         var deltaY = e.clientY - this.state.startY;
 
-        var newX = Math.min(Math.max(this.state.posX - (deltaX * 0.2), 0), 100);
-        var newY = Math.min(Math.max(this.state.posY - (deltaY * 0.2), 0), 100);
-        
-        var roundedX = Math.round(newX) + '%';
-        var roundedY = Math.round(newY) + '%';
+        var newX = Math.min(Math.max(this.state.posX - (deltaX * 0.25), 0), 100);
+        var newY = Math.min(Math.max(this.state.posY - (deltaY * 0.25), 0), 100);
 
+        // 拖曳中僅即時更新內部元件 State，保證畫面流暢不卡頓
         this.setState({
           posX: newX,
           posY: newY,
           startX: e.clientX,
           startY: e.clientY
         });
-
-        // 即時將值更新回 Decap CMS 資料模型
-        if (this.props.onChange) {
-          var data = this.props.entry.get('data')
-            .set('focal_x', roundedX)
-            .set('focal_y', roundedY);
-          this.props.onChange(data);
-        }
       },
 
       handleMouseUp: function() {
-        this.setState({ isDragging: false });
+        if (this.state.isDragging) {
+          this.setState({ isDragging: false });
+
+          // 放開滑鼠時才將新座標一次寫入左側表單，避免中途中斷拖曳
+          if (this.props.onChange) {
+            var roundX = Math.round(this.state.posX) + '%';
+            var roundY = Math.round(this.state.posY) + '%';
+
+            var updatedData = this.props.entry.get('data')
+              .set('focal_x', roundX)
+              .set('focal_y', roundY);
+              
+            this.props.onChange(updatedData);
+          }
+        }
       },
 
       render: function() {
@@ -179,9 +187,15 @@
         var link = entry.getIn(['data', 'link']) || entry.getIn(['data', 'pdf_url']);
         var cover = entry.getIn(['data', 'cover']);
 
-        // 讀取 Front-matter 內的焦點數值（若無則預設 50%）
-        var focalX = entry.getIn(['data', 'focal_x']) || '50%';
-        var focalY = entry.getIn(['data', 'focal_y']) || '50%';
+        // 拖曳中優先使用即時位置，放開後讀取 entry 的資料
+        var focalX, focalY;
+        if (this.state.isDragging) {
+          focalX = Math.round(this.state.posX) + '%';
+          focalY = Math.round(this.state.posY) + '%';
+        } else {
+          focalX = entry.getIn(['data', 'focal_x']) || (Math.round(this.state.posX) + '%');
+          focalY = entry.getIn(['data', 'focal_y']) || (Math.round(this.state.posY) + '%');
+        }
 
         var tagList = [];
         if (tagsRaw) {
@@ -205,13 +219,16 @@
             onMouseDown: this.handleMouseDown,
             onMouseMove: this.handleMouseMove,
             onMouseUp: this.handleMouseUp,
-            onMouseLeave: this.handleMouseUp
+            onMouseLeave: this.handleMouseUp,
+            style: { cursor: this.state.isDragging ? 'grabbing' : 'grab' }
           },
             h('img', {
               src: coverUrl,
               style: { 
                 objectPosition: focalX + ' ' + focalY,
-                transform: 'scale(1.2)'
+                transform: 'scale(1.2)',
+                userSelect: 'none',
+                pointerEvents: 'none'
               }
             }),
             h('span', { className: 'drag-hint' }, '✢ 按住拖曳挪動焦點')
