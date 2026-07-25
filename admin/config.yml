@@ -2,6 +2,7 @@ backend:
   name: github
   repo: YuYiFang0323/MyWeb  # 👈 這裡必須跟 GitHub 上的 Repo 名稱一模一樣！
   branch: main
+  site_domain: yuyifang0323.github.io/MyWeb
 
 locale: 'zh_Hant' # 設定系統語系為繁體中文
 
