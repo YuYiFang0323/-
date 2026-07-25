@@ -117,29 +117,103 @@
     <button id="backToTop"><i class="fa-solid fa-chevron-up"></i></button>
 
     <script>
-        // 手機版漢堡選單
-        const hamburger = document.getElementById('hamburger');
-        const navLinks = document.getElementById('navLinks');
-        hamburger.addEventListener('click', () => navLinks.classList.toggle('active'));
-        document.querySelectorAll('.nav-links a').forEach(l => l.addEventListener('click', () => navLinks.classList.remove('active')));
-
-        // 回到頁首按鈕
-        const backToTopBtn = document.getElementById('backToTop');
-        window.addEventListener('scroll', () => {
-            backToTopBtn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+      // 解析 Decap CMS 產生的 Markdown Front Matter
+      function parseFrontMatter(text) {
+        const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+        if (!match) return {};
+        const yamlText = match[1];
+        const data = {};
+        yamlText.split('\n').forEach(line => {
+          const colonIndex = line.indexOf(':');
+          if (colonIndex !== -1) {
+            const key = line.slice(0, colonIndex).trim();
+            let value = line.slice(colonIndex + 1).trim();
+            if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+              value = value.slice(1, -1);
+            }
+            data[key] = value;
+          }
         });
-        backToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        return data;
+      }
 
-        // 登入驗證重定向支援
-        if (window.netlifyIdentity) {
-            window.netlifyIdentity.on("init", user => {
-                if (!user) {
-                    window.netlifyIdentity.on("login", () => {
-                        document.location.href = "/admin/";
-                    });
-                }
-            });
+      // 讀取資料並保持你的原有樣式結構
+      async function loadCollection(folder, containerId, cardHTMLFn) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+    
+        try {
+          // 指向你的 GitHub 專案資料夾
+          const apiUrl = `https://api.github.com/repos/wanglong51314225/my-portfolio/contents/content/${folder}`;
+          const res = await fetch(apiUrl);
+      
+          if (res.ok) {
+            const files = await res.json();
+            const mdFiles = files.filter(f => f.name.endsWith('.md'));
+        
+            if (mdFiles.length === 0) {
+              container.innerHTML = '<p class="empty-msg">尚無內容，請至後台新增。</p>';
+              return;
+            }
+
+            container.innerHTML = '';
+            for (const file of mdFiles) {
+              const rawRes = await fetch(file.download_url);
+              const content = await rawRes.text();
+              const data = parseFrontMatter(content);
+              container.innerHTML += cardHTMLFn(data);
+            }
+          } else {
+            container.innerHTML = '<p class="empty-msg">尚無內容，請至後台新增。</p>';
+          }
+        } catch (err) {
+          console.error('Fetch error:', err);
+          container.innerHTML = '<p class="empty-msg">尚無內容，請至後台新增。</p>';
         }
-    </script>
+      }
+
+      // 卡片 HTML 渲染（搭配你原本的 CSS 類別名稱）
+      function renderResearchCard(data) {
+        const tagsArr = data.tags ? data.tags.split(/[,;]/).map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
+        const hasLink = data.link && data.link !== '000000' && data.link.trim() !== '';
+    
+        return `
+          <div class="card">
+            <h3>${data.title || '未命名項目'}</h3>
+            ${tagsArr ? `<div class="tags-wrapper">${tagsArr}</div>` : ''}
+            <p>${data.description || ''}</p>
+            ${hasLink ? `<a href="${data.link}" target="_blank" class="btn">查看連結</a>` : ''}
+          </div>
+        `;
+      }
+
+      function renderVideoCard(data) {
+        return `
+          <div class="card">
+            <h3>${data.title || '未命名作品'}</h3>
+            <p>${data.description || ''}</p>
+            ${data.youtube_url ? `<a href="${data.youtube_url}" target="_blank" class="btn">觀看影片</a>` : ''}
+          </div>
+        `;
+      }
+
+      function renderProjectCard(data) {
+        return `
+          <div class="card">
+            <h3>${data.title || '未命名項目'}</h3>
+            <p><strong>角色：</strong>${data.role || '-'}<br><strong>時間：</strong>${data.period || '-'}</p>
+            <p>${data.description || ''}</p>
+          </div>
+        `;
+      }
+
+      // 網頁載入後自動執行
+      document.addEventListener('DOMContentLoaded', () => {
+        loadCollection('research', 'research-list', renderResearchCard);
+        loadCollection('videos', 'videos-list', renderVideoCard);
+        loadCollection('plans', 'plans-list', renderProjectCard);
+        loadCollection('competitions', 'competitions-list', renderProjectCard);
+      });
+    </script>   
 </body>
 </html>
