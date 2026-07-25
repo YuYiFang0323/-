@@ -2,12 +2,15 @@ backend:
   name: git-gateway
   branch: main
 
+locale: 'zh_Hant' # 設定系統語系為繁體中文
+
 media_folder: "assets/uploads"
 public_folder: "/assets/uploads"
 
 collections:
   - name: "research"
     label: "研究成果"
+    label_singular: "研究成果項目"
     folder: "content/research"
     create: true
     slug: "{{slug}}"
@@ -19,6 +22,7 @@ collections:
 
   - name: "videos"
     label: "影音作品"
+    label_singular: "影音作品項目"
     folder: "content/videos"
     create: true
     slug: "{{slug}}"
@@ -29,6 +33,7 @@ collections:
 
   - name: "projects"
     label: "競賽與計畫"
+    label_singular: "競賽與計畫項目"
     folder: "content/projects"
     create: true
     slug: "{{slug}}"
