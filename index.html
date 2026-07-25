@@ -213,24 +213,32 @@
   <script>
     const USERNAME = "YuYiFang0323"; 
     const REPO = "MyWeb"; 
-    const BRANCH = "main"; // GitHub 預設分支
+    const BRANCH = "main"; // 如果您的 Git 預設分支是 master，請改為 "master"
 
-    // 修正：將路徑轉換為 GitHub Raw 直連網址
+    // 核心修正 1：轉譯圖片網址，確保正確取得 GitHub 原始檔案
     function getImageUrl(path) {
       if (!path) return '';
       
-      let cleanPath = path.trim().replace(/^['"]|['"]$/g, '');
+      let cleanPath = String(path).trim().replace(/^['"]|['"]$/g, '');
 
-      // 若本身已是完整 URL 則直接回傳
       if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://') || cleanPath.startsWith('blob:')) {
         return cleanPath;
       }
 
-      // 移除開頭多餘的斜線與 public/ static/ 前綴
+      // 剔除開頭斜線與常見目錄前綴
       cleanPath = cleanPath.replace(/^\//, '').replace(/^public\//, '').replace(/^static\//, '');
 
-      // 拼湊 GitHub Raw URL
       return `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${cleanPath}`;
+    }
+
+    // 核心修正 2：格式化 XY 焦點數值，避免出現 50%% 或純數字缺少 % 的問題
+    function formatFocal(val) {
+      if (val === undefined || val === null || val === '') return '50%';
+      let strVal = String(val).trim();
+      if (!strVal.endsWith('%')) {
+        strVal += '%';
+      }
+      return strVal;
     }
 
     function parseFrontMatter(text) {
@@ -277,7 +285,8 @@
 
         container.innerHTML = '';
         for (const file of mdFiles) {
-          const rawRes = await fetch(file.download_url);
+          // 加入快取消除參數 (?t=timestamp)，確保每次重新載入時抓到的都是最新的圖片與文章
+          const rawRes = await fetch(file.download_url + '?t=' + new Date().getTime());
           const text = await rawRes.text();
           const data = parseFrontMatter(text);
           container.innerHTML += renderFn(data);
@@ -302,11 +311,13 @@
       const tags = data.tags ? data.tags.split(/[,;]/).map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
       const hasLink = isValidUrl(data.link);
       
-      const focalX = data.focal_x || '50%';
-      const focalY = data.focal_y || '50%';
+      const focalX = formatFocal(data.focal_x);
+      const focalY = formatFocal(data.focal_y);
       
       const coverUrl = getImageUrl(data.cover);
-      const coverHtml = coverUrl ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` : '';
+      const coverHtml = coverUrl 
+        ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` 
+        : '';
 
       return `
         <div class="card">
@@ -324,10 +335,13 @@
     }
 
     function renderVideo(data) {
-      const focalX = data.focal_x || '50%';
-      const focalY = data.focal_y || '50%';
+      const focalX = formatFocal(data.focal_x);
+      const focalY = formatFocal(data.focal_y);
       const coverUrl = getImageUrl(data.cover);
-      const coverHtml = coverUrl ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` : '';
+      const coverHtml = coverUrl 
+        ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` 
+        : '';
+
       return `
         <div class="card">
           ${coverHtml}
@@ -343,10 +357,13 @@
     }
 
     function renderProject(data) {
-      const focalX = data.focal_x || '50%';
-      const focalY = data.focal_y || '50%';
+      const focalX = formatFocal(data.focal_x);
+      const focalY = formatFocal(data.focal_y);
       const coverUrl = getImageUrl(data.cover);
-      const coverHtml = coverUrl ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` : '';
+      const coverHtml = coverUrl 
+        ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` 
+        : '';
+
       return `
         <div class="card">
           ${coverHtml}
