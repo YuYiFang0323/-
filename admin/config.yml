@@ -19,8 +19,8 @@ collections:
     slug: "{{slug}}"
     fields:
       - { label: "封面圖片", name: "cover", widget: "image", required: false }
-      - { name: "focal_x", label: "封面焦點 X軸", widget: "string", required: false, default: "50%" }
-      - { name: "focal_y", label: "封面焦點 Y軸", widget: "string", required: false, default: "50%" }
+      - { label: "封面焦點 X軸", name: "focal_x", widget: "string", required: false, default: "50%" }
+      - { label: "封面焦點 Y軸", name: "focal_y", widget: "string", required: false, default: "50%" }
       - { label: "論文/研究標題", name: "title", widget: "string" }      
       - { label: "關鍵字標籤 (逗號隔開)", name: "tags", widget: "string" }
       - { label: "摘要簡述", name: "description", widget: "text" }
@@ -34,8 +34,8 @@ collections:
     slug: "{{slug}}"
     fields:
       - { label: "封面圖片", name: "cover", widget: "image", required: false }
-      - { name: "focal_x", label: "封面焦點 X軸", widget: "string", required: false, default: "50%" }
-      - { name: "focal_y", label: "封面焦點 Y軸", widget: "string", required: false, default: "50%" }
+      - { label: "封面焦點 X軸", name: "focal_x", widget: "string", required: false, default: "50%" }
+      - { label: "封面焦點 Y軸", name: "focal_y", widget: "string", required: false, default: "50%" }
       - { label: "作品名稱", name: "title", widget: "string" }
       - { label: "YouTube 影片連結", name: "youtube_url", widget: "string" }
       - { label: "作品說明", name: "description", widget: "text" }
@@ -48,8 +48,8 @@ collections:
     slug: "{{slug}}"
     fields:
       - { label: "封面圖片", name: "cover", widget: "image", required: false }
-      - { name: "focal_x", label: "封面焦點 X軸", widget: "string", required: false, default: "50%" }
-      - { name: "focal_y", label: "封面焦點 Y軸", widget: "string", required: false, default: "50%" }
+      - { label: "封面焦點 X軸", name: "focal_x", widget: "string", required: false, default: "50%" }
+      - { label: "封面焦點 Y軸", name: "focal_y", widget: "string", required: false, default: "50%" }
       - { label: "計畫名稱", name: "title", widget: "string" }
       - { label: "擔任角色", name: "role", widget: "string" }
       - { label: "執行時間", name: "period", widget: "string" }
@@ -63,8 +63,8 @@ collections:
     slug: "{{slug}}"
     fields:
       - { label: "封面圖片", name: "cover", widget: "image", required: false }
-      - { name: "focal_x", label: "封面焦點 X軸", widget: "string", required: false, default: "50%" }
-      - { name: "focal_y", label: "封面焦點 Y軸", widget: "string", required: false, default: "50%" }
+      - { label: "封面焦點 X軸", name: "focal_x", widget: "string", required: false, default: "50%" }
+      - { label: "封面焦點 Y軸", name: "focal_y", widget: "string", required: false, default: "50%" }
       - { label: "競賽名稱", name: "title", widget: "string" }
       - { label: "擔任角色", name: "role", widget: "string" }
       - { label: "執行時間", name: "period", widget: "string" }
