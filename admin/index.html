@@ -18,39 +18,49 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.innerHTML = `
-          /* 1. 圖片欄位內部的 content 區塊改為橫向 flex */
+          /* 1. 圖片欄位內部的 content 區塊改為橫向 flex 不換行 */
           div[aria-label="image field"] > div[class*="ControlTopbar"] + div {
             display: flex !important;
             flex-direction: row !important;
-            align-items: flex-start !important;
+            align-items: center !important;
             gap: 16px !important;
-            flex-wrap: wrap !important;
+            flex-wrap: nowrap !important;
           }
 
-          /* 2. 限制圖片包裝區塊寬度 */
+          /* 2. 限制圖片包裝區塊寬度 (順序 1) */
           div[class*="ImageWrapper"] {
-            max-width: 150px !important;
+            max-width: 140px !important;
             flex-shrink: 0 !important;
             margin-bottom: 0 !important;
+            order: 1 !important;
           }
 
-          /* 3. 中間三個按鈕直向排列 */
+          /* 3. 中間三個按鈕直向排列 (順序 2，緊貼圖片右邊) */
           div[class*="ImageWrapper"] + div {
             display: flex !important;
             flex-direction: column !important;
-            gap: 8px !important;
+            gap: 6px !important;
             align-items: flex-start !important;
-            justify-content: flex-start !important;
+            justify-content: center !important;
             flex-shrink: 0 !important;
+            order: 2 !important;
           }
           div[class*="ImageWrapper"] + div > button {
             margin: 0 !important;
             width: fit-content !important;
+            white-space: nowrap !important;
           }
 
-          /* 4. 搬移動進來的 X 軸、Y 軸 ControlContainer 樣式重塑 */
+          /* 4. 搬移動進來的 X 軸 (順序 3)、Y 軸 (順序 4) */
+          .moved-focal-x {
+            order: 3 !important;
+          }
+          .moved-focal-y {
+            order: 4 !important;
+          }
+
           .moved-focal-container {
-            width: 120px !important;
+            width: 110px !important;
             margin: 0 !important;
             padding: 8px !important;
             border: 1px dashed #cbd5e1 !important;
@@ -76,34 +86,30 @@
 
       // B. DOM 精準搬移邏輯
       try {
-        // 抓取圖片欄位容器
         const imageControl = document.querySelector('div[aria-label="image field"]');
         if (!imageControl) return;
 
-        // 抓取圖片欄位內部的內容掛載點（span -> div 那層）
         const targetTarget = imageControl.querySelector('div[class*="ImageWrapper"]')?.closest('span')?.parentElement || 
                              imageControl.querySelector('div[class*="ControlTopbar"] + div');
 
         if (!targetTarget) return;
 
-        // 取得所有 ControlContainer
         const allControls = Array.from(document.querySelectorAll('div[class*="ControlContainer"]'));
         const imgIndex = allControls.indexOf(imageControl);
 
         if (imgIndex !== -1) {
-          // 圖片欄位後面的第一個 string field 就是 X 軸，第二個就是 Y 軸
           const xControl = allControls[imgIndex + 1];
           const yControl = allControls[imgIndex + 2];
 
-          // 搬移 X 軸欄位
+          // 搬移 X 軸欄位並指定順序 class
           if (xControl && xControl.getAttribute('aria-label') === 'string field' && xControl.parentElement !== targetTarget) {
-            xControl.classList.add('moved-focal-container');
+            xControl.classList.add('moved-focal-container', 'moved-focal-x');
             targetTarget.appendChild(xControl);
           }
 
-          // 搬移 Y 軸欄位
+          // 搬移 Y 軸欄位並指定順序 class
           if (yControl && yControl.getAttribute('aria-label') === 'string field' && yControl.parentElement !== targetTarget) {
-            yControl.classList.add('moved-focal-container');
+            yControl.classList.add('moved-focal-container', 'moved-focal-y');
             targetTarget.appendChild(yControl);
           }
         }
