@@ -7,23 +7,33 @@
   
   <!-- 精準控制 Decap CMS 左側表單外框樣式 -->
   <style>
-    /* 1. 讓最外層「封面圖片」容器採用 Flex 橫向佈局，自動包住圖片與按鈕 */
+    /* 1. 最外層主灰框：設定為 Flex 橫向佈局，讓 [圖片+按鈕]、[X軸]、[Y軸] 一字排開 */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) {
       display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
+      justify-content: flex-start !important;
       gap: 20px !important;
       width: 100% !important;
       height: auto !important;
-      padding: 16px !important;
+      padding: 16px 20px !important;
       box-sizing: border-box !important;
     }
 
-    /* 限制圖片縮圖尺寸 */
+    /* 2. 圖片與按鈕的組合容器：設為橫向並排 */
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div:first-child {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 16px !important;
+      flex-shrink: 0 !important;
+    }
+
+    /* 3. 圖片縮圖外框與尺寸設定 */
     div[class*="ImageWrapper"] {
-      width: 120px !important;
-      max-width: 120px !important;
-      height: 90px !important;
+      width: 110px !important;
+      max-width: 110px !important;
+      height: 110px !important;
       flex-shrink: 0 !important;
       margin: 0 !important;
     }
@@ -32,10 +42,10 @@
       width: 100% !important;
       height: 100% !important;
       object-fit: cover !important;
-      border-radius: 4px !important;
+      border-radius: 6px !important;
     }
 
-    /* 圖片右側按鈕群：直向排列 */
+    /* 4. 圖片右側按鈕群：直向排列 */
     div[class*="ImageWrapper"] + div {
       display: flex !important;
       flex-direction: column !important;
@@ -46,28 +56,27 @@
       margin: 0 !important;
     }
 
-    /* 按鈕外觀微調 */
     div[class*="ImageWrapper"] + div > button {
       margin: 0 !important;
       white-space: nowrap !important;
     }
 
-    /* 2. 搬移過來的 X 軸與 Y 軸獨立卡片外框設定 */
+    /* 5. 搬移進來的 X/Y 軸卡片樣式 (內嵌於主灰色大外框內) */
     .moved-focal-box {
-      width: 120px !important;
-      min-width: 120px !important;
+      width: 130px !important;
+      min-width: 130px !important;
       height: auto !important;
       margin: 0 !important;
       padding: 10px 12px !important;
       border: 1px solid rgb(223, 223, 227) !important;
-      border-radius: 5px !important;
-      background-color: rgb(255, 255, 255) !important;
-      box-shadow: rgba(68, 74, 87, 0.05) 0px 2px 6px 0px !important;
+      border-radius: 6px !important;
+      background-color: #ffffff !important;
+      box-shadow: none !important;
       flex-shrink: 0 !important;
       box-sizing: border-box !important;
     }
 
-    /* 微調 X/Y 軸內部的標題與 Input 文字框尺寸 */
+    /* 微調 X/Y 軸標題與輸入框 */
     .moved-focal-box [class*="ControlTopbar"] {
       margin-bottom: 6px !important;
       padding: 0 !important;
@@ -86,6 +95,8 @@
       height: 36px !important;
       padding: 4px 8px !important;
       font-size: 14px !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 4px !important;
       box-sizing: border-box !important;
     }
   </style>
@@ -95,14 +106,18 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
   <script>
-    // 自動尋找並搬移 X軸、Y軸 輸入框至圖片右側
+    // 自動尋找並搬移 X軸、Y軸 輸入框至大外框內部的右側
     function moveFocalInputs() {
       try {
         const imgWrapper = document.querySelector('div[class*="ImageWrapper"]');
         if (!imgWrapper) return;
 
-        const mainContainer = imgWrapper.closest('div[class*="-ControlContainer"]') || imgWrapper.parentElement;
+        // 取得最外層的大灰框容器
+        const mainContainer = imgWrapper.closest('div[class*="-ControlContainer"]');
         if (!mainContainer) return;
+
+        // 取得圖片右側按鈕群的容器
+        const buttonGroup = imgWrapper.nextElementSibling || imgWrapper.parentElement.querySelector('div:nth-child(2)');
 
         const allContainers = Array.from(document.querySelectorAll('div[class*="ControlContainer"]'));
 
@@ -117,7 +132,13 @@
             textContent.includes('Y軸')
           ) {
             container.classList.add('moved-focal-box');
-            mainContainer.appendChild(container);
+            
+            // 如果有按鈕群容器，將 X/Y 軸緊接插在按鈕群後面，保留在大灰框內部
+            if (buttonGroup && buttonGroup.parentElement) {
+              buttonGroup.parentElement.insertBefore(container, buttonGroup.nextSibling);
+            } else {
+              mainContainer.appendChild(container);
+            }
           }
         });
       } catch (e) {
