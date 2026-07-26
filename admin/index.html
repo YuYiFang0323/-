@@ -1,524 +1,81 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>後台內容管理系統</title>
-</head>
-<body>
-  <!-- 載入 Decap CMS -->
-  <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-
-  <script>
-    // 0. 精準根據 DOM 結構調整左側 CMS 表單樣式與搬移 XY 軸
-    function injectCmsLayoutOverride() {
-      // 1. 注入排版 CSS
-      const styleId = 'decap-exact-image-layout-fix';
-      if (!document.getElementById(styleId)) {
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.innerHTML = `
-          /* 抓取包含「圖片Wrapper」與「按鈕Div」的最外層容器，改為橫向排列 */
-          div:has(> div[class*="ImageWrapper"]) {
+/* 1. 讓最外層「封面圖片」容器採用 Flex 橫向佈局，寬度自動填滿，包住圖片與按鈕 */
+          div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) {
             display: flex !important;
             flex-direction: row !important;
-            align-items: flex-start !important;
-            gap: 16px !important;
-            flex-wrap: nowrap !important;
+            align-items: center !important;
+            gap: 20px !important;
+            width: 100% !important;
+            height: auto !important;
+            padding: 16px !important;
+            box-sizing: border-box !important;
           }
 
-          /* 限制圖片區塊寬度，防止它撐爆左側 */
+          /* 限制圖片縮圖尺寸 */
           div[class*="ImageWrapper"] {
-            max-width: 140px !important;
+            width: 120px !important;
+            max-width: 120px !important;
+            height: 90px !important;
             flex-shrink: 0 !important;
-            margin-bottom: 0 !important;
+            margin: 0 !important;
           }
 
-          /* 抓取放按鈕的第二個 Div，改為直向排列放在圖片右邊 */
+          div[class*="ImageWrapper"] img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border-radius: 4px !important;
+          }
+
+          /* 圖片右側的按鈕群：直向排列 */
           div[class*="ImageWrapper"] + div {
             display: flex !important;
             flex-direction: column !important;
             gap: 8px !important;
             align-items: flex-start !important;
-            justify-content: flex-start !important;
+            justify-content: center !important;
             flex-shrink: 0 !important;
+            margin: 0 !important;
           }
 
-          /* 微調按鈕本身的邊距與寬度 */
+          /* 微調按鈕外觀 */
           div[class*="ImageWrapper"] + div > button {
             margin: 0 !important;
-            width: fit-content !important;
             white-space: nowrap !important;
           }
 
-          /* 搬移過來的 X/Y 軸欄位卡片樣式 */
+          /* 2. 搬移過來的 X軸 與 Y軸 獨立卡片外框設定 */
           .moved-focal-box {
-            width: 100px !important;
-            min-width: 90px !important;
+            width: 110px !important;
+            min-width: 110px !important;
+            height: auto !important;
             margin: 0 !important;
-            padding: 8px !important;
-            border: 1px dashed #cbd5e1 !important;
-            border-radius: 6px !important;
-            background: #f8fafc !important;
+            padding: 10px 12px !important;
+            border: 1px solid rgb(223, 223, 227) !important;
+            border-radius: 5px !important;
+            background-color: rgb(255, 255, 255) !important;
+            box-shadow: rgba(68, 74, 87, 0.05) 0px 2px 6px 0px !important;
             flex-shrink: 0 !important;
+            box-sizing: border-box !important;
           }
-          .moved-focal-box label,
-          .moved-focal-box [class*="ControlTopbar"],
-          .moved-focal-box span {
-            font-size: 12px !important;
-            white-space: nowrap !important;
-            margin-bottom: 4px !important;
+
+          /* 微調 X/Y 軸內部的標題與 Input 文字框尺寸 */
+          .moved-focal-box [class*="ControlTopbar"] {
+            margin-bottom: 6px !important;
             padding: 0 !important;
           }
+          
+          .moved-focal-box [class*="ControlTopbar"] span,
+          .moved-focal-box label {
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            white-space: nowrap !important;
+            color: #313d4f !important;
+          }
+
           .moved-focal-box input {
+            width: 100% !important;
+            height: 36px !important;
             padding: 4px 8px !important;
-            height: 32px !important;
             font-size: 14px !important;
+            box-sizing: border-box !important;
           }
-        `;
-        document.head.appendChild(style);
-      }
-
-      // 2. 自動尋找並搬移 X軸、Y軸 輸入框至圖片右側
-      try {
-        // 尋找圖片外層容器
-        const imgWrapper = document.querySelector('div[class*="ImageWrapper"]');
-        if (!imgWrapper) return;
-
-        // 圖片的主欄位容器 (包含圖片與按鈕的 Flex 容器)
-        const mainContainer = imgWrapper.closest('div:has(> div[class*="ImageWrapper"])') || imgWrapper.parentElement;
-        if (!mainContainer) return;
-
-        // 搜尋頁面上所有的 ControlContainer 欄位
-        const allContainers = Array.from(document.querySelectorAll('div[class*="ControlContainer"]'));
-
-        allContainers.forEach(container => {
-          // 避開已經搬過的
-          if (container.classList.contains('moved-focal-box')) return;
-
-          const textContent = container.innerText || '';
-          // 判定條件：包含 焦點、focal、X軸、Y軸 等關鍵字
-          if (
-            textContent.includes('焦點') || 
-            textContent.includes('focal') || 
-            textContent.includes('X軸') || 
-            textContent.includes('Y軸')
-          ) {
-            container.classList.add('moved-focal-box');
-            mainContainer.appendChild(container); // 搬移到圖片與按鈕同級的橫向容器中
-          }
-        });
-      } catch (e) {
-        console.warn('搬移焦點欄位時提醒:', e);
-      }
-    }
-
-    // 啟動監聽，確保 CMS 動態渲染後持續套用
-    injectCmsLayoutOverride();
-    const observer = new MutationObserver(injectCmsLayoutOverride);
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    // 1. 注入預覽區通用樣式
-    CMS.registerPreviewStyle(`    
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-        line-height: 1.6;
-        color: #2c3e50;
-        background-color: #f8f9fa;
-        padding: 2rem;
-      }
-
-      /* 橫向卡片容器 */
-      .card {
-        background: #ffffff;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        max-width: 952px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: row;
-        overflow: hidden;
-        min-height: 220px;
-      }
-
-      /* 左側封面圖片區塊 */
-      .card-cover-container {
-        width: 38%;
-        min-width: 260px;
-        flex-shrink: 0;
-        display: flex;
-        flex-direction: column;
-        background-color: #f1f5f9;
-        border-right: 1px solid #e2e8f0;
-      }
-
-      .card-cover-wrapper {
-        position: relative;
-        width: 100%;
-        flex-grow: 1;
-        min-height: 200px;
-        overflow: hidden;
-        cursor: grab;
-        user-select: none;
-      }
-      .card-cover-wrapper:active {
-        cursor: grabbing;
-      }
-      .card-cover-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        pointer-events: none;
-      }
-
-      /* 拖曳提示標籤 */
-      .drag-hint {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background: rgba(0,0,0,0.65);
-        color: white;
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 11px;
-        pointer-events: none;
-        z-index: 10;
-      }
-
-      /* 縮放控制拉桿工具列 */
-      .zoom-control-bar {
-        background: #ffffff;
-        padding: 6px 12px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        border-top: 1px solid #e2e8f0;
-        font-size: 12px;
-        color: #64748b;
-      }
-      .zoom-control-bar input[type="range"] {
-        flex-grow: 1;
-        height: 4px;
-        accent-color: #3b82f6;
-        cursor: pointer;
-      }
-
-      /* 右側內容區塊 */
-      .card-body {
-        padding: 1.5rem 1.8rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        flex-grow: 1;
-        width: 62%;
-      }
-      .card h3 {
-        font-size: 1.3rem;
-        color: #0f172a;
-        margin-bottom: 0.8rem;
-        line-height: 1.4;
-        font-weight: 700;
-      }
-      .card .meta-info {
-        margin-bottom: 0.6rem;
-        font-size: 0.88rem;
-        color: #64748b;
-        line-height: 1.5;
-      }
-      .card .tags-wrapper {
-        margin-bottom: 0.8rem;
-      }
-      .card .tag {
-        display: inline-block;
-        background: #eff6ff;
-        color: #2563eb;
-        padding: 0.25rem 0.6rem;
-        border-radius: 4px;
-        font-size: 0.82rem;
-        font-weight: 500;
-        margin-right: 0.4rem;
-        margin-bottom: 0.4rem;
-      }
-
-      /* 1. 摘要簡述左右對齊 (Justify) */
-      .card p {
-        color: #475569;
-        font-size: 0.95rem;
-        margin-bottom: 1.2rem;
-        white-space: pre-line;
-        word-break: break-word;
-        text-align: justify;       /* 左右對齊 */
-        text-justify: inter-word;  /* 文字間距調整 */
-      }
-
-      .card a.btn {
-        display: inline-block;
-        align-self: flex-start;
-        background: #3b82f6;
-        color: #ffffff;
-        padding: 0.5rem 1.2rem;
-        border-radius: 6px;
-        text-decoration: none;
-        font-size: 0.9rem;
-        font-weight: 500;
-        margin-top: auto;
-      }
-
-      /* 響應式微調 */
-      @media (max-width: 640px) {
-        .card {
-          flex-direction: column;
-        }
-        .card-cover-container {
-          width: 100%;
-        }
-        .card-body {
-          width: 100%;
-        }
-      }
-    `, { raw: true });
-
-    // 輔助工具：解析焦點數值 (0~100)
-    function parseFocalValue(val) {
-      if (val === undefined || val === null || val === '') return 50;
-      var num = parseInt(String(val).replace(/[^0-9]/g, ''), 10);
-      return isNaN(num) ? 50 : Math.min(Math.max(num, 0), 100);
-    }
-
-    // 輔助工具：抓取 YouTube ID
-    function getYoutubeId(url) {
-      if (!url) return null;
-      var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      var match = String(url).match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
-    }
-
-    // 2. 通用卡片預覽組件工廠
-    function createGenericPreview(collectionType) {
-      return createClass({
-        getInitialState: function() {
-          return { 
-            isDragging: false, 
-            startX: 0, 
-            startY: 0, 
-            posX: 50, 
-            posY: 50,
-            zoom: 1.2 // 預設放大倍率 1.2x
-          };
-        },
-
-        handleMouseDown: function(e) {
-          e.preventDefault();
-          var entry = this.props.entry;
-          var curX = parseFocalValue(entry.getIn(['data', 'focal_x']));
-          var curY = parseFocalValue(entry.getIn(['data', 'focal_y']));
-
-          this.setState({
-            isDragging: true,
-            startX: e.clientX,
-            startY: e.clientY,
-            posX: curX,
-            posY: curY
-          });
-        },
-
-        handleMouseMove: function(e) {
-          if (!this.state.isDragging) return;
-          var deltaX = e.clientX - this.state.startX;
-          var deltaY = e.clientY - this.state.startY;
-
-          var newX = Math.min(Math.max(this.state.posX - (deltaX * 0.3), 0), 100);
-          var newY = Math.min(Math.max(this.state.posY - (deltaY * 0.3), 0), 100);
-
-          var roundX = Math.round(newX);
-          var roundY = Math.round(newY);
-
-          this.setState({
-            posX: newX,
-            posY: newY,
-            startX: e.clientX,
-            startY: e.clientY
-          });
-
-          this.updateCmsInputs(roundX, roundY);
-        },
-
-        handleMouseUp: function() {
-          if (this.state.isDragging) {
-            this.setState({ isDragging: false });
-            var roundX = Math.round(this.state.posX);
-            var roundY = Math.round(this.state.posY);
-            this.updateCmsInputs(roundX, roundY);
-          }
-        },
-
-        // 縮放拉桿變動事件 handler
-        handleZoomChange: function(e) {
-          this.setState({ zoom: parseFloat(e.target.value) });
-        },
-
-        updateCmsInputs: function(x, y) {
-          try {
-            var inputs = window.parent.document.querySelectorAll('input[type="number"], input[id*="focal"]');
-            var inputX, inputY;
-
-            inputs.forEach(function(input) {
-              var id = (input.id || '').toLowerCase();
-              var name = (input.name || '').toLowerCase();
-              if (id.includes('focal_x') || name.includes('focal_x') || id.endsWith('-x')) inputX = input;
-              if (id.includes('focal_y') || name.includes('focal_y') || id.endsWith('-y')) inputY = input;
-            });
-
-            if (!inputX && inputs[0]) inputX = inputs[0];
-            if (!inputY && inputs[1]) inputY = inputs[1];
-
-            var setNativeValue = function(element, value) {
-              var valueSetter = Object.getOwnPropertyDescriptor(element, 'value').set;
-              var prototype = Object.getPrototypeOf(element);
-              var prototypeValueSetter = Object.getOwnPropertyDescriptor(prototype, 'value').set;
-
-              if (prototypeValueSetter && valueSetter !== prototypeValueSetter) {
-                prototypeValueSetter.call(element, value);
-              } else if (valueSetter) {
-                valueSetter.call(element, value);
-              } else {
-                element.value = value;
-              }
-              element.dispatchEvent(new Event('input', { bubbles: true }));
-              element.dispatchEvent(new Event('change', { bubbles: true }));
-            };
-
-            if (inputX) setNativeValue(inputX, x);
-            if (inputY) setNativeValue(inputY, y);
-          } catch (err) {
-            console.warn('自動同步 XY 欄位時發生警告:', err);
-          }
-        },
-
-        render: function() {
-          var entry = this.props.entry;
-          var getAsset = this.props.getAsset;
-
-          // 基礎通用的數據
-          var title = entry.getIn(['data', 'title']) || '標題名稱';
-          var description = entry.getIn(['data', 'description']) || entry.getIn(['data', 'summary']) || '';
-          var cover = entry.getIn(['data', 'cover']);
-
-          // 讀取焦點位置
-          var numX = this.state.isDragging ? Math.round(this.state.posX) : parseFocalValue(entry.getIn(['data', 'focal_x']));
-          var numY = this.state.isDragging ? Math.round(this.state.posY) : parseFocalValue(entry.getIn(['data', 'focal_y']));
-          var focalX = numX + '%';
-          var focalY = numY + '%';
-
-          // 計算封面圖網址 (含有 YouTube 自動對應)
-          var coverUrl = null;
-          if (cover) {
-            var coverAsset = getAsset(cover);
-            coverUrl = coverAsset ? coverAsset.toString() : cover;
-          } else if (collectionType === 'videos') {
-            var ytUrl = entry.getIn(['data', 'youtube_url']);
-            var ytId = getYoutubeId(ytUrl);
-            if (ytId) coverUrl = 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg';
-          }
-
-          // 建立封面圖片 Element (含圖片 + 縮放拉桿)
-          var coverElement = null;
-          if (coverUrl) {
-            coverElement = h('div', { className: 'card-cover-container' },
-              h('div', {
-                className: 'card-cover-wrapper',
-                onMouseDown: this.handleMouseDown,
-                onMouseMove: this.handleMouseMove,
-                onMouseUp: this.handleMouseUp,
-                onMouseLeave: this.handleMouseUp,
-                style: { cursor: this.state.isDragging ? 'grabbing' : 'grab' }
-              },
-                h('img', {
-                  src: coverUrl,
-                  style: { 
-                    objectPosition: focalX + ' ' + focalY,
-                    transform: 'scale(' + this.state.zoom + ')', // 使用動態 Zoom
-                    userSelect: 'none',
-                    pointerEvents: 'none'
-                  }
-                }),
-                h('span', { className: 'drag-hint' }, '拖曳焦點 (X:' + numX + ' Y:' + numY + ')')
-              ),
-              /* 2. 圖片縮放拉桿工具列 */
-              h('div', { className: 'zoom-control-bar' },
-                h('span', {}, '🔍 縮放:'),
-                h('input', {
-                  type: 'range',
-                  min: '1.0',
-                  max: '3.0',
-                  step: '0.1',
-                  value: this.state.zoom,
-                  onChange: this.handleZoomChange
-                }),
-                h('span', {}, Math.round(this.state.zoom * 100) + '%')
-              )
-            );
-          }
-
-          // 根據不同類別渲染特定資訊欄位
-          var extraContent = null;
-          var buttonElement = null;
-
-          if (collectionType === 'research') {
-            var tagsRaw = entry.getIn(['data', 'tags']);
-            var link = entry.getIn(['data', 'link']) || entry.getIn(['data', 'pdf_url']);
-            var tagList = tagsRaw ? tagsRaw.split(/[,;]/).map(function(t) { return t.trim(); }).filter(Boolean) : [];
-            
-            extraContent = tagList.length > 0 && h('div', { className: 'tags-wrapper' },
-              tagList.map(function(tag, i) { return h('span', { key: i, className: 'tag' }, tag); })
-            );
-
-            if (link && typeof link === 'string' && link.trim() !== '') {
-              buttonElement = h('a', { href: link, target: '_blank', className: 'btn' }, '查看論文/連結');
-            }
-          } else if (collectionType === 'videos') {
-            var youtubeUrl = entry.getIn(['data', 'youtube_url']);
-            if (youtubeUrl) {
-              buttonElement = h('a', { href: youtubeUrl, target: '_blank', className: 'btn' }, '觀看影片');
-            }
-          } else if (collectionType === 'plans') {
-            var role = entry.getIn(['data', 'role']) || '-';
-            var period = entry.getIn(['data', 'period']) || '-';
-            extraContent = h('div', { className: 'meta-info' },
-              h('div', {}, '角色：' + role),
-              h('div', {}, '時間：' + period)
-            );
-          } else if (collectionType === 'competitions') {
-            var award = entry.getIn(['data', 'award']) || entry.getIn(['data', 'role']) || '-';
-            var compPeriod = entry.getIn(['data', 'period']) || entry.getIn(['data', 'date']) || '-';
-            extraContent = h('div', { className: 'meta-info' },
-              h('div', {}, '獎項：' + award),
-              h('div', {}, '時間：' + compPeriod)
-            );
-          }
-
-          return h('div', { className: 'card' },
-            coverElement,
-            h('div', { className: 'card-body' },
-              h('div', {},
-                h('h3', {}, title),
-                extraContent,
-                h('p', {}, description)
-              ),
-              buttonElement
-            )
-          );
-        }
-      });
-    }
-
-    // 3. 將預覽範本註冊到對應的四個 Collection
-    CMS.registerPreviewTemplate('research', createGenericPreview('research'));
-    CMS.registerPreviewTemplate('videos', createGenericPreview('videos'));
-    CMS.registerPreviewTemplate('plans', createGenericPreview('plans'));
-    CMS.registerPreviewTemplate('competitions', createGenericPreview('competitions'));
-  </script>
-</body>
-</html>
