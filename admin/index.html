@@ -6,39 +6,57 @@
   <title>後台內容管理系統</title>
   
   <style>
-    /* 1. 主容器：橫向排列 */
+    /* 1. 主容器：保持橫向 flex，但還原內外距，避免外層形成額外的大外框 */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) {
       display: flex !important;
       flex-direction: row !important;
       align-items: flex-start !important;
       justify-content: flex-start !important;
-      gap: 20px !important;
+      gap: 16px !important;
       width: 100% !important;
-      padding: 16px !important;
+      padding: 0 !important;
+      margin-bottom: 16px !important;
       box-sizing: border-box !important;
-      position: relative !important;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
     }
 
-    /* 2. 封面圖片標題絕對定位 */
-    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > label,
-    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div[class*="ControlTopbar"] {
-      position: absolute !important;
-      top: -28px !important;
-      left: 0 !important;
-      font-weight: 600 !important;
-      color: #334155 !important;
-    }
-
-    /* 3. 左側大灰框：改為橫向 Flex（圖片在左，按鈕群在右） */
+    /* 2. 重設左側大灰框：完美還原為綠色框（標準 Decap 欄位框）的外觀 */
     .image-field-left-group {
+      display: flex !important;
+      flex-direction: column !important;
+      flex-grow: 1 !important;
+      padding: 12px 16px !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 8px !important;
+      background-color: #ffffff !important;
+      box-sizing: border-box !important;
+    }
+
+    /* 3. 還原標題「封面圖片 (選填)」：跟綠色框一樣放在框內左上方 */
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) label,
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) div[class*="ControlTopbar"] {
+      position: static !important;
+      display: block !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      color: #475569 !important;
+      margin-bottom: 12px !important;
+      padding: 0 !important;
+      background: transparent !important;
+    }
+
+    /* 4. 灰框內部的內容區（圖片 + 按鈕）：橫向排列 */
+    .image-field-inner-content {
       display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
       gap: 16px !important;
-      flex-grow: 1 !important;
+      width: 100% !important;
     }
 
-    /* 4. 圖片縮圖外框固定尺寸 */
+    /* 5. 圖片縮圖外框 */
     div[class*="ImageWrapper"] {
       width: 120px !important;
       min-width: 120px !important;
@@ -56,7 +74,7 @@
       object-fit: cover !important;
     }
 
-    /* 5. 搬到綠色區塊後的按鈕容器 */
+    /* 6. 圖片右側按鈕組 */
     .moved-btn-group {
       display: flex !important;
       flex-direction: column !important;
@@ -66,7 +84,7 @@
       margin: 0 !important;
       padding: 0 !important;
       border: none !important;
-      width: auto !important;
+      background: transparent !important;
     }
 
     .moved-btn-group button,
@@ -79,7 +97,7 @@
       text-align: center !important;
     }
 
-    /* 6. 右側 X/Y 軸容器（垂直上下堆疊） */
+    /* 7. 右側 X/Y 軸容器（標準欄位外框樣式） */
     .focal-inputs-column {
       display: flex !important;
       flex-direction: column !important;
@@ -90,12 +108,12 @@
     .moved-focal-box {
       display: flex !important;
       flex-direction: column !important;
-      width: 140px !important;
-      min-width: 140px !important;
+      width: 150px !important;
+      min-width: 150px !important;
       margin: 0 !important;
-      padding: 8px 10px !important;
+      padding: 12px 16px !important;
       border: 1px solid #e2e8f0 !important;
-      border-radius: 6px !important;
+      border-radius: 8px !important;
       background-color: #ffffff !important;
       box-sizing: border-box !important;
     }
@@ -107,15 +125,15 @@
       font-weight: 600 !important;
       white-space: nowrap !important;
       color: #475569 !important;
-      margin-bottom: 4px !important;
+      margin-bottom: 6px !important;
       padding: 0 !important;
     }
 
     .moved-focal-box input {
       display: block !important;
       width: 100% !important;
-      height: 32px !important;
-      padding: 2px 8px !important;
+      height: 36px !important;
+      padding: 4px 8px !important;
       font-size: 13px !important;
       border: 1px solid #cbd5e1 !important;
       border-radius: 4px !important;
@@ -137,23 +155,34 @@
         const mainContainer = imgWrapper.closest('div[class*="-ControlContainer"]');
         if (!mainContainer) return;
 
-        // 1. 強制讓左邊大灰框成為 Flex Row 容器
+        // 1. 設定左側包裝框（圖片+標題+按鈕）樣式
         const outerBox = imgWrapper.parentElement;
-        if (outerBox && !outerBox.classList.contains('image-field-left-group')) {
-          outerBox.classList.add('image-field-left-group');
-        }
+        if (outerBox && outerBox !== mainContainer) {
+          if (!outerBox.classList.contains('image-field-left-group')) {
+            outerBox.classList.add('image-field-left-group');
+          }
 
-        // 2. 尋找按鈕組並搬移到圖片的右手邊 (綠色區域)
-        const btnGroup = imgWrapper.nextElementSibling;
-        if (btnGroup && !btnGroup.classList.contains('moved-btn-group')) {
-          btnGroup.classList.add('moved-btn-group');
-          // 確保按鈕群被排在圖片後面（右邊）
-          if (imgWrapper.parentElement) {
-            imgWrapper.parentElement.appendChild(btnGroup);
+          // 建立內部 圖片+按鈕 專用的橫向列容器
+          let innerContent = outerBox.querySelector('.image-field-inner-content');
+          if (!innerContent) {
+            innerContent = document.createElement('div');
+            innerContent.className = 'image-field-inner-content';
+            outerBox.appendChild(innerContent);
+          }
+
+          // 將圖片與按鈕放入內層容器中
+          if (imgWrapper.parentElement !== innerContent) {
+            innerContent.appendChild(imgWrapper);
+          }
+
+          const btnGroup = imgWrapper.nextElementSibling || outerBox.querySelector('div:not(.image-field-inner-content):not([class*="ImageWrapper"])');
+          if (btnGroup && btnGroup !== innerContent) {
+            btnGroup.classList.add('moved-btn-group');
+            innerContent.appendChild(btnGroup);
           }
         }
 
-        // 3. 建立右側垂直堆疊專用的 Column 容器
+        // 2. 建立右側垂直堆疊專用的 Column 容器
         let rightColumn = mainContainer.querySelector('.focal-inputs-column');
         if (!rightColumn) {
           rightColumn = document.createElement('div');
@@ -161,7 +190,7 @@
           mainContainer.appendChild(rightColumn);
         }
 
-        // 4. 尋找 X 軸與 Y 軸並移入右側 Column
+        // 3. 尋找 X 軸與 Y 軸並移入右側 Column
         const allContainers = Array.from(document.querySelectorAll('div[class*="ControlContainer"]'));
         let xBox = null;
         let yBox = null;
