@@ -6,7 +6,7 @@
   <title>後台內容管理系統</title>
   
   <style>
-    /* 1. 主容器：設置整體橫向（圖片區塊在左，X/Y軸欄位在右） */
+    /* 1. 主容器：橫向排列 */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) {
       display: flex !important;
       flex-direction: row !important;
@@ -19,7 +19,7 @@
       position: relative !important;
     }
 
-    /* 2. 強制讓「封面圖片 (選填)」標題浮在左上方 */
+    /* 2. 封面圖片標題絕對定位 */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > label,
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div[class*="ControlTopbar"] {
       position: absolute !important;
@@ -29,23 +29,16 @@
       color: #334155 !important;
     }
 
-    /* 3. 【核心修正】左側大灰框內部的第一層容器：強制將「圖片」與「按鈕群」橫向併排 */
-    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div:first-of-type,
-    div[class*="ImageWrapper"] ~ div,
-    div[class*="ImageWrapper"] {
-      box-sizing: border-box !important;
-    }
-
-    /* 找到直接包住圖片與按鈕的父節點，改成橫向 flex */
-    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div:not(.focal-inputs-column) {
+    /* 3. 左側大灰框：改為橫向 Flex（圖片在左，按鈕群在右） */
+    .image-field-left-group {
       display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
       gap: 16px !important;
-      width: 100% !important;
+      flex-grow: 1 !important;
     }
 
-    /* 4. 圖片縮圖外框 */
+    /* 4. 圖片縮圖外框固定尺寸 */
     div[class*="ImageWrapper"] {
       width: 120px !important;
       min-width: 120px !important;
@@ -63,8 +56,8 @@
       object-fit: cover !important;
     }
 
-    /* 5. 【核心修正】圖片右側的按鈕容器：擺在圖片右邊，內部按鈕保持垂直堆疊、取消滿寬 */
-    div[class*="ImageWrapper"] + div {
+    /* 5. 搬到綠色區塊後的按鈕容器 */
+    .moved-btn-group {
       display: flex !important;
       flex-direction: column !important;
       justify-content: center !important;
@@ -74,22 +67,19 @@
       padding: 0 !important;
       border: none !important;
       width: auto !important;
-      flex-grow: 0 !important;
-      flex-shrink: 0 !important;
     }
 
-    /* 按鈕樣式微調：限制寬度為自動內容寬度 */
-    div[class*="ImageWrapper"] + div button,
-    div[class*="ImageWrapper"] + div a,
-    div[class*="ImageWrapper"] + div span {
+    .moved-btn-group button,
+    .moved-btn-group a,
+    .moved-btn-group span {
       margin: 0 !important;
-      width: auto !important;
-      min-width: 140px !important;
+      width: 160px !important;
       white-space: nowrap !important;
       display: inline-block !important;
+      text-align: center !important;
     }
 
-    /* 6. 右側的 X/Y 軸容器包裝區（保持垂直上下堆疊） */
+    /* 6. 右側 X/Y 軸容器（垂直上下堆疊） */
     .focal-inputs-column {
       display: flex !important;
       flex-direction: column !important;
@@ -147,7 +137,23 @@
         const mainContainer = imgWrapper.closest('div[class*="-ControlContainer"]');
         if (!mainContainer) return;
 
-        // 建立右側垂直堆疊專用的 Column 容器 (若不存在時自動建立)
+        // 1. 強制讓左邊大灰框成為 Flex Row 容器
+        const outerBox = imgWrapper.parentElement;
+        if (outerBox && !outerBox.classList.contains('image-field-left-group')) {
+          outerBox.classList.add('image-field-left-group');
+        }
+
+        // 2. 尋找按鈕組並搬移到圖片的右手邊 (綠色區域)
+        const btnGroup = imgWrapper.nextElementSibling;
+        if (btnGroup && !btnGroup.classList.contains('moved-btn-group')) {
+          btnGroup.classList.add('moved-btn-group');
+          // 確保按鈕群被排在圖片後面（右邊）
+          if (imgWrapper.parentElement) {
+            imgWrapper.parentElement.appendChild(btnGroup);
+          }
+        }
+
+        // 3. 建立右側垂直堆疊專用的 Column 容器
         let rightColumn = mainContainer.querySelector('.focal-inputs-column');
         if (!rightColumn) {
           rightColumn = document.createElement('div');
@@ -155,7 +161,7 @@
           mainContainer.appendChild(rightColumn);
         }
 
-        // 尋找 X 軸與 Y 軸
+        // 4. 尋找 X 軸與 Y 軸並移入右側 Column
         const allContainers = Array.from(document.querySelectorAll('div[class*="ControlContainer"]'));
         let xBox = null;
         let yBox = null;
@@ -167,7 +173,6 @@
           if (text.includes('Y軸')) yBox = container;
         });
 
-        // 將 X 軸、Y 軸移動到右側垂直 Column 裡面
         if (xBox && xBox.parentElement !== rightColumn) {
           xBox.classList.add('moved-focal-box');
           rightColumn.appendChild(xBox);
@@ -177,7 +182,6 @@
           rightColumn.appendChild(yBox);
         }
 
-        // 確保順序：X 軸在上，Y 軸在下
         if (xBox && yBox && xBox.nextElementSibling !== yBox) {
           rightColumn.appendChild(xBox);
           rightColumn.appendChild(yBox);
