@@ -22,13 +22,7 @@
       box-shadow: none !important;
       outline: none !important;
     }
-
-    /* 2. 隱藏預設最外層的 ControlTopbar 標題 */
-    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div[class*="ControlTopbar"],
-    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > label {
-      display: none !important;
-    }
-
+    
     /* 3. 【核心修正】左側「封面圖片」區塊：改為標準 CMS 的標籤外框樣式 */
     .image-field-left-group {
       display: flex !important;
