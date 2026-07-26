@@ -6,7 +6,7 @@
   <title>後台內容管理系統</title>
   
   <style>
-    /* 1. 【核心修正】最外層大容器：徹底移除外框、背景與陰影 */
+    /* 1. 【核心修正】完全移除最外層紅色框框的邊框、背景與陰影 */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) {
       display: flex !important;
       flex-direction: row !important;
@@ -16,22 +16,20 @@
       width: 100% !important;
       padding: 0 !important;
       margin-bottom: 20px !important;
-      
-      /* 移除紅色圈選的最外層框線與背景 */
       border: none !important;
-      outline: none !important;
+      border-radius: 0 !important;
       background: transparent !important;
-      background-color: transparent !important;
       box-shadow: none !important;
+      outline: none !important;
     }
 
-    /* 2. 隱藏原生的頂層 ControlTopbar */
+    /* 2. 隱藏預設最外層的 ControlTopbar 標題 */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div[class*="ControlTopbar"],
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > label {
       display: none !important;
     }
 
-    /* 3. 左側包含「圖片+按鈕」的容器（保留標準外框） */
+    /* 3. 保留內層「封面圖片 (選填)」標準欄位外框 */
     .image-field-left-group {
       display: flex !important;
       flex-direction: row !important;
@@ -39,7 +37,6 @@
       gap: 20px !important;
       flex-grow: 1 !important;
       
-      /* 標準單層外框樣式 */
       border: 1px solid #e2e8f0 !important;
       border-radius: 8px !important;
       background-color: #ffffff !important;
@@ -48,7 +45,7 @@
       box-sizing: border-box !important;
     }
 
-    /* 標題標籤 */
+    /* 標籤小標題：封面圖片 (選填) */
     .image-field-left-group::before {
       content: "封面圖片 (選填)" !important;
       position: absolute !important;
@@ -64,7 +61,7 @@
       z-index: 5 !important;
     }
 
-    /* 4. 圖片縮圖外框 */
+    /* 4. 圖片縮圖外框固定尺寸 */
     div[class*="ImageWrapper"] {
       width: 120px !important;
       min-width: 120px !important;
@@ -82,7 +79,7 @@
       object-fit: cover !important;
     }
 
-    /* 5. 圖片右側按鈕容器 */
+    /* 5. 圖片右側的按鈕容器 */
     .moved-btn-group {
       display: flex !important;
       flex-direction: column !important;
@@ -105,7 +102,7 @@
       text-align: center !important;
     }
 
-    /* 6. 右側 X/Y 軸容器 */
+    /* 6. 右側 X/Y 軸獨立欄位容器 */
     .focal-inputs-column {
       display: flex !important;
       flex-direction: column !important;
@@ -164,13 +161,13 @@
         const mainContainer = imgWrapper.closest('div[class*="-ControlContainer"]');
         if (!mainContainer) return;
 
-        // 1. 強制讓左邊大灰框成為獨立欄位外框
+        // 1. 設定左側的欄位外框
         const outerBox = imgWrapper.parentElement;
         if (outerBox && !outerBox.classList.contains('image-field-left-group')) {
           outerBox.classList.add('image-field-left-group');
         }
 
-        // 2. 尋找按鈕組並搬移到圖片右手邊
+        // 2. 尋找按鈕組並搬移到圖片右邊
         const btnGroup = imgWrapper.nextElementSibling;
         if (btnGroup && !btnGroup.classList.contains('moved-btn-group')) {
           btnGroup.classList.add('moved-btn-group');
@@ -179,7 +176,7 @@
           }
         }
 
-        // 3. 建立右側垂直堆疊專用的 Column 容器
+        // 3. 建立右側專用的 Column 容器
         let rightColumn = mainContainer.querySelector('.focal-inputs-column');
         if (!rightColumn) {
           rightColumn = document.createElement('div');
