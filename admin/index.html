@@ -6,56 +6,49 @@
   <title>後台內容管理系統</title>
   
   <style>
-    
-    /* 1. 最外層主容器：無邊框、純橫向 Flex 排列 */
+    /* 1. 最外層圖片主容器：改為橫向排列 */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) {
       display: flex !important;
       flex-direction: column !important;
-      align-items: flex-start !important;
-      justify-content: flex-start !important;     
       width: 100% !important;
-      padding: 0 !important;
       margin-bottom: 20px !important;
       border: none !important;
-      border-radius: 0 !important;
       background: transparent !important;
-      box-shadow: none !important;
-      outline: none !important;
     }
-    
-    /* 3. 【核心修正】左側「封面圖片」區塊：改為標準 CMS 的標籤外框樣式 */
-    .css-83wr9v {
-      display: block;
-      width: 100%;
-      padding: 16px 20px;
-      margin: 0px;
-      border: 2px solid rgb(223, 223, 227);
-      border-radius: 0px 5px 5px;
-      outline: 0px;
-      box-shadow: none;
-      background-color: rgb(255, 255, 255);
-      color: rgb(68, 74, 87);
-      transition: border-color 0.2s;
-      position: relative;
-      font-size: 15px;
-      line-height: 1.5;
-      margin-top: 24px;
+
+    /* 2. 灰色邊框包覆層 (.css-83wr9v)：設定為 Flex 橫向直立對齊 */
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div[class*="css-"] {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      gap: 24px !important;
+      padding: 16px 20px !important;
+      border: 2px solid rgb(223, 223, 227) !important;
+      border-radius: 0px 5px 5px 5px !important;
+      background-color: #ffffff !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
     }
+
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div[class*="css-"] > span {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      width: 100% !important;
+      gap: 24px !important;
+    }
+
+    /* 3. 左側「縮圖 + 按鈕」組合包 */
     .image-field-left-group {
       display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
-      gap: 20px !important;
-      flex-grow: 1 !important;
-      
-      /* 外框樣式：對齊第二張圖 */
-      border-radius: 0 6px 6px 6px !important; /* 左上角直角，其餘圓角 */
-      background-color: #ffffff !important;     
-      position: relative !important;
-      box-sizing: border-box !important;      
+      gap: 16px !important;
+      flex-shrink: 0 !important;
     }
-    
-    /* 4. 圖片縮圖外框固定尺寸 */
+
+    /* 4. 圖片縮圖固定 120x120 */
     div[class*="ImageWrapper"] {
       width: 120px !important;
       min-width: 120px !important;
@@ -73,16 +66,14 @@
       object-fit: cover !important;
     }
 
-    /* 5. 圖片右側按鈕容器 */
+    /* 5. 中間按鈕垂直排列 */
     .moved-btn-group {
       display: flex !important;
       flex-direction: column !important;
       justify-content: center !important;
-      align-items: flex-start !important;
       gap: 8px !important;
       margin: 0 !important;
       padding: 0 !important;
-      border: none !important;
       width: auto !important;
     }
 
@@ -90,33 +81,34 @@
     .moved-btn-group a,
     .moved-btn-group span {
       margin: 0 !important;
-      width: 150px !important;
+      width: 140px !important;
       white-space: nowrap !important;
       display: inline-block !important;
       text-align: center !important;
     }
 
-    /* 6. 右側 X/Y 軸獨立欄位容器 */
+    /* 6. 右側 X/Y 軸容器：改為橫向排列 (Row) */
     .focal-inputs-column {
       display: flex !important;
-      flex-direction: column !important;
-      gap: 12px !important;
-      flex-shrink: 0 !important;
-      margin-top: 24px !important; /* 與左側對齊頂部 */
+      flex-direction: row !important;
+      gap: 16px !important;
+      align-items: center !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
 
+    /* X 軸與 Y 軸卡片樣式 */
     .moved-focal-box {
       display: flex !important;
       flex-direction: column !important;
-      width: 150px !important;
-      min-width: 150px !important;
+      width: 140px !important;
+      min-width: 140px !important;
       margin: 0 !important;
       padding: 12px 14px !important;
       border: 1px solid #cbd5e1 !important;
       border-radius: 8px !important;
       background-color: #ffffff !important;
       box-sizing: border-box !important;
-      position: relative !important;
     }
 
     .moved-focal-box [class*="ControlTopbar"],
@@ -156,30 +148,33 @@
         const mainContainer = imgWrapper.closest('div[class*="-ControlContainer"]');
         if (!mainContainer) return;
 
-        // 1. 設定左側欄位容器
+        // 1. 確保圖片外層為 image-field-left-group
         const outerBox = imgWrapper.parentElement;
         if (outerBox && !outerBox.classList.contains('image-field-left-group')) {
           outerBox.classList.add('image-field-left-group');
         }
 
-        // 2. 尋找按鈕組並搬移到圖片右邊
+        // 2. 尋找按鈕組並放入 left-group
         const btnGroup = imgWrapper.nextElementSibling;
         if (btnGroup && !btnGroup.classList.contains('moved-btn-group')) {
           btnGroup.classList.add('moved-btn-group');
-          if (imgWrapper.parentElement) {
-            imgWrapper.parentElement.appendChild(btnGroup);
+          if (outerBox) {
+            outerBox.appendChild(btnGroup);
           }
         }
 
-        // 3. 建立右側專用 Column 容器
-        let rightColumn = mainContainer.querySelector('.focal-inputs-column');
+        // 3. 建立或取得 span 容器
+        let spanContainer = outerBox.parentElement;
+
+        // 4. 建立右側專用 X/Y 軸橫向容器
+        let rightColumn = spanContainer.querySelector('.focal-inputs-column');
         if (!rightColumn) {
           rightColumn = document.createElement('div');
           rightColumn.className = 'focal-inputs-column';
-          mainContainer.appendChild(rightColumn);
+          spanContainer.appendChild(rightColumn);
         }
 
-        // 4. 尋找 X 軸與 Y 軸並移入右側 Column
+        // 5. 尋找 X 軸與 Y 軸欄位並移入專屬容器
         const allContainers = Array.from(document.querySelectorAll('div[class*="ControlContainer"]'));
         let xBox = null;
         let yBox = null;
@@ -197,11 +192,6 @@
         }
         if (yBox && yBox.parentElement !== rightColumn) {
           yBox.classList.add('moved-focal-box');
-          rightColumn.appendChild(yBox);
-        }
-
-        if (xBox && yBox && xBox.nextElementSibling !== yBox) {
-          rightColumn.appendChild(xBox);
           rightColumn.appendChild(yBox);
         }
       } catch (e) {
