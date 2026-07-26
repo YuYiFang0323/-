@@ -17,7 +17,7 @@
     }
 
     /* 2. 灰色邊框包覆層 (.css-83wr9v)：設定為 Flex 橫向直立對齊 */
-    /* 封面圖片 (選填) */
+    /* 封面圖片 (選填) 的標頭*/
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div[class*="css-"] {
       display: flex !important;
       flex-direction: row !important;
@@ -29,13 +29,14 @@
       box-sizing: border-box !important;
       width: 100% !important;
     }
-
+    
+    /* 封面圖片 (選填) 的主要內容格子 */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div[class*="css-"] > span {
       display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
       width: 100% !important;
-      gap: 24px !important;
+      gap: 30px !important;
     }
 
     /* 3. 左側「縮圖 + 按鈕」組合包 */
@@ -47,10 +48,10 @@
       flex-shrink: 0 !important;
     }
 
-    /* 4. 圖片縮圖固定 120x120 */
+    /* 4. 圖片縮圖固定 120x275 */
     div[class*="ImageWrapper"] {
       width: 120px !important;
-      min-width: 120px !important;
+      min-width: 275px !important;
       height: 120px !important;
       margin: 0 !important;
       flex-shrink: 0 !important;
