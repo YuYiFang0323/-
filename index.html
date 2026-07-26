@@ -30,7 +30,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     nav {
-      max-width: 952px;
+      max-width: 952px; /* 寬度對齊 952px */
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
@@ -58,16 +58,20 @@
       color: #3b82f6;
     }
 
-    /* 全螢幕自我介紹區塊 (Hero Section) */
+    /* === 全螢幕自我介紹區塊 (Hero Section) === */
     .hero {
-      min-height: calc(100vh - 65px);
+      min-height: calc(100vh - 65px); /* 扣除 Header 高度達到滿版 */
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       text-align: center;
       padding: 3rem 1.5rem;
-      background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+      
+      /* 修改處：使用放在 assets/uploads/ 的 GIF 檔作為背景 */
+      background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), 
+                  url('https://raw.githubusercontent.com/YuYiFang0323/MyWeb/main/assets/uploads/您的檔名.gif') center/cover no-repeat;
+      
       position: relative;
     }
     .hero-content {
@@ -130,7 +134,6 @@
       border-color: #94a3b8;
       transform: translateY(-2px);
     }
-    
     /* 向下滾動指標動畫 */
     .scroll-indicator {
       position: absolute;
@@ -152,7 +155,7 @@
       60% { transform: translate(-50%, -5px); }
     }
 
-    /* 主要內容區域 */
+    /* 主要內容區域：改為 952px 寬度 */
     .container {
       max-width: 952px;
       margin: 0 auto;
@@ -160,10 +163,11 @@
       flex: 1;
     }
 
+    /* 各區塊標題設計 */
     section {
       margin-bottom: 4rem;
       text-align: center;
-      scroll-margin-top: 80px;
+      scroll-margin-top: 80px; /* 避免標題被固定導覽列遮擋 */
     }
     section h2 {
       font-size: 2rem;
@@ -182,6 +186,7 @@
       border-radius: 2px;
     }
 
+    /* 橫向卡片容器（單欄） */
     .grid {
       display: flex;
       flex-direction: column;
@@ -190,7 +195,7 @@
       text-align: left;
     }
 
-    /* 卡片設計 */
+    /* 橫向長方形卡片 */
     .card {
       background: #ffffff;
       border-radius: 12px;
@@ -198,18 +203,19 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       transition: transform 0.2s, box-shadow 0.2s;
       display: flex;
-      flex-direction: row;
+      flex-direction: row; /* 關鍵：改為左右橫向 */
       overflow: hidden;
-      min-height: 250px;
+      height: 270px; /* 卡片舒適高度 */
     }
     .card:hover {
       transform: translateY(-4px);
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
 
+    /* 左側封面圖片區塊 (佔約 38% 寬度) */
     .card-cover-wrapper {
       width: 38%;
-      min-width: 240px;
+      min-width: 260px;
       flex-shrink: 0;
       background-color: #f1f5f9;
       overflow: hidden;
@@ -223,6 +229,7 @@
       display: block;
     }
 
+    /* 右側內容區塊 */
     .card-body {
       padding: 1.5rem 1.8rem;
       display: flex;
@@ -235,42 +242,45 @@
     .card h3 {
       font-size: 1.3rem;
       color: #0f172a;
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.8rem;
       line-height: 1.4;
       display: -webkit-box;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 1; /* 限制顯示的行數，例如 1 行 */
       overflow: hidden;
     }
     .card .tags-wrapper {
       margin-bottom: 0.8rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+      overflow: hidden;
     }
     .card .tag {
       display: inline-block;
       background: #eff6ff;
       color: #2563eb;
-      padding: 0.2rem 0.6rem;
+      padding: 0.25rem 0.6rem;
       border-radius: 4px;
       font-size: 0.82rem;
       font-weight: 500;
+      margin-right: 0.4rem;
+      margin-bottom: 0.4rem;
     }
     .card p {
       color: #475569;
       font-size: 0.95rem;
-      margin-bottom: 0.8rem;     
-      word-break: break-word;
+      margin-bottom: 0.8rem;      
+      word-break: break-all;
       display: -webkit-box;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 3; /* 限制顯示的行數，例如 3 行 */
       overflow: hidden;
       text-align: justify;
     }
     .card a.btn {
       display: inline-block;
-      align-self: flex-start;
+      align-self: flex-start; /* 按鈕靠左下 */
       background: #3b82f6;
       color: #ffffff;
       padding: 0.5rem 1.2rem;
@@ -350,12 +360,11 @@
       font-size: 0.85rem;
     }
 
-    /* 響應式手機版適應 */
+    /* 手機版 (寬度 < 640px) 自動轉回豎向，確保不會壓縮 */
     @media (max-width: 640px) {
       .hero-title { font-size: 2rem; }
       .hero-subtitle { font-size: 1.15rem; }
       .hero-description { font-size: 1rem; text-align: left; }
-      .nav-links { gap: 0.8rem; font-size: 0.9rem; }
       .card {
         flex-direction: column;
         height: auto;
@@ -430,7 +439,7 @@
     </section>
   </div>
 
-  <!-- 網頁頁尾 -->
+  <!-- 網頁尾巴：聯絡資訊頁尾 -->
   <footer id="contact">
     <div class="footer-container">
       <div class="footer-info">
@@ -440,8 +449,8 @@
       <div class="footer-contact">
         <h4>Contact Info</h4>
         <a href="mailto:your.email@example.com">✉️ 電子郵件：your.email@example.com</a>
-        <a href="https://github.com/YuYiFang0323" target="_blank" rel="noopener noreferrer">🌐 GitHub：YuYiFang0323</a>
-        <a href="#" target="_blank" rel="noopener noreferrer">📍 單位 / 機構：您的所屬單位</a>
+        <a href="https://github.com/YuYiFang0323" target="_blank">🌐 GitHub：YuYiFang0323</a>
+        <a href="#" target="_blank">📍 單位 / 機構：您的所屬單位</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -491,19 +500,18 @@
       return strVal;
     }
 
-    // 優化的 Front Matter 解析器（支援包含冒號的內容與單雙引號）
+    // Front Matter 解析器
     function parseFrontMatter(text) {
       const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
       if (!match) return { description: text };
-      
       const yamlText = match[1];
       const data = {};
       
       yamlText.split('\n').forEach(line => {
-        const lineMatch = line.match(/^([^:]+):\s*(.*)$/);
-        if (lineMatch) {
-          const key = lineMatch[1].trim();
-          let value = lineMatch[2].trim();
+        const colonIndex = line.indexOf(':');
+        if (colonIndex !== -1) {
+          const key = line.slice(0, colonIndex).trim();
+          let value = line.slice(colonIndex + 1).trim();
           if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
             value = value.slice(1, -1);
           }
@@ -519,7 +527,6 @@
       return data;
     }
 
-    // 使用 Promise.all 平行載入並渲染 MD 檔案
     async function loadDirectoryFiles(folder, containerId, renderFn) {
       const container = document.getElementById(containerId);
       if (!container) return;
@@ -543,26 +550,13 @@
           return;
         }
 
-        const timeStamp = new Date().getTime();
-        const fetchPromises = mdFiles.map(file => 
-          fetch(`${file.download_url}?t=${timeStamp}`)
-            .then(r => r.text())
-            .then(text => parseFrontMatter(text))
-            .catch(err => {
-              console.error(`解析檔案 ${file.name} 失敗:`, err);
-              return null;
-            })
-        );
-
-        const items = await Promise.all(fetchPromises);
-        
         container.innerHTML = '';
-        items.forEach(data => {
-          if (data) {
-            container.innerHTML += renderFn(data);
-          }
-        });
-
+        for (const file of mdFiles) {
+          const rawRes = await fetch(file.download_url + '?t=' + new Date().getTime());
+          const text = await rawRes.text();
+          const data = parseFrontMatter(text);
+          container.innerHTML += renderFn(data);
+        }
       } catch (err) {
         console.warn(`[${folder}] 讀取狀態:`, err);
         container.innerHTML = `<p class="empty-msg">尚無內容，請至後台新增。</p>`;
@@ -600,7 +594,7 @@
               ${tags ? `<div class="tags-wrapper">${tags}</div>` : ''}
               <p>${data.description || ''}</p>
             </div>
-            ${hasLink ? `<a href="${data.link}" target="_blank" rel="noopener noreferrer" class="btn">查看論文/連結</a>` : ''}
+            ${hasLink ? `<a href="${data.link}" target="_blank" class="btn">查看論文/連結</a>` : ''}
           </div>
         </div>
       `;
@@ -628,7 +622,7 @@
               <h3>${data.title || '無標題'}</h3>
               <p>${data.description || ''}</p>
             </div>
-            ${data.youtube_url ? `<a href="${data.youtube_url}" target="_blank" rel="noopener noreferrer" class="btn">觀看影片</a>` : ''}
+            ${data.youtube_url ? `<a href="${data.youtube_url}" target="_blank" class="btn">觀看影片</a>` : ''}
           </div>
         </div>
       `;
