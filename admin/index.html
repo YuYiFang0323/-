@@ -10,49 +10,92 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
   <script>
-    // 0. 精準根據 DOM 結構調整左側 CMS 表單樣式
+    // 0. 核心修正：將 X/Y 軸欄位節點動態搬移至圖片右側，並調整樣式
     function injectCmsLayoutOverride() {
+      // A. 注入必要的 CSS 排版樣式
       const styleId = 'decap-exact-image-layout-fix';
-      if (document.getElementById(styleId)) return;
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.innerHTML = `
+          /* 1. 最外層圖片卡片容器：改為橫向 Flex，允許內容自動包裹 */
+          div:has(> div[class*="ImageWrapper"]) {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: flex-start !important;
+            gap: 16px !important;
+            flex-wrap: wrap !important;
+          }
 
-      const style = document.createElement('style');
-      style.id = styleId;
-      style.innerHTML = `
-        /* 1. 抓取包含「圖片Wrapper」與「按鈕Div」的最外層容器，改為橫向排列 */
-        div:has(> div[class*="ImageWrapper"]) {
-          display: flex !important;
-          flex-direction: row !important;
-          align-items: flex-start !important;
-          gap: 16px !important;
-        }
+          /* 2. 左側圖片 Wrapper 寬度控制 */
+          div[class*="ImageWrapper"] {
+            max-width: 160px !important;
+            flex-shrink: 0 !important;
+            margin-bottom: 0 !important;
+          }
 
-        /* 2. 限制圖片區塊寬度，防止它撐爆左側 */
-        div[class*="ImageWrapper"] {
-          max-width: 180px !important;
-          flex-shrink: 0 !important;
-          margin-bottom: 0 !important;
-        }
+          /* 3. 中間按鈕容器：直向排列 */
+          div[class*="ImageWrapper"] + div {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+            align-items: flex-start !important;
+            justify-content: flex-start !important;
+            flex-shrink: 0 !important;
+          }
 
-        /* 3. 抓取放按鈕的第二個 Div，改為直向排列放在圖片右邊 */
-        div[class*="ImageWrapper"] + div {
-          display: flex !important;
-          flex-direction: column !important;
-          gap: 8px !important;
-          align-items: flex-start !important;
-          justify-content: flex-start !important;
-          flex-grow: 1 !important;
-        }
+          div[class*="ImageWrapper"] + div > button {
+            margin: 0 !important;
+            width: fit-content !important;
+          }
 
-        /* 4. 微調按鈕本身的邊距與寬度 */
-        div[class*="ImageWrapper"] + div > button {
-          margin: 0 !important;
-          width: fit-content !important;
-        }
-      `;
-      document.head.appendChild(style);
+          /* 4. 右側新搬進來的 Focal X / Y 軸欄位樣式調整 */
+          .focal-field-moved {
+            width: 110px !important;
+            margin-bottom: 0 !important;
+            flex-shrink: 0 !important;
+          }
+          .focal-field-moved label {
+            font-size: 12px !important;
+            white-space: nowrap !important;
+            margin-bottom: 4px !important;
+          }
+          .focal-field-moved input {
+            padding: 6px 8px !important;
+            height: 36px !important;
+            font-size: 14px !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+
+      // B. DOM 節點搬移邏輯 (將下面的 X/Y 軸 ControlContainer 搬到圖片區塊右邊)
+      try {
+        const imageWrapper = document.querySelector('div[class*="ImageWrapper"]');
+        if (!imageWrapper) return;
+
+        const parentContainer = imageWrapper.closest('div:has(> div[class*="ImageWrapper"])');
+        if (!parentContainer) return;
+
+        // 搜尋含有焦點 X/Y 軸關鍵字的整個 Field 容器
+        const allControlContainers = document.querySelectorAll('div[class*="ControlContainer"]');
+        
+        allControlContainers.forEach(container => {
+          const labelText = container.textContent || '';
+          if (labelText.includes('封面焦點 X 軸') || labelText.includes('封面焦點 Y 軸') || labelText.includes('focal_x') || labelText.includes('focal_y')) {
+            // 確保尚未搬移過，避免重複搬移造成無窮迴圈
+            if (container.parentElement !== parentContainer) {
+              container.classList.add('focal-field-moved');
+              parentContainer.appendChild(container); // 移動節點至圖片容器內右側
+            }
+          }
+        });
+      } catch (err) {
+        console.warn('移動 X/Y 軸欄位時發生提示:', err);
+      }
     }
 
-    // 啟動監聽，確保 CMS 動態渲染後持續套用
+    // 啟動監聽，確保 CMS 動態渲染與頁面切換後持續自動執行搬移與樣式套用
     injectCmsLayoutOverride();
     const observer = new MutationObserver(injectCmsLayoutOverride);
     observer.observe(document.body, { childList: true, subtree: true });
@@ -181,15 +224,15 @@
         margin-bottom: 0.4rem;
       }
 
-      /* 1. 摘要簡述左右對齊 (Justify) */
+      /* 摘要簡述左右對齊 (Justify) */
       .card p {
         color: #475569;
         font-size: 0.95rem;
         margin-bottom: 1.2rem;
         white-space: pre-line;
         word-break: break-word;
-        text-align: justify;       /* 左右對齊 */
-        text-justify: inter-word;  /* 文字間距調整 */
+        text-align: justify;
+        text-justify: inter-word;
       }
 
       .card a.btn {
@@ -205,7 +248,6 @@
         margin-top: auto;
       }
 
-      /* 響應式微調 */
       @media (max-width: 640px) {
         .card {
           flex-direction: column;
@@ -244,7 +286,7 @@
             startY: 0, 
             posX: 50, 
             posY: 50,
-            zoom: 1.2 // 預設放大倍率 1.2x
+            zoom: 1.2
           };
         },
 
@@ -293,7 +335,6 @@
           }
         },
 
-        // 縮放拉桿變動事件 handler
         handleZoomChange: function(e) {
           this.setState({ zoom: parseFloat(e.target.value) });
         },
@@ -340,18 +381,15 @@
           var entry = this.props.entry;
           var getAsset = this.props.getAsset;
 
-          // 基礎通用的數據
           var title = entry.getIn(['data', 'title']) || '標題名稱';
           var description = entry.getIn(['data', 'description']) || entry.getIn(['data', 'summary']) || '';
           var cover = entry.getIn(['data', 'cover']);
 
-          // 讀取焦點位置
           var numX = this.state.isDragging ? Math.round(this.state.posX) : parseFocalValue(entry.getIn(['data', 'focal_x']));
           var numY = this.state.isDragging ? Math.round(this.state.posY) : parseFocalValue(entry.getIn(['data', 'focal_y']));
           var focalX = numX + '%';
           var focalY = numY + '%';
 
-          // 計算封面圖網址 (含有 YouTube 自動對應)
           var coverUrl = null;
           if (cover) {
             var coverAsset = getAsset(cover);
@@ -362,7 +400,6 @@
             if (ytId) coverUrl = 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg';
           }
 
-          // 建立封面圖片 Element (含圖片 + 縮放拉桿)
           var coverElement = null;
           if (coverUrl) {
             coverElement = h('div', { className: 'card-cover-container' },
@@ -378,14 +415,13 @@
                   src: coverUrl,
                   style: { 
                     objectPosition: focalX + ' ' + focalY,
-                    transform: 'scale(' + this.state.zoom + ')', // 使用動態 Zoom
+                    transform: 'scale(' + this.state.zoom + ')',
                     userSelect: 'none',
                     pointerEvents: 'none'
                   }
                 }),
                 h('span', { className: 'drag-hint' }, '拖曳焦點 (X:' + numX + ' Y:' + numY + ')')
               ),
-              /* 2. 圖片縮放拉桿工具列 */
               h('div', { className: 'zoom-control-bar' },
                 h('span', {}, '🔍 縮放:'),
                 h('input', {
@@ -401,7 +437,6 @@
             );
           }
 
-          // 根據不同類別渲染特定資訊欄位
           var extraContent = null;
           var buttonElement = null;
 
