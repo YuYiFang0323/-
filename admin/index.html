@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   
   <script>
-    // 1. 注入預覽區通用樣式
+    // 1. 注入預覽區通用樣式 (已同步改為橫向卡片)
     CMS.registerPreviewStyle(`    
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
@@ -20,24 +20,29 @@
         background-color: #f8f9fa;
         padding: 2rem;
       }
+
+      /* 橫向卡片容器 */
       .card {
         background: #ffffff;
         border-radius: 12px;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-        max-width: 380px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        max-width: 952px; /* 與前台一致 */
         margin: 0 auto;
         display: flex;
-        flex-direction: column;
-        justify-content: space-between;
+        flex-direction: row; /* 橫向排版：左圖右文 */
         overflow: hidden;
+        min-height: 220px;
       }
+
+      /* 左側封面圖片區塊 (佔 38% 寬度) */
       .card-cover-wrapper {
         position: relative;
-        width: 100%;
-        aspect-ratio: 16 / 9;
-        overflow: hidden;
+        width: 38%;
+        min-width: 260px;
+        flex-shrink: 0;
         background-color: #f1f5f9;
+        overflow: hidden;
         cursor: grab;
         user-select: none;
       }
@@ -50,6 +55,8 @@
         object-fit: cover;
         pointer-events: none;
       }
+
+      /* 焦點紅點標記 */
       .focal-point-marker {
         position: absolute;
         width: 14px;
@@ -60,26 +67,34 @@
         transform: translate(-50%, -50%);
         box-shadow: 0 0 4px rgba(0,0,0,0.4);
         pointer-events: none;
+        z-index: 10;
       }
+
+      /* 拖曳提示標籤 */
       .drag-hint {
         position: absolute;
         bottom: 8px;
         right: 8px;
-        background: rgba(0,0,0,0.6);
+        background: rgba(0,0,0,0.65);
         color: white;
-        padding: 2px 8px;
+        padding: 3px 8px;
         border-radius: 4px;
         font-size: 11px;
         pointer-events: none;
+        z-index: 10;
       }
+
+      /* 右側內容區塊 */
       .card-body {
-        padding: 1.5rem;
+        padding: 1.5rem 1.8rem;
         display: flex;
         flex-direction: column;
+        justify-content: space-between;
         flex-grow: 1;
+        width: 62%;
       }
       .card h3 {
-        font-size: 1.25rem;
+        font-size: 1.3rem;
         color: #0f172a;
         margin-bottom: 0.8rem;
         line-height: 1.4;
@@ -98,8 +113,8 @@
         display: inline-block;
         background: #eff6ff;
         color: #2563eb;
-        padding: 0.25rem 0.65rem;
-        border-radius: 6px;
+        padding: 0.25rem 0.6rem;
+        border-radius: 4px;
         font-size: 0.82rem;
         font-weight: 500;
         margin-right: 0.4rem;
@@ -114,15 +129,29 @@
       }
       .card a.btn {
         display: inline-block;
-        text-align: center;
+        align-self: flex-start;
         background: #3b82f6;
         color: #ffffff;
-        padding: 0.5rem 1rem;
+        padding: 0.5rem 1.2rem;
         border-radius: 6px;
         text-decoration: none;
         font-size: 0.9rem;
         font-weight: 500;
         margin-top: auto;
+      }
+
+      /* 響應式微調 */
+      @media (max-width: 640px) {
+        .card {
+          flex-direction: column;
+        }
+        .card-cover-wrapper {
+          width: 100%;
+          height: 200px;
+        }
+        .card-body {
+          width: 100%;
+        }
       }
     `, { raw: true });
 
@@ -141,7 +170,7 @@
       return (match && match[2].length === 11) ? match[2] : null;
     }
 
-    // 2. 通用卡片預覽組件工廠 (基於依賴的 type 呈現不同欄位)
+    // 2. 通用卡片預覽組件工廠
     function createGenericPreview(collectionType) {
       return createClass({
         getInitialState: function() {
@@ -281,7 +310,7 @@
                 className: 'focal-point-marker',
                 style: { left: focalX, top: focalY }
               }),
-              h('span', { className: 'drag-hint' }, '✢ 按住拖曳挪動焦點 (X:' + numX + ' Y:' + numY + ')')
+              h('span', { className: 'drag-hint' }, '✢ 拖曳焦點 (X:' + numX + ' Y:' + numY + ')')
             );
           }
 
