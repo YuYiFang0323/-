@@ -6,7 +6,7 @@
   <title>後台內容管理系統</title>
   
   <style>
-    /* 1. 【核心修正】完全移除最外層紅色框框的邊框、背景與陰影 */
+    /* 1. 最外層主容器：無邊框、純橫向 Flex 排列 */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) {
       display: flex !important;
       flex-direction: row !important;
@@ -29,7 +29,7 @@
       display: none !important;
     }
 
-    /* 3. 保留內層「封面圖片 (選填)」標準欄位外框 */
+    /* 3. 【核心修正】左側「封面圖片」區塊：改為標準 CMS 的標籤外框樣式 */
     .image-field-left-group {
       display: flex !important;
       flex-direction: row !important;
@@ -37,28 +37,32 @@
       gap: 20px !important;
       flex-grow: 1 !important;
       
-      border: 1px solid #e2e8f0 !important;
-      border-radius: 8px !important;
+      /* 外框樣式：對齊第二張圖 */
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 0 6px 6px 6px !important; /* 左上角直角，其餘圓角 */
       background-color: #ffffff !important;
-      padding: 16px 20px !important;
+      padding: 24px 20px 16px 20px !important; /* 上方預留空間給標籤 */
       position: relative !important;
       box-sizing: border-box !important;
+      margin-top: 24px !important; /* 留出頂部標籤高度 */
     }
 
-    /* 標籤小標題：封面圖片 (選填) */
+    /* 【核心修正】完全復刻第二張圖左上角的「灰色標籤」樣式 */
     .image-field-left-group::before {
       content: "封面圖片 (選填)" !important;
       position: absolute !important;
-      top: -12px !important;
-      left: 12px !important;
-      background-color: #f1f5f9 !important;
+      top: -25px !important;
+      left: -1px !important;
+      background-color: #e2e8f0 !important; /* 灰底色 */
       color: #475569 !important;
-      font-size: 12px !important;
+      font-size: 13px !important;
       font-weight: 600 !important;
-      padding: 2px 8px !important;
-      border-radius: 4px !important;
-      line-height: 1.2 !important;
+      padding: 3px 10px !important;
+      border-radius: 4px 4px 0 0 !important; /* 上方圓角，下方直角 */
+      line-height: 1.4 !important;
       z-index: 5 !important;
+      border: 1px solid #cbd5e1 !important;
+      border-bottom: none !important;
     }
 
     /* 4. 圖片縮圖外框固定尺寸 */
@@ -79,7 +83,7 @@
       object-fit: cover !important;
     }
 
-    /* 5. 圖片右側的按鈕容器 */
+    /* 5. 圖片右側按鈕容器 */
     .moved-btn-group {
       display: flex !important;
       flex-direction: column !important;
@@ -108,6 +112,7 @@
       flex-direction: column !important;
       gap: 12px !important;
       flex-shrink: 0 !important;
+      margin-top: 24px !important; /* 與左側對齊頂部 */
     }
 
     .moved-focal-box {
@@ -117,7 +122,7 @@
       min-width: 150px !important;
       margin: 0 !important;
       padding: 12px 14px !important;
-      border: 1px solid #e2e8f0 !important;
+      border: 1px solid #cbd5e1 !important;
       border-radius: 8px !important;
       background-color: #ffffff !important;
       box-sizing: border-box !important;
@@ -161,7 +166,7 @@
         const mainContainer = imgWrapper.closest('div[class*="-ControlContainer"]');
         if (!mainContainer) return;
 
-        // 1. 設定左側的欄位外框
+        // 1. 設定左側欄位容器
         const outerBox = imgWrapper.parentElement;
         if (outerBox && !outerBox.classList.contains('image-field-left-group')) {
           outerBox.classList.add('image-field-left-group');
@@ -176,7 +181,7 @@
           }
         }
 
-        // 3. 建立右側專用的 Column 容器
+        // 3. 建立右側專用 Column 容器
         let rightColumn = mainContainer.querySelector('.focal-inputs-column');
         if (!rightColumn) {
           rightColumn = document.createElement('div');
