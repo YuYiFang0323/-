@@ -6,49 +6,75 @@
   <title>後台內容管理系統</title>
   
   <style>
-    /* 1. 最外層主容器：無邊框、純橫向 Flex 排列 */
+    /* =========================================================
+       1. 最外層主容器：無邊框、純橫向 Flex 排列
+       ========================================================= */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) {
       display: flex !important;
       flex-direction: row !important;
       align-items: flex-start !important;
       justify-content: flex-start !important;
-      gap: 16px !important;
+      gap: 20px !important;
       width: 100% !important;
       padding: 0 !important;
-      margin-bottom: 20px !important;
+      margin-bottom: 28px !important;
       border: none !important;
       border-radius: 0 !important;
       background: transparent !important;
       box-shadow: none !important;
       outline: none !important;
     }
-    
-    /* 3. 【核心修正】左側「封面圖片」區塊：改為標準 CMS 的標籤外框樣式 */
+
+    /* =========================================================
+       2. 左側「封面圖片」區塊：標準頁籤與內容主框
+       ========================================================= */
+    /* 頂部 Topbar / Label 定位 (頁籤效果) */
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div[class*="ControlTopbar"] {
+      position: absolute !important;
+      top: -24px !important;
+      left: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      z-index: 2 !important;
+    }
+
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) label[for*="cover-field"],
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) label {
+      display: inline-block !important;
+      padding: 3px 10px !important;
+      background-color: #dfdfe3 !important;
+      color: #5d626f !important;
+      font-size: 12px !important;
+      font-weight: bold !important;
+      border: 2px solid #dfdfe3 !important;
+      border-bottom: none !important;
+      border-radius: 4px 4px 0 0 !important;
+      margin: 0 !important;
+    }
+
+    /* 左側主框（預留頂部空間給頁籤） */
     .css-83wr9v {
-      display: block;
-      width: 100%;
-      padding: 16px 20px;
-      margin: 0px;
-      border: 2px solid rgb(223, 223, 227);
-      border-radius: 0px 5px 5px;
-      outline: 0px;
-      box-shadow: none;
-      background-color: rgb(255, 255, 255);
-      color: rgb(68, 74, 87);
-      transition: border-color 0.2s;
-      position: relative;
-      font-size: 15px;
-      line-height: 1.5;
+      position: relative !important;
+      margin-top: 24px !important;
+      width: 100% !important;
+      padding: 0 !important;
+      border: none !important;
+      background: transparent !important;
     }
 
     .image-field-left-group {
-      display: flex !important;           /* 1. 開啟 Flex 彈性佈局 */
-      flex-direction: row !important;     /* 2. 強制讓子元素「左右橫向」排列 */
-      align-items: center !important;     /* 3. 讓圖片與按鈕垂直居中對齊 */
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
       gap: 20px !important;
+      padding: 16px !important;
+      border: 2px solid #dfdfe3 !important;
+      border-radius: 0 5px 5px 5px !important; /* 左上角直角，完美對接頁籤 */
+      background: #ffffff !important;
+      box-sizing: border-box !important;
     }
     
-    /* 4. 圖片縮圖外框固定尺寸 */
+    /* 圖片縮圖外框 */
     div[class*="ImageWrapper"] {
       width: 120px !important;
       min-width: 120px !important;
@@ -66,7 +92,7 @@
       object-fit: cover !important;
     }
 
-    /* 5. 圖片右側按鈕容器 */
+    /* 圖片右側按鈕容器 */
     .moved-btn-group {
       display: flex !important;
       flex-direction: column !important;
@@ -89,50 +115,66 @@
       text-align: center !important;
     }
 
-    /* 6. 右側 X/Y 軸獨立欄位容器 */
+    /* =========================================================
+       3. 右側 X/Y 軸獨立欄位區塊
+       ========================================================= */
     .focal-inputs-column {
       display: flex !important;
       flex-direction: column !important;
-      gap: 12px !important;
+      gap: 20px !important;
+      width: 160px !important;
+      min-width: 160px !important;
       flex-shrink: 0 !important;
-      margin-top: 24px !important; /* 與左側對齊頂部 */
-    }
-
-    .moved-focal-box {
-      display: flex !important;
-      flex-direction: column !important;
-      width: 150px !important;
-      min-width: 150px !important;
       margin: 0 !important;
-      padding: 12px 14px !important;
-      border: 1px solid #cbd5e1 !important;
-      border-radius: 8px !important;
-      background-color: #ffffff !important;
-      box-sizing: border-box !important;
-      position: relative !important;
-    }
-
-    .moved-focal-box [class*="ControlTopbar"],
-    .moved-focal-box label {
-      display: block !important;
-      font-size: 12px !important;
-      font-weight: 600 !important;
-      white-space: nowrap !important;
-      color: #475569 !important;
-      margin-bottom: 6px !important;
       padding: 0 !important;
     }
 
+    /* 外層 Container 取消重複邊框與背景 */
+    .moved-focal-box {
+      position: relative !important;
+      margin-top: 24px !important; /* 留出頂部給頁籤，與左側高度精準對齊 */
+      padding: 0 !important;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      display: block !important;
+    }
+
+    /* X 軸與 Y 軸 Topbar / Label (頁籤定位) */
+    .moved-focal-box > div[class*="ControlTopbar"] {
+      position: absolute !important;
+      top: -24px !important;
+      left: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      z-index: 2 !important;
+    }
+
+    .moved-focal-box label {
+      display: inline-block !important;
+      padding: 3px 8px !important;
+      background-color: #dfdfe3 !important;
+      color: #5d626f !important;
+      font-size: 12px !important;
+      font-weight: bold !important;
+      border: 2px solid #dfdfe3 !important;
+      border-bottom: none !important;
+      border-radius: 4px 4px 0 0 !important;
+      white-space: nowrap !important;
+      margin: 0 !important;
+    }
+
+    /* X 軸與 Y 軸 Input 輸入框 */
     .moved-focal-box input {
       display: block !important;
       width: 100% !important;
-      height: 34px !important;
-      padding: 2px 8px !important;
-      font-size: 13px !important;
-      border: 1px solid #cbd5e1 !important;
-      border-radius: 4px !important;
-      box-sizing: border-box !important;
+      height: 40px !important;
+      padding: 8px 12px !important;
+      font-size: 14px !important;
+      border: 2px solid #dfdfe3 !important;
+      border-radius: 0 5px 5px 5px !important; /* 左上角直角，對接頁籤 */
       background: #ffffff !important;
+      box-sizing: border-box !important;
     }
   </style>
 </head>
