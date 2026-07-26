@@ -11,6 +11,9 @@
       line-height: 1.6;
       color: #2c3e50;
       background-color: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
 
     /* 頂部導覽列 */
@@ -56,6 +59,7 @@
       max-width: 952px;
       margin: 0 auto;
       padding: 3rem 1.5rem;
+      flex: 1;
     }
 
     /* 各區塊標題設計 */
@@ -196,10 +200,69 @@
       padding: 2rem 0;
     }
 
+    /* 頁尾 Contact 區塊樣式 */
+    footer {
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 3rem 1.5rem 2rem 1.5rem;
+      margin-top: auto;
+    }
+    .footer-container {
+      max-width: 952px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+    .footer-info h3 {
+      font-size: 1.4rem;
+      margin-bottom: 0.8rem;
+      color: #ffffff;
+    }
+    .footer-info p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      max-width: 400px;
+      line-height: 1.6;
+    }
+    .footer-contact {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .footer-contact h4 {
+      font-size: 1.1rem;
+      margin-bottom: 0.4rem;
+      color: #ffffff;
+    }
+    .footer-contact a {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .footer-contact a:hover {
+      color: #60a5fa;
+    }
+    .footer-bottom {
+      max-width: 952px;
+      margin: 2.5rem auto 0 auto;
+      padding-top: 1.5rem;
+      border-top: 1px solid #334155;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+
     /* 手機版 (寬度 < 640px) 自動轉回豎向，確保不會壓縮 */
     @media (max-width: 640px) {
       .card {
         flex-direction: column;
+        height: auto;
       }
       .card-cover-wrapper {
         width: 100%;
@@ -207,6 +270,9 @@
       }
       .card-body {
         width: 100%;
+      }
+      .footer-container {
+        flex-direction: column;
       }
     }
   </style>
@@ -221,6 +287,7 @@
         <li><a href="#videos">影音作品</a></li>
         <li><a href="#plans">計畫作品</a></li>
         <li><a href="#competitions">競賽獲獎</a></li>
+        <li><a href="#contact">聯絡資訊</a></li>
       </ul>
     </nav>
   </header>
@@ -246,6 +313,26 @@
       <div id="competitions-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
     </section>
   </div>
+
+  <!-- 網頁尾巴：聯絡資訊頁尾 -->
+  <footer id="contact">
+    <div class="footer-container">
+      <div class="footer-info">
+        <h3>聯絡資訊 Contact</h3>
+        <p>感謝您的瀏覽！若您對我的研究成果、專案合作或教學計畫有任何興趣或疑問，歡迎透過以下方式與我聯繫。</p>
+      </div>
+      <div class="footer-contact">
+        <h4>Contact Info</h4>
+        <!-- 請將下方資訊替換為您的實際聯絡方式 -->
+        <a href="mailto:your.email@example.com">✉️ 電子郵件：your.email@example.com</a>
+        <a href="https://github.com/YuYiFang0323" target="_blank">🌐 GitHub：YuYiFang0323</a>
+        <a href="#" target="_blank">📍 單位 / 機構：您的所屬單位</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Portfolio. All rights reserved.</p>
+    </div>
+  </footer>
 
   <script>
     const USERNAME = "YuYiFang0323"; 
