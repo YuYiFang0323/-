@@ -10,6 +10,48 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
   <script>
+    // 0. 動態注入左側 CMS 編輯表單樣式 (將圖片欄位按鈕移至圖片右側)
+    (function injectCmsAdminStyles() {
+      var cssNode = document.createElement('style');
+      cssNode.innerHTML = `
+        /* 1. 找到圖片上傳欄位的內部包覆層，改為橫向 Flexbox 排列 */
+        div[class*="nc-fileControl-data"],
+        div[class*="FileControl"] {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: flex-start !important;
+          gap: 16px !important;
+        }
+
+        /* 2. 限制圖片預覽區域的寬度，不讓它佔滿全寬 */
+        div[class*="nc-fileControl-imageWrapper"],
+        div[class*="FileControl"] > div:first-child {
+          max-width: 200px !important;
+          flex-shrink: 0 !important;
+        }
+
+        /* 3. 將按鈕區塊（選擇其他圖片/URL/刪除）排列在圖片右側（原紅框處） */
+        div[class*="nc-fileControl-buttons"],
+        div[class*="FileControl"] > div:last-child {
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: flex-start !important;
+          gap: 8px !important;
+          margin-top: 0 !important;
+          flex-grow: 1 !important;
+        }
+
+        /* 4. 調整按鈕寬度與對齊 */
+        div[class*="nc-fileControl-buttons"] button,
+        div[class*="FileControl"] button {
+          width: fit-content !important;
+          max-width: 100% !important;
+          margin: 0 !important;
+        }
+      `;
+      document.head.appendChild(cssNode);
+    })();
+
     // 1. 注入預覽區通用樣式
     CMS.registerPreviewStyle(`    
       * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -102,7 +144,7 @@
         padding: 1.5rem 1.8rem;
         display: flex;
         flex-direction: column;
-        justify-content: flex-start; /* 【修改】改為從頭排列，不再強制拉開距離 */
+        justify-content: space-between;
         flex-grow: 1;
         width: 62%;
       }
@@ -134,18 +176,17 @@
         margin-bottom: 0.4rem;
       }
 
-      /* 摘要簡述左右對齊 */
+      /* 1. 摘要簡述左右對齊 (Justify) */
       .card p {
         color: #475569;
         font-size: 0.95rem;
         margin-bottom: 1.2rem;
         white-space: pre-line;
         word-break: break-word;
-        text-align: justify;
-        text-justify: inter-word;
+        text-align: justify;       /* 左右對齊 */
+        text-justify: inter-word;  /* 文字間距調整 */
       }
 
-      /* 【修改】按鈕位置調整 */
       .card a.btn {
         display: inline-block;
         align-self: flex-start;
@@ -156,7 +197,7 @@
         text-decoration: none;
         font-size: 0.9rem;
         font-weight: 500;
-        margin-top: 0.5rem; /* 【修改】改為與上方內文保持固定的小間距 */
+        margin-top: auto;
       }
 
       /* 響應式微調 */
@@ -339,6 +380,7 @@
                 }),
                 h('span', { className: 'drag-hint' }, '拖曳焦點 (X:' + numX + ' Y:' + numY + ')')
               ),
+              /* 2. 圖片縮放拉桿工具列 */
               h('div', { className: 'zoom-control-bar' },
                 h('span', {}, '🔍 縮放:'),
                 h('input', {
