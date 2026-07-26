@@ -48,6 +48,29 @@
           margin: 0 !important;
           width: fit-content !important;
         }
+        
+        /* 5. 被搬移進來的 X/Y 軸欄位容器樣式 */
+          .moved-focal-container {
+            width: 110px !important;
+            margin: 0 !important;
+            padding: 8px !important;
+            border: 1px dashed #cbd5e1 !important;
+            border-radius: 6px !important;
+            background: #f8fafc !important;
+            flex-shrink: 0 !important;
+          }
+          .moved-focal-container label, 
+          .moved-focal-container [class*="ControlTopbar"] {
+            font-size: 12px !important;
+            white-space: nowrap !important;
+            margin-bottom: 4px !important;
+            padding: 0 !important;
+          }
+          .moved-focal-container input {
+            padding: 4px 8px !important;
+            height: 32px !important;
+            font-size: 14px !important;
+          }
       `;
       document.head.appendChild(style);
     }
