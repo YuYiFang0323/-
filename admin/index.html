@@ -40,7 +40,13 @@
       font-size: 15px;
       line-height: 1.5;
     }
-    
+
+    .image-field-left-group {
+      display: flex !important;           /* 1. 開啟 Flex 彈性佈局 */
+      flex-direction: row !important;     /* 2. 強制讓子元素「左右橫向」排列 */
+      align-items: center !important;     /* 3. 讓圖片與按鈕垂直居中對齊 */
+      gap: 20px !important;
+    }
     
     /* 4. 圖片縮圖外框固定尺寸 */
     div[class*="ImageWrapper"] {
