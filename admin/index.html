@@ -6,8 +6,8 @@
   <title>後台內容管理系統</title>
   
   <style>
-    /* 1. 最外層圖片主容器：改為橫向排列 (不論是否有 ImageWrapper 均套用) */
-    div[class*="-ControlContainer"].has-focal-layout {
+    /* 1. 最外層圖片主容器：改為橫向排列 */
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) {
       display: flex !important;
       flex-direction: column !important;
       width: 100% !important;
@@ -16,8 +16,9 @@
       background: transparent !important;
     }
 
-    /* 2. 灰色邊框包覆層：設定為 Flex 橫向直立對齊 */
-    div[class*="-ControlContainer"].has-focal-layout > div[class*="css-"] {
+    /* 2. 灰色邊框包覆層 (.css-83wr9v)：設定為 Flex 橫向直立對齊 */
+    /* 封面圖片 (選填) 的標頭*/
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div[class*="css-"] {
       display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
@@ -29,8 +30,8 @@
       width: 100% !important;
     }
     
-    /* 封面圖片的主要內容格子 */
-    div[class*="-ControlContainer"].has-focal-layout > div[class*="css-"] > span {
+    /* 封面圖片 (選填) 的主要內容格子 */
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div[class*="css-"] > span {
       display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
@@ -65,9 +66,8 @@
       object-fit: cover !important;
     }
 
-    /* 5. 按鈕垂直排列 */
-    .moved-btn-group,
-    .image-field-left-group > div:not([class*="ImageWrapper"]):not(.focal-inputs-column) {
+    /* 5. 中間按鈕垂直排列 */
+    .moved-btn-group {
       display: flex !important;
       flex-direction: column !important;
       justify-content: center !important;
@@ -79,9 +79,7 @@
 
     .moved-btn-group button,
     .moved-btn-group a,
-    .moved-btn-group span,
-    .image-field-left-group button,
-    .image-field-left-group a {
+    .moved-btn-group span {
       margin: 0 !important;
       width: 140px !important;
       white-space: nowrap !important;
@@ -144,41 +142,29 @@
   <script>
     function fixFocalLayout() {
       try {
-        const allContainers = Array.from(document.querySelectorAll('div[class*="-ControlContainer"]'));
-        
-        // 1. 定位「封面圖片」主容器
-        let mainContainer = null;
-        allContainers.forEach(container => {
-          const text = container.innerText || '';
-          if (text.includes('封面圖片')) {
-            mainContainer = container;
-          }
-        });
+        const imgWrapper = document.querySelector('div[class*="ImageWrapper"]');
+        if (!imgWrapper) return;
 
+        const mainContainer = imgWrapper.closest('div[class*="-ControlContainer"]');
         if (!mainContainer) return;
 
-        // 動態加上識別 class 讓 CSS 生效
-        mainContainer.classList.add('has-focal-layout');
-
-        // 2. 找到內容層 span 或內層 div
-        const spanContainer = mainContainer.querySelector('div[class*="css-"] > span') || mainContainer.querySelector('div[class*="css-"]');
-        if (!spanContainer) return;
-
-        // 3. 確保左側群組存在 (包含上傳按鈕/縮圖)
-        let leftGroup = spanContainer.querySelector('.image-field-left-group');
-        if (!leftGroup) {
-          leftGroup = document.createElement('div');
-          leftGroup.className = 'image-field-left-group';
-          
-          // 將非 focal-inputs-column 的子元素移入 leftGroup
-          const children = Array.from(spanContainer.childNodes);
-          children.forEach(child => {
-            if (child.nodeType === 1 && !child.classList.contains('focal-inputs-column')) {
-              leftGroup.appendChild(child);
-            }
-          });
-          spanContainer.insertBefore(leftGroup, spanContainer.firstChild);
+        // 1. 確保圖片外層為 image-field-left-group
+        const outerBox = imgWrapper.parentElement;
+        if (outerBox && !outerBox.classList.contains('image-field-left-group')) {
+          outerBox.classList.add('image-field-left-group');
         }
+
+        // 2. 尋找按鈕組並放入 left-group
+        const btnGroup = imgWrapper.nextElementSibling;
+        if (btnGroup && !btnGroup.classList.contains('moved-btn-group')) {
+          btnGroup.classList.add('moved-btn-group');
+          if (outerBox) {
+            outerBox.appendChild(btnGroup);
+          }
+        }
+
+        // 3. 建立或取得 span 容器
+        let spanContainer = outerBox.parentElement;
 
         // 4. 建立右側專用 X/Y 軸橫向容器
         let rightColumn = spanContainer.querySelector('.focal-inputs-column');
@@ -188,7 +174,8 @@
           spanContainer.appendChild(rightColumn);
         }
 
-        // 5. 尋找 X 軸與 Y 軸欄位並移入 rightColumn
+        // 5. 尋找 X 軸與 Y 軸欄位並移入專屬容器
+        const allContainers = Array.from(document.querySelectorAll('div[class*="ControlContainer"]'));
         let xBox = null;
         let yBox = null;
 
