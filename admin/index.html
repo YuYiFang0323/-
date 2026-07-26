@@ -29,7 +29,23 @@
       color: #334155 !important;
     }
 
-    /* 3. 圖片與按鈕組（左半邊灰框）：圖片在左，按鈕在右 (Flex Row) */
+    /* 3. 【核心修正】左側大灰框內部的第一層容器：強制將「圖片」與「按鈕群」橫向併排 */
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div:first-of-type,
+    div[class*="ImageWrapper"] ~ div,
+    div[class*="ImageWrapper"] {
+      box-sizing: border-box !important;
+    }
+
+    /* 找到直接包住圖片與按鈕的父節點，改成橫向 flex */
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div:not(.focal-inputs-column) {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 16px !important;
+      width: 100% !important;
+    }
+
+    /* 4. 圖片縮圖外框 */
     div[class*="ImageWrapper"] {
       width: 120px !important;
       min-width: 120px !important;
@@ -47,25 +63,33 @@
       object-fit: cover !important;
     }
 
-    /* 圖片右側的按鈕容器：垂直排列 */
+    /* 5. 【核心修正】圖片右側的按鈕容器：擺在圖片右邊，內部按鈕保持垂直堆疊、取消滿寬 */
     div[class*="ImageWrapper"] + div {
       display: flex !important;
       flex-direction: column !important;
       justify-content: center !important;
+      align-items: flex-start !important;
       gap: 8px !important;
       margin: 0 !important;
       padding: 0 !important;
       border: none !important;
+      width: auto !important;
+      flex-grow: 0 !important;
       flex-shrink: 0 !important;
     }
 
+    /* 按鈕樣式微調：限制寬度為自動內容寬度 */
     div[class*="ImageWrapper"] + div button,
+    div[class*="ImageWrapper"] + div a,
     div[class*="ImageWrapper"] + div span {
       margin: 0 !important;
+      width: auto !important;
+      min-width: 140px !important;
       white-space: nowrap !important;
+      display: inline-block !important;
     }
 
-    /* 4. 右側的 X/Y 軸容器包裝區：將發送進來的 X 軸與 Y 軸強制變為垂直上下堆疊 (Flex Column) */
+    /* 6. 右側的 X/Y 軸容器包裝區（保持垂直上下堆疊） */
     .focal-inputs-column {
       display: flex !important;
       flex-direction: column !important;
