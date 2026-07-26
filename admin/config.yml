@@ -66,7 +66,7 @@ collections:
       - { label: "封面焦點 X軸", name: "focal_x", widget: "string", required: false, default: "50%" }
       - { label: "封面焦點 Y軸", name: "focal_y", widget: "string", required: false, default: "50%" }
       - { label: "競賽名稱", name: "title", widget: "string" }
-      - { label: "擔任角色", name: "role", widget: "string" }
+      - { label: "獎項", name: "role", widget: "string" }
       - { label: "執行時間", name: "period", widget: "string" }
       - { label: "詳細說明", name: "description", widget: "text" }
 
