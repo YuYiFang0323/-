@@ -35,29 +35,23 @@
         min-height: 220px;
       }
 
-      /* 左側封面圖片與工具整合區塊 */
+      /* 左側封面圖片區塊 */
       .card-cover-container {
-        width: 45%;
-        min-width: 300px;
+        width: 38%;
+        min-width: 260px;
         flex-shrink: 0;
         display: flex;
-        flex-direction: row; /* 改為橫向排列：左圖片、右控制區 */
+        flex-direction: column;
         background-color: #f1f5f9;
         border-right: 1px solid #e2e8f0;
-        align-items: center;
-        padding: 10px;
-        gap: 12px;
       }
 
-      /* 圖片預覽縮圖容器 */
       .card-cover-wrapper {
         position: relative;
-        width: 140px;
-        height: 140px;
-        flex-shrink: 0;
+        width: 100%;
+        flex-grow: 1;
+        min-height: 200px;
         overflow: hidden;
-        border-radius: 8px;
-        border: 1px solid #cbd5e1;
         cursor: grab;
         user-select: none;
       }
@@ -74,39 +68,30 @@
       /* 拖曳提示標籤 */
       .drag-hint {
         position: absolute;
-        bottom: 4px;
-        right: 4px;
+        top: 8px;
+        right: 8px;
         background: rgba(0,0,0,0.65);
         color: white;
-        padding: 2px 6px;
+        padding: 3px 8px;
         border-radius: 4px;
-        font-size: 10px;
+        font-size: 11px;
         pointer-events: none;
         z-index: 10;
       }
 
-      /* 右側工具控制區 (放在圖片右邊) */
-      .controls-right-box {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        flex-grow: 1;
-      }
-
-      /* 縮放控制拉桿 */
+      /* 縮放控制拉桿工具列 */
       .zoom-control-bar {
         background: #ffffff;
-        padding: 6px 10px;
-        border-radius: 6px;
-        border: 1px solid #e2e8f0;
+        padding: 6px 12px;
         display: flex;
-        flex-direction: column;
-        gap: 4px;
+        align-items: center;
+        gap: 8px;
+        border-top: 1px solid #e2e8f0;
         font-size: 12px;
         color: #64748b;
       }
       .zoom-control-bar input[type="range"] {
-        width: 100%;
+        flex-grow: 1;
         height: 4px;
         accent-color: #3b82f6;
         cursor: pointer;
@@ -117,9 +102,9 @@
         padding: 1.5rem 1.8rem;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: flex-start; /* 【修改】改為從頭排列，不再強制拉開距離 */
         flex-grow: 1;
-        width: 55%;
+        width: 62%;
       }
       .card h3 {
         font-size: 1.3rem;
@@ -149,7 +134,7 @@
         margin-bottom: 0.4rem;
       }
 
-      /* 摘要簡述左右對齊 (Justify) */
+      /* 摘要簡述左右對齊 */
       .card p {
         color: #475569;
         font-size: 0.95rem;
@@ -160,6 +145,7 @@
         text-justify: inter-word;
       }
 
+      /* 【修改】按鈕位置調整 */
       .card a.btn {
         display: inline-block;
         align-self: flex-start;
@@ -170,7 +156,7 @@
         text-decoration: none;
         font-size: 0.9rem;
         font-weight: 500;
-        margin-top: auto;
+        margin-top: 0.5rem; /* 【修改】改為與上方內文保持固定的小間距 */
       }
 
       /* 響應式微調 */
@@ -330,7 +316,7 @@
             if (ytId) coverUrl = 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg';
           }
 
-          // 建立封面圖片 Element (圖片在左、操作列在右)
+          // 建立封面圖片 Element (含圖片 + 縮放拉桿)
           var coverElement = null;
           if (coverUrl) {
             coverElement = h('div', { className: 'card-cover-container' },
@@ -346,26 +332,24 @@
                   src: coverUrl,
                   style: { 
                     objectPosition: focalX + ' ' + focalY,
-                    transform: 'scale(' + this.state.zoom + ')',
+                    transform: 'scale(' + this.state.zoom + ')', // 使用動態 Zoom
                     userSelect: 'none',
                     pointerEvents: 'none'
                   }
                 }),
-                h('span', { className: 'drag-hint' }, X: + numX + ' Y:' + numY)
+                h('span', { className: 'drag-hint' }, '拖曳焦點 (X:' + numX + ' Y:' + numY + ')')
               ),
-              /* 排在圖片右側的控制區塊 */
-              h('div', { className: 'controls-right-box' },
-                h('div', { className: 'zoom-control-bar' },
-                  h('span', {}, '🔍 縮放 (' + Math.round(this.state.zoom * 100) + '%)'),
-                  h('input', {
-                    type: 'range',
-                    min: '1.0',
-                    max: '3.0',
-                    step: '0.1',
-                    value: this.state.zoom,
-                    onChange: this.handleZoomChange
-                  })
-                )
+              h('div', { className: 'zoom-control-bar' },
+                h('span', {}, '🔍 縮放:'),
+                h('input', {
+                  type: 'range',
+                  min: '1.0',
+                  max: '3.0',
+                  step: '0.1',
+                  value: this.state.zoom,
+                  onChange: this.handleZoomChange
+                }),
+                h('span', {}, Math.round(this.state.zoom * 100) + '%')
               )
             );
           }
