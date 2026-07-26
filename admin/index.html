@@ -5,34 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>後台內容管理系統</title>
   
-  <!-- 精準控制 Decap CMS 左側表單外框樣式 -->
+  <!-- 超強效 Decap CMS 左側表單排版覆蓋 -->
   <style>
-    /* 1. 最外層主灰框：設定為 Flex 橫向佈局，讓 [圖片+按鈕]、[X軸]、[Y軸] 一字排開 */
+    /* 1. 最外層主容器：強制橫向 Flex 排版 */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) {
       display: flex !important;
       flex-direction: row !important;
+      flex-wrap: nowrap !important;
       align-items: center !important;
       justify-content: flex-start !important;
-      gap: 20px !important;
+      gap: 16px !important;
       width: 100% !important;
       height: auto !important;
-      padding: 16px 20px !important;
+      padding: 16px !important;
       box-sizing: border-box !important;
     }
 
-    /* 2. 圖片與按鈕的組合容器：設為橫向並排 */
-    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div:first-child {
+    /* 2. 徹底打破 Decap CMS 內部原本的直向層級包覆，強制所有直接子元素與孫元素橫向排列 */
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div,
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div > div {
       display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
       gap: 16px !important;
-      flex-shrink: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: none !important;
+      background: transparent !important;
+      width: auto !important;
     }
 
-    /* 3. 圖片縮圖外框與尺寸設定 */
+    /* 3. 圖片預覽縮圖外框 */
     div[class*="ImageWrapper"] {
       width: 110px !important;
-      max-width: 110px !important;
+      min-width: 110px !important;
       height: 110px !important;
       flex-shrink: 0 !important;
       margin: 0 !important;
@@ -45,30 +51,33 @@
       border-radius: 6px !important;
     }
 
-    /* 4. 圖片右側按鈕群：直向排列 */
+    /* 4. 圖片右側的三個按鈕（選擇其他圖片 / Replace with URL / 刪除圖片）：強制獨自保持直向垂直排列 */
     div[class*="ImageWrapper"] + div {
       display: flex !important;
       flex-direction: column !important;
-      gap: 8px !important;
       align-items: flex-start !important;
       justify-content: center !important;
+      gap: 6px !important;
       flex-shrink: 0 !important;
-      margin: 0 !important;
     }
 
-    div[class*="ImageWrapper"] + div > button {
+    div[class*="ImageWrapper"] + div > button,
+    div[class*="ImageWrapper"] + div > span {
       margin: 0 !important;
       white-space: nowrap !important;
     }
 
-    /* 5. 搬移進來的 X/Y 軸卡片樣式 (內嵌於主灰色大外框內) */
+    /* 5. 搬移後的 X 軸、Y 軸外框獨立樣式 */
     .moved-focal-box {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
       width: 130px !important;
       min-width: 130px !important;
       height: auto !important;
       margin: 0 !important;
-      padding: 10px 12px !important;
-      border: 1px solid rgb(223, 223, 227) !important;
+      padding: 8px 10px !important;
+      border: 1px solid #dfdfe3 !important;
       border-radius: 6px !important;
       background-color: #ffffff !important;
       box-shadow: none !important;
@@ -76,28 +85,29 @@
       box-sizing: border-box !important;
     }
 
-    /* 微調 X/Y 軸標題與輸入框 */
-    .moved-focal-box [class*="ControlTopbar"] {
-      margin-bottom: 6px !important;
-      padding: 0 !important;
-    }
-    
-    .moved-focal-box [class*="ControlTopbar"] span,
-    .moved-focal-box label {
+    /* 微調標題與輸入框 */
+    .moved-focal-box [class*="ControlTopbar"],
+    .moved-focal-box label,
+    .moved-focal-box span {
+      display: block !important;
       font-size: 13px !important;
       font-weight: 600 !important;
       white-space: nowrap !important;
       color: #313d4f !important;
+      margin-bottom: 4px !important;
+      padding: 0 !important;
     }
 
     .moved-focal-box input {
+      display: block !important;
       width: 100% !important;
-      height: 36px !important;
+      height: 34px !important;
       padding: 4px 8px !important;
       font-size: 14px !important;
       border: 1px solid #cbd5e1 !important;
       border-radius: 4px !important;
       box-sizing: border-box !important;
+      background: #fff !important;
     }
   </style>
 </head>
@@ -106,50 +116,51 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
   <script>
-    // 自動尋找並搬移 X軸、Y軸 輸入框至大外框內部的右側
-    function moveFocalInputs() {
+    // 自動尋找並橫向重組：[ 圖片 ] [ 按鈕群 ] [ X軸 ] [ Y軸 ]
+    function forceHorizontalLayout() {
       try {
         const imgWrapper = document.querySelector('div[class*="ImageWrapper"]');
         if (!imgWrapper) return;
 
-        // 取得最外層的大灰框容器
+        // 取得最外層大灰框
         const mainContainer = imgWrapper.closest('div[class*="-ControlContainer"]');
         if (!mainContainer) return;
 
-        // 取得圖片右側按鈕群的容器
-        const buttonGroup = imgWrapper.nextElementSibling || imgWrapper.parentElement.querySelector('div:nth-child(2)');
-
+        // 搜尋 X軸 與 Y軸
         const allContainers = Array.from(document.querySelectorAll('div[class*="ControlContainer"]'));
+        let xBox = null;
+        let yBox = null;
 
         allContainers.forEach(container => {
-          if (container === mainContainer || container.classList.contains('moved-focal-box')) return;
-
+          if (container === mainContainer) return;
           const textContent = container.innerText || '';
-          if (
-            textContent.includes('焦點') || 
-            textContent.includes('focal') || 
-            textContent.includes('X軸') || 
-            textContent.includes('Y軸')
-          ) {
-            container.classList.add('moved-focal-box');
-            
-            // 如果有按鈕群容器，將 X/Y 軸緊接插在按鈕群後面，保留在大灰框內部
-            if (buttonGroup && buttonGroup.parentElement) {
-              buttonGroup.parentElement.insertBefore(container, buttonGroup.nextSibling);
-            } else {
-              mainContainer.appendChild(container);
-            }
-          }
+          if (textContent.includes('X軸')) xBox = container;
+          if (textContent.includes('Y軸')) yBox = container;
         });
+
+        // 打破原始的包裹結構，將 X 軸與 Y 軸直接插入至大灰框內部最右側
+        if (xBox && !xBox.classList.contains('moved-focal-box')) {
+          xBox.classList.add('moved-focal-box');
+          mainContainer.appendChild(xBox);
+        }
+
+        if (yBox && !yBox.classList.contains('moved-focal-box')) {
+          yBox.classList.add('moved-focal-box');
+          mainContainer.appendChild(yBox);
+        }
+
+        // 強制確保順序：X軸在Y軸前面
+        if (xBox && yBox && xBox.nextElementSibling !== yBox) {
+          mainContainer.appendChild(xBox);
+          mainContainer.appendChild(yBox);
+        }
       } catch (e) {
-        console.warn('搬移焦點欄位時提醒:', e);
+        console.warn('佈局調整提醒:', e);
       }
     }
 
-    // 啟動監聽，確保 CMS 動態渲染後持續執行搬移
-    moveFocalInputs();
-    const observer = new MutationObserver(moveFocalInputs);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 啟動持續監聽，對抗 React 的動態 DOM 刷新
+    setInterval(forceHorizontalLayout, 300);
 
     // 註冊右側預覽頁面樣式
     CMS.registerPreviewStyle(`    
