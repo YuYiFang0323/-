@@ -23,7 +23,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     nav {
-      max-width: 1000px;
+      max-width: 952px; /* 寬度對齊 952px */
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
@@ -51,9 +51,9 @@
       color: #3b82f6;
     }
 
-    /* 主要內容區域 */
+    /* 主要內容區域：改為 952px 寬度 */
     .container {
-      max-width: 1000px;
+      max-width: 952px;
       margin: 0 auto;
       padding: 3rem 1.5rem;
     }
@@ -80,15 +80,16 @@
       border-radius: 2px;
     }
 
-    /* 卡片網格與樣式 */
+    /* 橫向卡片容器（單欄） */
     .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      display: flex;
+      flex-direction: column;
       gap: 1.8rem;
       margin-top: 2rem;
       text-align: left;
     }
 
+    /* 橫向長方形卡片 */
     .card {
       background: #ffffff;
       border-radius: 12px;
@@ -96,33 +97,44 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       transition: transform 0.2s, box-shadow 0.2s;
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      flex-direction: row; /* 關鍵：改為左右橫向 */
       overflow: hidden;
+      min-height: 220px; /* 卡片舒適高度 */
     }
     .card:hover {
       transform: translateY(-4px);
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
 
-    /* 封面圖片等寬與裁切設定 */
-    .card-cover {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      display: block;
+    /* 左側封面圖片區塊 (佔約 38% 寬度) */
+    .card-cover-wrapper {
+      width: 38%;
+      min-width: 260px;
+      flex-shrink: 0;
       background-color: #f1f5f9;
+      overflow: hidden;
+      position: relative;
     }
 
+    .card-cover {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* 右側內容區塊 */
     .card-body {
-      padding: 1.5rem;
+      padding: 1.5rem 1.8rem;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
       flex-grow: 1;
+      width: 62%;
     }
 
     .card h3 {
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       color: #0f172a;
       margin-bottom: 0.8rem;
       line-height: 1.4;
@@ -146,14 +158,14 @@
       font-size: 0.95rem;
       margin-bottom: 1.2rem;
       white-space: pre-line;
-      flex-grow: 1;
+      word-break: break-all;
     }
     .card a.btn {
       display: inline-block;
-      text-align: center;
+      align-self: flex-start; /* 按鈕靠左下 */
       background: #3b82f6;
       color: #ffffff;
-      padding: 0.5rem 1rem;
+      padding: 0.5rem 1.2rem;
       border-radius: 6px;
       text-decoration: none;
       font-size: 0.9rem;
@@ -166,11 +178,24 @@
     }
 
     .empty-msg {
-      grid-column: 1 / -1;
       text-align: center;
       color: #94a3b8;
       font-size: 1rem;
       padding: 2rem 0;
+    }
+
+    /* 手機版 (寬度 < 640px) 自動轉回豎向，確保不會壓縮 */
+    @media (max-width: 640px) {
+      .card {
+        flex-direction: column;
+      }
+      .card-cover-wrapper {
+        width: 100%;
+        height: 200px;
+      }
+      .card-body {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -223,30 +248,26 @@
       return (match && match[2].length === 11) ? match[2] : null;
     }
 
-    // 核心修正 1：轉譯圖片網址，嚴謹適應 static/、assets/ 與絕對路徑
+    // 轉譯圖片網址
     function getImageUrl(path) {
       if (!path) return '';
       
       let cleanPath = String(path).trim().replace(/^['"]|['"]$/g, '');
 
-      // 完整外連或 blob 網址直接回傳
       if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://') || cleanPath.startsWith('blob:')) {
         return cleanPath;
       }
 
-      // 移除開頭斜線與 public/
       cleanPath = cleanPath.replace(/^\//, '').replace(/^public\//, '');
 
-      // 如果路徑已經包含 assets/ 或 static/，直接拼接 Github raw 網址
       if (cleanPath.startsWith('assets/') || cleanPath.startsWith('static/')) {
         return `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${cleanPath}`;
       }
 
-      // 預設補充 static/ 前綴（配合 Decap CMS 預設上傳目錄）
       return `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/static/${cleanPath}`;
     }
 
-    // 核心修正 2：格式化 XY 焦點數值
+    // 格式化 XY 焦點數值
     function formatFocal(val) {
       if (val === undefined || val === null || val === '') return '50%';
       let strVal = String(val).trim();
@@ -256,7 +277,7 @@
       return strVal;
     }
 
-    // 增強型 Front Matter 解析器（避免網址與多號出錯）
+    // Front Matter 解析器
     function parseFrontMatter(text) {
       const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
       if (!match) return { description: text };
@@ -275,7 +296,6 @@
         }
       });
 
-      // 解析 Markdown 本文作為長描述（若有）
       const body = text.replace(/^---\r?\n[\s\S]*?\r?\n---/, '').trim();
       if (body && !data.description) {
         data.description = body;
@@ -309,7 +329,6 @@
 
         container.innerHTML = '';
         for (const file of mdFiles) {
-          // 快取消除參數
           const rawRes = await fetch(file.download_url + '?t=' + new Date().getTime());
           const text = await rawRes.text();
           const data = parseFrontMatter(text);
@@ -340,7 +359,7 @@
       
       const coverUrl = getImageUrl(data.cover);
       const coverHtml = coverUrl 
-        ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` 
+        ? `<div class="card-cover-wrapper"><img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.parentElement.style.display='none'"></div>` 
         : '';
 
       return `
@@ -363,14 +382,13 @@
       const focalY = formatFocal(data.focal_y);
       let coverUrl = getImageUrl(data.cover);
 
-      // 自動備援：若無封面但有 YouTube 連結，自動抓取 YouTube 高清預覽圖
       if (!coverUrl && data.youtube_url) {
         const ytId = getYoutubeId(data.youtube_url);
         if (ytId) coverUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
       }
 
       const coverHtml = coverUrl 
-        ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` 
+        ? `<div class="card-cover-wrapper"><img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.parentElement.style.display='none'"></div>` 
         : '';
 
       return `
@@ -392,7 +410,7 @@
       const focalY = formatFocal(data.focal_y);
       const coverUrl = getImageUrl(data.cover);
       const coverHtml = coverUrl 
-        ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` 
+        ? `<div class="card-cover-wrapper"><img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.parentElement.style.display='none'"></div>` 
         : '';
 
       return `
@@ -417,7 +435,7 @@
       const focalY = formatFocal(data.focal_y);
       const coverUrl = getImageUrl(data.cover);
       const coverHtml = coverUrl 
-        ? `<img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.style.display='none'">` 
+        ? `<div class="card-cover-wrapper"><img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.parentElement.style.display='none'"></div>` 
         : '';
 
       return `
