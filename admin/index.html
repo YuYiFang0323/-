@@ -8,78 +8,9 @@
 <body>
   <!-- 載入 Decap CMS -->
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  
+
   <script>
-    // ==========================================
-    // 0. 注入 Decap CMS 左側編輯面板 (Left Control Panel) 的自訂 CSS
-    // ==========================================
-    CMS.registerStyle(`
-      /* 1. 將圖片控制元件改為水平排列：左側縮圖、右側三個按鈕 */
-      div[class*="ControlContainer"]:has(div[class*="ImageControl"]),
-      div[class*="ControlContainer"]:has(input[id*="cover"]) {
-        grid-column: span 2;
-      }
-
-      /* 圖片主體與按鈕區塊併排 */
-      div[class*="ImageControlContainer"],
-      div[class*="MediaControl"],
-      div[class*="ImageWrapper"] {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: flex-start !important;
-        gap: 12px !important;
-      }
-
-      /* 縮圖調整大小 */
-      div[class*="ImageControlContainer"] img,
-      div[class*="MediaControl"] img {
-        max-width: 140px !important;
-        height: auto !important;
-        object-fit: contain !important;
-      }
-
-      /* 右側按鈕群組直向排列 */
-      div[class*="ImageControlButtons"],
-      div[class*="ButtonsGroup"],
-      div[class*="ImageControl"] > div:nth-child(2) {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 6px !important;
-        justify-content: flex-start !important;
-      }
-
-      div[class*="ImageControlButtons"] button,
-      div[class*="ButtonsGroup"] button {
-        margin: 0 !important;
-        white-space: nowrap !important;
-      }
-
-      /* 2. 建立橫向 4 欄 Layout：包含 [封面圖片(占2欄)] [焦點X軸] [焦點Y軸] */
-      /* 抓取包含這三個欄位的共同父容器 */
-      form > div:has(input[id*="focal_x"]),
-      div[class*="PaneContainer"]:has(input[id*="focal_x"]),
-      div[class*="ControlPane"]:has(input[id*="focal_x"]) {
-        display: grid !important;
-        grid-template-columns: 2fr 1fr 1fr !important; /* 4欄區域配置 (圖片+按鈕佔2, X佔1, Y佔1) */
-        gap: 16px !important;
-        align-items: start !important;
-      }
-
-      /* 強制將 cover 圖片欄位、X 軸、Y 軸併入 Grid 列 */
-      div[class*="ControlContainer"]:has(input[id*="focal_x"]),
-      div[class*="ControlContainer"]:has(input[id*="focal_y"]) {
-        margin-bottom: 0 !important;
-      }
-
-      div[class*="ControlContainer"]:has(input[id*="focal_x"]) input,
-      div[class*="ControlContainer"]:has(input[id*="focal_y"]) input {
-        width: 100% !important;
-      }
-    `, { raw: true });
-
-    // ==========================================
     // 1. 注入預覽區通用樣式
-    // ==========================================
     CMS.registerPreviewStyle(`    
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
@@ -203,7 +134,7 @@
         margin-bottom: 0.4rem;
       }
 
-      /* 摘要簡述左右對齊 (Justify) */
+      /* 1. 摘要簡述左右對齊 (Justify) */
       .card p {
         color: #475569;
         font-size: 0.95rem;
@@ -256,9 +187,7 @@
       return (match && match[2].length === 11) ? match[2] : null;
     }
 
-    // ==========================================
     // 2. 通用卡片預覽組件工廠
-    // ==========================================
     function createGenericPreview(collectionType) {
       return createClass({
         getInitialState: function() {
@@ -407,9 +336,10 @@
                     pointerEvents: 'none'
                   }
                 }),
+                /* 已移除紅點標記 (.focal-point-marker) */
                 h('span', { className: 'drag-hint' }, '拖曳焦點 (X:' + numX + ' Y:' + numY + ')')
               ),
-              /* 圖片縮放拉桿工具列 */
+              /* 2. 圖片縮放拉桿工具列 */
               h('div', { className: 'zoom-control-bar' },
                 h('span', {}, '🔍 縮放:'),
                 h('input', {
@@ -477,9 +407,7 @@
       });
     }
 
-    // ==========================================
     // 3. 將預覽範本註冊到對應的四個 Collection
-    // ==========================================
     CMS.registerPreviewTemplate('research', createGenericPreview('research'));
     CMS.registerPreviewTemplate('videos', createGenericPreview('videos'));
     CMS.registerPreviewTemplate('plans', createGenericPreview('plans'));
