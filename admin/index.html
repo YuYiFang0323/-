@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   
   <script>
-    // 1. 注入預覽區通用樣式 (已同步改為橫向卡片)
+    // 1. 注入預覽區通用樣式
     CMS.registerPreviewStyle(`    
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
@@ -27,21 +27,30 @@
         border-radius: 12px;
         border: 1px solid #e2e8f0;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        max-width: 952px; /* 與前台一致 */
+        max-width: 952px;
         margin: 0 auto;
         display: flex;
-        flex-direction: row; /* 橫向排版：左圖右文 */
+        flex-direction: row;
         overflow: hidden;
         min-height: 220px;
       }
 
-      /* 左側封面圖片區塊 (佔 38% 寬度) */
-      .card-cover-wrapper {
-        position: relative;
+      /* 左側封面圖片區塊 */
+      .card-cover-container {
         width: 38%;
         min-width: 260px;
         flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
         background-color: #f1f5f9;
+        border-right: 1px solid #e2e8f0;
+      }
+
+      .card-cover-wrapper {
+        position: relative;
+        width: 100%;
+        flex-grow: 1;
+        min-height: 200px;
         overflow: hidden;
         cursor: grab;
         user-select: none;
@@ -56,24 +65,10 @@
         pointer-events: none;
       }
 
-      /* 焦點紅點標記 */
-      .focal-point-marker {
-        position: absolute;
-        width: 14px;
-        height: 14px;
-        background-color: #ef4444;
-        border: 2px solid #ffffff;
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        box-shadow: 0 0 4px rgba(0,0,0,0.4);
-        pointer-events: none;
-        z-index: 10;
-      }
-
       /* 拖曳提示標籤 */
       .drag-hint {
         position: absolute;
-        bottom: 8px;
+        top: 8px;
         right: 8px;
         background: rgba(0,0,0,0.65);
         color: white;
@@ -82,6 +77,24 @@
         font-size: 11px;
         pointer-events: none;
         z-index: 10;
+      }
+
+      /* 縮放控制拉桿工具列 */
+      .zoom-control-bar {
+        background: #ffffff;
+        padding: 6px 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-top: 1px solid #e2e8f0;
+        font-size: 12px;
+        color: #64748b;
+      }
+      .zoom-control-bar input[type="range"] {
+        flex-grow: 1;
+        height: 4px;
+        accent-color: #3b82f6;
+        cursor: pointer;
       }
 
       /* 右側內容區塊 */
@@ -120,13 +133,18 @@
         margin-right: 0.4rem;
         margin-bottom: 0.4rem;
       }
+
+      /* 1. 摘要簡述左右對齊 (Justify) */
       .card p {
         color: #475569;
         font-size: 0.95rem;
         margin-bottom: 1.2rem;
         white-space: pre-line;
-        word-break: break-all;
+        word-break: break-word;
+        text-align: justify;       /* 左右對齊 */
+        text-justify: inter-word;  /* 文字間距調整 */
       }
+
       .card a.btn {
         display: inline-block;
         align-self: flex-start;
@@ -145,9 +163,8 @@
         .card {
           flex-direction: column;
         }
-        .card-cover-wrapper {
+        .card-cover-container {
           width: 100%;
-          height: 200px;
         }
         .card-body {
           width: 100%;
@@ -174,7 +191,14 @@
     function createGenericPreview(collectionType) {
       return createClass({
         getInitialState: function() {
-          return { isDragging: false, startX: 0, startY: 0, posX: 50, posY: 50 };
+          return { 
+            isDragging: false, 
+            startX: 0, 
+            startY: 0, 
+            posX: 50, 
+            posY: 50,
+            zoom: 1.2 // 預設放大倍率 1.2x
+          };
         },
 
         handleMouseDown: function(e) {
@@ -220,6 +244,11 @@
             var roundY = Math.round(this.state.posY);
             this.updateCmsInputs(roundX, roundY);
           }
+        },
+
+        // 縮放拉桿變動事件 handler
+        handleZoomChange: function(e) {
+          this.setState({ zoom: parseFloat(e.target.value) });
         },
 
         updateCmsInputs: function(x, y) {
@@ -286,31 +315,43 @@
             if (ytId) coverUrl = 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg';
           }
 
-          // 建立封面圖片 Element
+          // 建立封面圖片 Element (含圖片 + 縮放拉桿)
           var coverElement = null;
           if (coverUrl) {
-            coverElement = h('div', {
-              className: 'card-cover-wrapper',
-              onMouseDown: this.handleMouseDown,
-              onMouseMove: this.handleMouseMove,
-              onMouseUp: this.handleMouseUp,
-              onMouseLeave: this.handleMouseUp,
-              style: { cursor: this.state.isDragging ? 'grabbing' : 'grab' }
-            },
-              h('img', {
-                src: coverUrl,
-                style: { 
-                  objectPosition: focalX + ' ' + focalY,
-                  transform: 'scale(1.2)',
-                  userSelect: 'none',
-                  pointerEvents: 'none'
-                }
-              }),
+            coverElement = h('div', { className: 'card-cover-container' },
               h('div', {
-                className: 'focal-point-marker',
-                style: { left: focalX, top: focalY }
-              }),
-              h('span', { className: 'drag-hint' }, '✢ 拖曳焦點 (X:' + numX + ' Y:' + numY + ')')
+                className: 'card-cover-wrapper',
+                onMouseDown: this.handleMouseDown,
+                onMouseMove: this.handleMouseMove,
+                onMouseUp: this.handleMouseUp,
+                onMouseLeave: this.handleMouseUp,
+                style: { cursor: this.state.isDragging ? 'grabbing' : 'grab' }
+              },
+                h('img', {
+                  src: coverUrl,
+                  style: { 
+                    objectPosition: focalX + ' ' + focalY,
+                    transform: 'scale(' + this.state.zoom + ')', // 使用動態 Zoom
+                    userSelect: 'none',
+                    pointerEvents: 'none'
+                  }
+                }),
+                /* 已移除紅點標記 (.focal-point-marker) */
+                h('span', { className: 'drag-hint' }, '拖曳焦點 (X:' + numX + ' Y:' + numY + ')')
+              ),
+              /* 2. 圖片縮放拉桿工具列 */
+              h('div', { className: 'zoom-control-bar' },
+                h('span', {}, '🔍 縮放:'),
+                h('input', {
+                  type: 'range',
+                  min: '1.0',
+                  max: '3.0',
+                  step: '0.1',
+                  value: this.state.zoom,
+                  onChange: this.handleZoomChange
+                }),
+                h('span', {}, Math.round(this.state.zoom * 100) + '%')
+              )
             );
           }
 
