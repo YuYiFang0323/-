@@ -99,7 +99,7 @@
       display: flex;
       flex-direction: row; /* 關鍵：改為左右橫向 */
       overflow: hidden;
-      height: 350px; /* 卡片舒適高度 */
+      height: 270px; /* 卡片舒適高度 */
     }
     .card:hover {
       transform: translateY(-4px);
@@ -140,14 +140,14 @@
       line-height: 1.4;
       display: -webkit-box;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2; /* 限制顯示的行數，例如 2 行 */
+      -webkit-line-clamp: 1; /* 限制顯示的行數，例如 1 行 */
       overflow: hidden;
     }
     .card .tags-wrapper {
       margin-bottom: 0.8rem;
       display: -webkit-box;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 1;
       overflow: hidden;
     }
     .card .tag {
@@ -168,7 +168,7 @@
       word-break: break-all;
       display: -webkit-box;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 5; /* 限制顯示的行數，例如 5 行 */
+      -webkit-line-clamp: 3; /* 限制顯示的行數，例如 3 行 */
       overflow: hidden;
       text-align: justify;
     }
