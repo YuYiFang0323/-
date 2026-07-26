@@ -24,21 +24,23 @@
     }
     
     /* 3. 【核心修正】左側「封面圖片」區塊：改為標準 CMS 的標籤外框樣式 */
-    .image-field-left-group {
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: center !important;
-      gap: 20px !important;
-      flex-grow: 1 !important;
-      
-      /* 外框樣式：對齊第二張圖 */
-      border-radius: 0 6px 6px 6px !important; /* 左上角直角，其餘圓角 */
-      background-color: #ffffff !important;
-      padding: 24px 20px 16px 20px !important; /* 上方預留空間給標籤 */
-      position: relative !important;
-      box-sizing: border-box !important;
-      margin-top: 24px !important; /* 留出頂部標籤高度 */
+    .css-83wr9v {
+      display: block;
+      width: 100%;
+      padding: 16px 20px;
+      margin: 0px;
+      border: 2px solid rgb(223, 223, 227);
+      border-radius: 0px 5px 5px;
+      outline: 0px;
+      box-shadow: none;
+      background-color: rgb(255, 255, 255);
+      color: rgb(68, 74, 87);
+      transition: border-color 0.2s;
+      position: relative;
+      font-size: 15px;
+      line-height: 1.5;
     }
+    
     
     /* 4. 圖片縮圖外框固定尺寸 */
     div[class*="ImageWrapper"] {
