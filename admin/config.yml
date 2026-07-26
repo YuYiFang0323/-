@@ -33,7 +33,7 @@ collections:
     create: true
     slug: "{{slug}}"
     fields:
-      - { label: "封面圖片", name: "cover", widget: "image", required: false }
+      - { label: "封面圖片 (如果有放連結系統會自動截取影片的封面，也可以自己手動換一個)", name: "cover", widget: "image", required: false }
       - { label: "封面焦點 X軸", name: "focal_x", widget: "string", required: false, default: "50%" }
       - { label: "封面焦點 Y軸", name: "focal_y", widget: "string", required: false, default: "50%" }
       - { label: "作品名稱", name: "title", widget: "string" }
