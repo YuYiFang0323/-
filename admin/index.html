@@ -10,6 +10,49 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
   <script>
+    // -------------------------------------------------------------
+    // 【新增/修改部分】注入編輯表單樣式 (調整「封面圖片」控制項的按鈕位置)
+    // -------------------------------------------------------------
+    CMS.registerStyle(`
+      /* 針對 CMS 圖片上傳/編輯元件容器 */
+      div[class*="ControlContainer"], 
+      div[class*="imageControl"] {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start !important;
+        gap: 16px !important;
+      }
+
+      /* 圖片預覽縮圖容器 */
+      div[class*="ImageWrapper"], 
+      div[class*="imageWrapper"] {
+        margin-bottom: 0 !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* 按鈕群組容器：改為橫向排列並置於圖片右側 */
+      div[class*="ButtonsWrapper"],
+      div[class*="buttonsWrapper"],
+      div[class*="ImageWrapper"] + div,
+      div[class*="imageWrapper"] + div {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 8px !important;
+        margin-top: 0 !important;
+      }
+
+      /* 確保各個按鈕樣式美觀 */
+      div[class*="ButtonsWrapper"] button,
+      div[class*="buttonsWrapper"] button,
+      div[class*="ImageWrapper"] + div button,
+      div[class*="imageWrapper"] + div button {
+        margin: 0 !important;
+        white-space: nowrap !important;
+      }
+    `);
+
     // 1. 注入預覽區通用樣式
     CMS.registerPreviewStyle(`    
       * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -134,7 +177,7 @@
         margin-bottom: 0.4rem;
       }
 
-      /* 1. 摘要簡述左右對齊 (Justify) */
+      /* 摘要簡述左右對齊 (Justify) */
       .card p {
         color: #475569;
         font-size: 0.95rem;
@@ -336,10 +379,9 @@
                     pointerEvents: 'none'
                   }
                 }),
-                /* 已移除紅點標記 (.focal-point-marker) */
                 h('span', { className: 'drag-hint' }, '拖曳焦點 (X:' + numX + ' Y:' + numY + ')')
               ),
-              /* 2. 圖片縮放拉桿工具列 */
+              /* 圖片縮放拉桿工具列 */
               h('div', { className: 'zoom-control-bar' },
                 h('span', {}, '🔍 縮放:'),
                 h('input', {
