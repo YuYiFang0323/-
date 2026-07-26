@@ -10,46 +10,107 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
   <script>
-    // 0. 精準根據 DOM 結構調整左側 CMS 表單樣式
+    // 0. 精準根據 DOM 結構調整左側 CMS 表單樣式與搬移 XY 軸
     function injectCmsLayoutOverride() {
+      // 1. 注入排版 CSS
       const styleId = 'decap-exact-image-layout-fix';
-      if (document.getElementById(styleId)) return;
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.innerHTML = `
+          /* 抓取包含「圖片Wrapper」與「按鈕Div」的最外層容器，改為橫向排列 */
+          div:has(> div[class*="ImageWrapper"]) {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: flex-start !important;
+            gap: 16px !important;
+            flex-wrap: nowrap !important;
+          }
 
-      const style = document.createElement('style');
-      style.id = styleId;
-      style.innerHTML = `
-        /* 1. 抓取包含「圖片Wrapper」與「按鈕Div」的最外層容器，改為橫向排列 */
-        div:has(> div[class*="ImageWrapper"]) {
-          display: flex !important;
-          flex-direction: row !important;
-          align-items: flex-start !important;
-          gap: 16px !important;
-        }
+          /* 限制圖片區塊寬度，防止它撐爆左側 */
+          div[class*="ImageWrapper"] {
+            max-width: 140px !important;
+            flex-shrink: 0 !important;
+            margin-bottom: 0 !important;
+          }
 
-        /* 2. 限制圖片區塊寬度，防止它撐爆左側 */
-        div[class*="ImageWrapper"] {
-          max-width: 180px !important;
-          flex-shrink: 0 !important;
-          margin-bottom: 0 !important;
-        }
+          /* 抓取放按鈕的第二個 Div，改為直向排列放在圖片右邊 */
+          div[class*="ImageWrapper"] + div {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+            align-items: flex-start !important;
+            justify-content: flex-start !important;
+            flex-shrink: 0 !important;
+          }
 
-        /* 3. 抓取放按鈕的第二個 Div，改為直向排列放在圖片右邊 */
-        div[class*="ImageWrapper"] + div {
-          display: flex !important;
-          flex-direction: column !important;
-          gap: 8px !important;
-          align-items: flex-start !important;
-          justify-content: flex-start !important;
-          flex-grow: 1 !important;
-        }
+          /* 微調按鈕本身的邊距與寬度 */
+          div[class*="ImageWrapper"] + div > button {
+            margin: 0 !important;
+            width: fit-content !important;
+            white-space: nowrap !important;
+          }
 
-        /* 4. 微調按鈕本身的邊距與寬度 */
-        div[class*="ImageWrapper"] + div > button {
-          margin: 0 !important;
-          width: fit-content !important;
-        }   
-      `;
-      document.head.appendChild(style);
+          /* 搬移過來的 X/Y 軸欄位卡片樣式 */
+          .moved-focal-box {
+            width: 100px !important;
+            min-width: 90px !important;
+            margin: 0 !important;
+            padding: 8px !important;
+            border: 1px dashed #cbd5e1 !important;
+            border-radius: 6px !important;
+            background: #f8fafc !important;
+            flex-shrink: 0 !important;
+          }
+          .moved-focal-box label,
+          .moved-focal-box [class*="ControlTopbar"],
+          .moved-focal-box span {
+            font-size: 12px !important;
+            white-space: nowrap !important;
+            margin-bottom: 4px !important;
+            padding: 0 !important;
+          }
+          .moved-focal-box input {
+            padding: 4px 8px !important;
+            height: 32px !important;
+            font-size: 14px !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+
+      // 2. 自動尋找並搬移 X軸、Y軸 輸入框至圖片右側
+      try {
+        // 尋找圖片外層容器
+        const imgWrapper = document.querySelector('div[class*="ImageWrapper"]');
+        if (!imgWrapper) return;
+
+        // 圖片的主欄位容器 (包含圖片與按鈕的 Flex 容器)
+        const mainContainer = imgWrapper.closest('div:has(> div[class*="ImageWrapper"])') || imgWrapper.parentElement;
+        if (!mainContainer) return;
+
+        // 搜尋頁面上所有的 ControlContainer 欄位
+        const allContainers = Array.from(document.querySelectorAll('div[class*="ControlContainer"]'));
+
+        allContainers.forEach(container => {
+          // 避開已經搬過的
+          if (container.classList.contains('moved-focal-box')) return;
+
+          const textContent = container.innerText || '';
+          // 判定條件：包含 焦點、focal、X軸、Y軸 等關鍵字
+          if (
+            textContent.includes('焦點') || 
+            textContent.includes('focal') || 
+            textContent.includes('X軸') || 
+            textContent.includes('Y軸')
+          ) {
+            container.classList.add('moved-focal-box');
+            mainContainer.appendChild(container); // 搬移到圖片與按鈕同級的橫向容器中
+          }
+        });
+      } catch (e) {
+        console.warn('搬移焦點欄位時提醒:', e);
+      }
     }
 
     // 啟動監聽，確保 CMS 動態渲染後持續套用
