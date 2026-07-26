@@ -18,24 +18,34 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.innerHTML = `
-          /* 1. 圖片欄位內部的 content 區塊改為橫向 flex 不換行 */
-          div[aria-label="image field"] > div[class*="ControlTopbar"] + div {
+          /* 1. 外層主容器：保持橫向不換行、垂直置中 */
+          div[aria-label="image field"] div.css-83wr9v {
             display: flex !important;
             flex-direction: row !important;
             align-items: center !important;
+            justify-content: flex-start !important;
             gap: 16px !important;
             flex-wrap: nowrap !important;
           }
 
-          /* 2. 限制圖片包裝區塊寬度 (順序 1) */
-          div[class*="ImageWrapper"] {
-            max-width: 140px !important;
+          /* 2. 關鍵修正：圖片 + 按鈕的包裹層 (span)，強制轉為橫向排列！ */
+          div[aria-label="image field"] div.css-83wr9v > span {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 12px !important;
             flex-shrink: 0 !important;
-            margin-bottom: 0 !important;
-            order: 1 !important;
           }
 
-          /* 3. 中間三個按鈕直向排列 (順序 2，緊貼圖片右邊) */
+          /* 3. 限制圖片包裝區塊 */
+          div[class*="ImageWrapper"] {
+            max-width: 130px !important;
+            flex-shrink: 0 !important;
+            margin-bottom: 0 !important;
+          }
+
+          /* 4. 按鈕群組（圖片後面的兄弟元素，通常包含按鈕） */
+          div[class*="ImageWrapper"] ~ div,
           div[class*="ImageWrapper"] + div {
             display: flex !important;
             flex-direction: column !important;
@@ -43,22 +53,15 @@
             align-items: flex-start !important;
             justify-content: center !important;
             flex-shrink: 0 !important;
-            order: 2 !important;
           }
-          div[class*="ImageWrapper"] + div > button {
+
+          div[aria-label="image field"] button {
             margin: 0 !important;
             width: fit-content !important;
             white-space: nowrap !important;
           }
 
-          /* 4. 搬移動進來的 X 軸 (順序 3)、Y 軸 (順序 4) */
-          .moved-focal-x {
-            order: 3 !important;
-          }
-          .moved-focal-y {
-            order: 4 !important;
-          }
-
+          /* 5. 搬移動進來的 X 軸、Y 軸容器 */
           .moved-focal-container {
             width: 110px !important;
             margin: 0 !important;
@@ -89,9 +92,8 @@
         const imageControl = document.querySelector('div[aria-label="image field"]');
         if (!imageControl) return;
 
-        const targetTarget = imageControl.querySelector('div[class*="ImageWrapper"]')?.closest('span')?.parentElement || 
-                             imageControl.querySelector('div[class*="ControlTopbar"] + div');
-
+        // 找到外層放置的主容器 .css-83wr9v
+        const targetTarget = imageControl.querySelector('div.css-83wr9v');
         if (!targetTarget) return;
 
         const allControls = Array.from(document.querySelectorAll('div[class*="ControlContainer"]'));
@@ -101,13 +103,13 @@
           const xControl = allControls[imgIndex + 1];
           const yControl = allControls[imgIndex + 2];
 
-          // 搬移 X 軸欄位並指定順序 class
+          // 搬移 X 軸欄位
           if (xControl && xControl.getAttribute('aria-label') === 'string field' && xControl.parentElement !== targetTarget) {
             xControl.classList.add('moved-focal-container', 'moved-focal-x');
             targetTarget.appendChild(xControl);
           }
 
-          // 搬移 Y 軸欄位並指定順序 class
+          // 搬移 Y 軸欄位
           if (yControl && yControl.getAttribute('aria-label') === 'string field' && yControl.parentElement !== targetTarget) {
             yControl.classList.add('moved-focal-container', 'moved-focal-y');
             targetTarget.appendChild(yControl);
