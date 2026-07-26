@@ -145,6 +145,10 @@
     }
     .card .tags-wrapper {
       margin-bottom: 0.8rem;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
     }
     .card .tag {
       display: inline-block;
@@ -166,6 +170,7 @@
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 5; /* 限制顯示的行數，例如 5 行 */
       overflow: hidden;
+      text-align: justify;
     }
     .card a.btn {
       display: inline-block;
