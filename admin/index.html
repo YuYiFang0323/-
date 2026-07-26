@@ -40,25 +40,7 @@
       box-sizing: border-box !important;
       margin-top: 24px !important; /* 留出頂部標籤高度 */
     }
-
-    /* 【核心修正】完全復刻第二張圖左上角的「灰色標籤」樣式 */
-    .image-field-left-group::before {
-      content: "封面圖片 (選填)" !important;
-      position: absolute !important;
-      top: -25px !important;
-      left: -1px !important;
-      background-color: #e2e8f0 !important; /* 灰底色 */
-      color: #475569 !important;
-      font-size: 13px !important;
-      font-weight: 600 !important;
-      padding: 3px 10px !important;
-      border-radius: 4px 4px 0 0 !important; /* 上方圓角，下方直角 */
-      line-height: 1.4 !important;
-      z-index: 5 !important;
-      border: 1px solid #cbd5e1 !important;
-      border-bottom: none !important;
-    }
-
+    
     /* 4. 圖片縮圖外框固定尺寸 */
     div[class*="ImageWrapper"] {
       width: 120px !important;
