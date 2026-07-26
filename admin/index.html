@@ -10,49 +10,6 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
   <script>
-    // -------------------------------------------------------------
-    // 【新增/修改部分】注入編輯表單樣式 (調整「封面圖片」控制項的按鈕位置)
-    // -------------------------------------------------------------
-    CMS.registerStyle(`
-      /* 針對 CMS 圖片上傳/編輯元件容器 */
-      div[class*="ControlContainer"], 
-      div[class*="imageControl"] {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: flex-start !important;
-        gap: 16px !important;
-      }
-
-      /* 圖片預覽縮圖容器 */
-      div[class*="ImageWrapper"], 
-      div[class*="imageWrapper"] {
-        margin-bottom: 0 !important;
-        flex-shrink: 0 !important;
-      }
-
-      /* 按鈕群組容器：改為橫向排列並置於圖片右側 */
-      div[class*="ButtonsWrapper"],
-      div[class*="buttonsWrapper"],
-      div[class*="ImageWrapper"] + div,
-      div[class*="imageWrapper"] + div {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: wrap !important;
-        align-items: center !important;
-        gap: 8px !important;
-        margin-top: 0 !important;
-      }
-
-      /* 確保各個按鈕樣式美觀 */
-      div[class*="ButtonsWrapper"] button,
-      div[class*="buttonsWrapper"] button,
-      div[class*="ImageWrapper"] + div button,
-      div[class*="imageWrapper"] + div button {
-        margin: 0 !important;
-        white-space: nowrap !important;
-      }
-    `);
-
     // 1. 注入預覽區通用樣式
     CMS.registerPreviewStyle(`    
       * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -78,23 +35,29 @@
         min-height: 220px;
       }
 
-      /* 左側封面圖片區塊 */
+      /* 左側封面圖片與工具整合區塊 */
       .card-cover-container {
-        width: 38%;
-        min-width: 260px;
+        width: 45%;
+        min-width: 300px;
         flex-shrink: 0;
         display: flex;
-        flex-direction: column;
+        flex-direction: row; /* 改為橫向排列：左圖片、右控制區 */
         background-color: #f1f5f9;
         border-right: 1px solid #e2e8f0;
+        align-items: center;
+        padding: 10px;
+        gap: 12px;
       }
 
+      /* 圖片預覽縮圖容器 */
       .card-cover-wrapper {
         position: relative;
-        width: 100%;
-        flex-grow: 1;
-        min-height: 200px;
+        width: 140px;
+        height: 140px;
+        flex-shrink: 0;
         overflow: hidden;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
         cursor: grab;
         user-select: none;
       }
@@ -111,30 +74,39 @@
       /* 拖曳提示標籤 */
       .drag-hint {
         position: absolute;
-        top: 8px;
-        right: 8px;
+        bottom: 4px;
+        right: 4px;
         background: rgba(0,0,0,0.65);
         color: white;
-        padding: 3px 8px;
+        padding: 2px 6px;
         border-radius: 4px;
-        font-size: 11px;
+        font-size: 10px;
         pointer-events: none;
         z-index: 10;
       }
 
-      /* 縮放控制拉桿工具列 */
+      /* 右側工具控制區 (放在圖片右邊) */
+      .controls-right-box {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex-grow: 1;
+      }
+
+      /* 縮放控制拉桿 */
       .zoom-control-bar {
         background: #ffffff;
-        padding: 6px 12px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
         display: flex;
-        align-items: center;
-        gap: 8px;
-        border-top: 1px solid #e2e8f0;
+        flex-direction: column;
+        gap: 4px;
         font-size: 12px;
         color: #64748b;
       }
       .zoom-control-bar input[type="range"] {
-        flex-grow: 1;
+        width: 100%;
         height: 4px;
         accent-color: #3b82f6;
         cursor: pointer;
@@ -147,7 +119,7 @@
         flex-direction: column;
         justify-content: space-between;
         flex-grow: 1;
-        width: 62%;
+        width: 55%;
       }
       .card h3 {
         font-size: 1.3rem;
@@ -184,8 +156,8 @@
         margin-bottom: 1.2rem;
         white-space: pre-line;
         word-break: break-word;
-        text-align: justify;       /* 左右對齊 */
-        text-justify: inter-word;  /* 文字間距調整 */
+        text-align: justify;
+        text-justify: inter-word;
       }
 
       .card a.btn {
@@ -358,7 +330,7 @@
             if (ytId) coverUrl = 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg';
           }
 
-          // 建立封面圖片 Element (含圖片 + 縮放拉桿)
+          // 建立封面圖片 Element (圖片在左、操作列在右)
           var coverElement = null;
           if (coverUrl) {
             coverElement = h('div', { className: 'card-cover-container' },
@@ -374,25 +346,26 @@
                   src: coverUrl,
                   style: { 
                     objectPosition: focalX + ' ' + focalY,
-                    transform: 'scale(' + this.state.zoom + ')', // 使用動態 Zoom
+                    transform: 'scale(' + this.state.zoom + ')',
                     userSelect: 'none',
                     pointerEvents: 'none'
                   }
                 }),
-                h('span', { className: 'drag-hint' }, '拖曳焦點 (X:' + numX + ' Y:' + numY + ')')
+                h('span', { className: 'drag-hint' }, X: + numX + ' Y:' + numY)
               ),
-              /* 圖片縮放拉桿工具列 */
-              h('div', { className: 'zoom-control-bar' },
-                h('span', {}, '🔍 縮放:'),
-                h('input', {
-                  type: 'range',
-                  min: '1.0',
-                  max: '3.0',
-                  step: '0.1',
-                  value: this.state.zoom,
-                  onChange: this.handleZoomChange
-                }),
-                h('span', {}, Math.round(this.state.zoom * 100) + '%')
+              /* 排在圖片右側的控制區塊 */
+              h('div', { className: 'controls-right-box' },
+                h('div', { className: 'zoom-control-bar' },
+                  h('span', {}, '🔍 縮放 (' + Math.round(this.state.zoom * 100) + '%)'),
+                  h('input', {
+                    type: 'range',
+                    min: '1.0',
+                    max: '3.0',
+                    step: '0.1',
+                    value: this.state.zoom,
+                    onChange: this.handleZoomChange
+                  })
+                )
               )
             );
           }
