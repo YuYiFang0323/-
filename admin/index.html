@@ -10,58 +10,49 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
   <script>
-    // 0. 強制注入樣式至最上層與 CMS 主要影陰 / 容器
+    // 0. 精準根據 DOM 結構調整左側 CMS 表單樣式
     function injectCmsLayoutOverride() {
-      const styleId = 'decap-image-layout-fix';
+      const styleId = 'decap-exact-image-layout-fix';
       if (document.getElementById(styleId)) return;
 
       const style = document.createElement('style');
       style.id = styleId;
       style.innerHTML = `
-        /* 抓取圖片預覽框的父級容器，改為橫向排列 */
-        div[class*="ControlContainer"] > div > div,
-        div[class*="WidgetFolder"] > div,
-        div[data-slate-editor="false"] {
+        /* 1. 抓取包含「圖片Wrapper」與「按鈕Div」的最外層容器，改為橫向排列 */
+        div:has(> div[class*="ImageWrapper"]) {
           display: flex !important;
           flex-direction: row !important;
           align-items: flex-start !important;
           gap: 16px !important;
         }
 
-        /* 針對包含「圖片預覽」與「按鈕群組」的直接父元素 */
-        div:has(> button):has(> div img),
-        div:has(> button):has(> img) {
-          display: flex !important;
-          flex-direction: row !important;
-          align-items: flex-start !important;
-          gap: 16px !important;
-        }
-
-        /* 限制縮圖區域寬度，避免縮圖把區域擠爆 */
-        div:has(> button) > div:first-child,
-        div:has(> button) > img {
+        /* 2. 限制圖片區塊寬度，防止它撐爆左側 */
+        div[class*="ImageWrapper"] {
           max-width: 180px !important;
           flex-shrink: 0 !important;
+          margin-bottom: 0 !important;
         }
 
-        /* 把所有操作按鈕放到右側，變為縱向排列 */
-        div:has(> button) > button,
-        div:has(> button) > div:has(> button) {
+        /* 3. 抓取放按鈕的第二個 Div，改為直向排列放在圖片右邊 */
+        div[class*="ImageWrapper"] + div {
           display: flex !important;
           flex-direction: column !important;
           gap: 8px !important;
           align-items: flex-start !important;
+          justify-content: flex-start !important;
+          flex-grow: 1 !important;
         }
 
-        /* 萬用備用：抓取左側表單中所有連續出現 button 的區域強制作 flex 靠右 */
-        label + div button {
-          margin-top: 0 !important;
+        /* 4. 微調按鈕本身的邊距與寬度 */
+        div[class*="ImageWrapper"] + div > button {
+          margin: 0 !important;
+          width: fit-content !important;
         }
       `;
       document.head.appendChild(style);
     }
 
-    // 啟動監聽，確保 CMS 完全渲染後持續套用樣式
+    // 啟動監聽，確保 CMS 動態渲染後持續套用
     injectCmsLayoutOverride();
     const observer = new MutationObserver(injectCmsLayoutOverride);
     observer.observe(document.body, { childList: true, subtree: true });
