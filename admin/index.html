@@ -6,7 +6,7 @@
   <title>後台內容管理系統</title>
   
   <style>
-    /* 1. 外層容器：改為橫向排列，左側為灰框，右側為 X/Y 軸 */
+    /* 1. 外層容器：改為橫向排列（左邊是圖片灰框，右邊是 X/Y 軸） */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) {
       display: flex !important;
       flex-direction: row !important;
@@ -19,7 +19,7 @@
       position: relative !important;
     }
 
-    /* 2. 標題列 (封面圖片 選填) 獨立置頂 */
+    /* 2. 主標籤「封面圖片 (選填)」定位至頂端 */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div[class*="ControlTopbar"] {
       position: absolute !important;
       top: -28px !important;
@@ -28,7 +28,7 @@
       background: transparent !important;
     }
 
-    /* 3. 左側內容區塊：只包住「圖片」與「三個按鈕」的灰色外框 */
+    /* 3. 左側灰色外框：僅包裹「圖片 + 按鈕」 */
     .custom-image-widget-area {
       display: flex !important;
       flex-direction: row !important;
@@ -61,7 +61,7 @@
       object-fit: cover !important;
     }
 
-    /* 5. 圖片右側的三個按鈕：強迫上下垂直排列 */
+    /* 5. 圖片右側的三個按鈕：上下垂直排列 */
     div[class*="ImageWrapper"] + div {
       display: flex !important;
       flex-direction: column !important;
@@ -88,7 +88,7 @@
       flex-shrink: 0 !important;
     }
 
-    /* 7. 被搬出來的 X 軸與 Y 軸樣式微調 */
+    /* 7. 搬移後的 X 軸與 Y 軸獨立區塊 */
     .moved-focal-box {
       width: 140px !important;
       min-width: 140px !important;
@@ -107,7 +107,7 @@
   <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
   <script>
-    // 自動調整結構：圖片與按鈕放在左側灰框，X/Y 軸獨立放在灰框右側
+    // 自動搬移與重新配置：讓灰框只包裹圖片和按鈕，X/Y 軸獨立在右側外圍
     function fixFocalLayout() {
       try {
         const imgWrapper = document.querySelector('div[class*="ImageWrapper"]');
@@ -117,19 +117,19 @@
         const mainContainer = imgWrapper.closest('div[class*="-ControlContainer"]');
         if (!mainContainer) return;
 
-        // 區分出標題列與內容區塊
+        // 區分出「內容區塊」
         const topBar = mainContainer.querySelector('div[class*="ControlTopbar"]');
         if (!topBar) return;
         
         const innerContainer = topBar.nextElementSibling;
         if (!innerContainer) return;
 
-        // 將圖片與按鈕所在的區域加上 class 以套用左側灰框 CSS
+        // 替內容區塊加上 custom class，使其成為獨立的小灰框
         if (!innerContainer.classList.contains('custom-image-widget-area')) {
           innerContainer.classList.add('custom-image-widget-area');
         }
 
-        // 在最外層主容器內建立右側獨立的 X/Y 軸容器（灰框之外）
+        // 在最外層建立獨立於灰框之外的 X/Y 軸容器
         let xyWrapper = mainContainer.querySelector('.xy-vertical-wrapper');
         if (!xyWrapper) {
           xyWrapper = document.createElement('div');
@@ -137,7 +137,7 @@
           mainContainer.appendChild(xyWrapper);
         }
 
-        // 搜尋 DOM 中的 X軸 與 Y軸 欄位
+        // 搜尋 DOM 中的 X軸 與 Y軸
         const allContainers = Array.from(document.querySelectorAll('div[class*="ControlContainer"]'));
         let xBox = null;
         let yBox = null;
@@ -149,7 +149,7 @@
           if (text.includes('Y軸')) yBox = container;
         });
 
-        // 將 X/Y 軸搬移至獨立容器內（灰框右側之外）
+        // 將 X/Y 軸搬移至獨立容器內（非灰框內）
         if (xBox && xBox.parentElement !== xyWrapper) {
           xBox.classList.add('moved-focal-box');
           xyWrapper.appendChild(xBox);
@@ -165,7 +165,7 @@
           xyWrapper.appendChild(yBox);
         }
       } catch (e) {
-        // 防止 React 動態渲染干擾
+        // 防止 React 動態渲染時的干擾
       }
     }
 
