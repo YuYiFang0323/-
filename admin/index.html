@@ -6,7 +6,7 @@
   <title>後台內容管理系統</title>
   
   <style>
-    /* 1. 主容器：保持橫向 flex，但還原內外距，避免外層形成額外的大外框 */
+    /* 1. 最外層主容器：取消外框，改為純橫向排列 */
     div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) {
       display: flex !important;
       flex-direction: row !important;
@@ -15,48 +15,52 @@
       gap: 16px !important;
       width: 100% !important;
       padding: 0 !important;
-      margin-bottom: 16px !important;
-      box-sizing: border-box !important;
+      margin-bottom: 20px !important;
       border: none !important;
       background: transparent !important;
       box-shadow: none !important;
     }
 
-    /* 2. 重設左側大灰框：完美還原為綠色框（標準 Decap 欄位框）的外觀 */
+    /* 2. 隱藏原生的頂層 ControlTopbar（避免標題重複出現） */
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > div[class*="ControlTopbar"],
+    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) > label {
+      display: none !important;
+    }
+
+    /* 3. 【核心修正】將左側包著「圖片+按鈕」的區塊，改成跟一般 CMS 輸入框（綠框）一模一樣的樣式 */
     .image-field-left-group {
-      display: flex !important;
-      flex-direction: column !important;
-      flex-grow: 1 !important;
-      padding: 12px 16px !important;
-      border: 1px solid #e2e8f0 !important;
-      border-radius: 8px !important;
-      background-color: #ffffff !important;
-      box-sizing: border-box !important;
-    }
-
-    /* 3. 還原標題「封面圖片 (選填)」：跟綠色框一樣放在框內左上方 */
-    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) label,
-    div[class*="-ControlContainer"]:has(div[class*="ImageWrapper"]) div[class*="ControlTopbar"] {
-      position: static !important;
-      display: block !important;
-      font-size: 13px !important;
-      font-weight: 600 !important;
-      color: #475569 !important;
-      margin-bottom: 12px !important;
-      padding: 0 !important;
-      background: transparent !important;
-    }
-
-    /* 4. 灰框內部的內容區（圖片 + 按鈕）：橫向排列 */
-    .image-field-inner-content {
       display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
-      gap: 16px !important;
-      width: 100% !important;
+      gap: 20px !important;
+      flex-grow: 1 !important;
+      
+      /* 標準 CMS 欄位外框樣式 */
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 8px !important;
+      background-color: #ffffff !important;
+      padding: 16px 20px !important;
+      position: relative !important;
+      box-sizing: border-box !important;
     }
 
-    /* 5. 圖片縮圖外框 */
+    /* 在左側外框左上方加上標準的灰底「封面圖片 (選填)」標題標籤 */
+    .image-field-left-group::before {
+      content: "封面圖片 (選填)" !important;
+      position: absolute !important;
+      top: -12px !important;
+      left: 12px !important;
+      background-color: #f1f5f9 !important;
+      color: #475569 !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      padding: 2px 8px !important;
+      border-radius: 4px !important;
+      line-height: 1.2 !important;
+      z-index: 5 !important;
+    }
+
+    /* 4. 圖片縮圖外框 */
     div[class*="ImageWrapper"] {
       width: 120px !important;
       min-width: 120px !important;
@@ -74,7 +78,7 @@
       object-fit: cover !important;
     }
 
-    /* 6. 圖片右側按鈕組 */
+    /* 5. 圖片右側的按鈕容器 */
     .moved-btn-group {
       display: flex !important;
       flex-direction: column !important;
@@ -84,20 +88,20 @@
       margin: 0 !important;
       padding: 0 !important;
       border: none !important;
-      background: transparent !important;
+      width: auto !important;
     }
 
     .moved-btn-group button,
     .moved-btn-group a,
     .moved-btn-group span {
       margin: 0 !important;
-      width: 160px !important;
+      width: 150px !important;
       white-space: nowrap !important;
       display: inline-block !important;
       text-align: center !important;
     }
 
-    /* 7. 右側 X/Y 軸容器（標準欄位外框樣式） */
+    /* 6. 右側 X/Y 軸容器（標準外框與垂直上下堆疊） */
     .focal-inputs-column {
       display: flex !important;
       flex-direction: column !important;
@@ -111,11 +115,12 @@
       width: 150px !important;
       min-width: 150px !important;
       margin: 0 !important;
-      padding: 12px 16px !important;
+      padding: 12px 14px !important;
       border: 1px solid #e2e8f0 !important;
       border-radius: 8px !important;
       background-color: #ffffff !important;
       box-sizing: border-box !important;
+      position: relative !important;
     }
 
     .moved-focal-box [class*="ControlTopbar"],
@@ -132,8 +137,8 @@
     .moved-focal-box input {
       display: block !important;
       width: 100% !important;
-      height: 36px !important;
-      padding: 4px 8px !important;
+      height: 34px !important;
+      padding: 2px 8px !important;
       font-size: 13px !important;
       border: 1px solid #cbd5e1 !important;
       border-radius: 4px !important;
@@ -155,34 +160,22 @@
         const mainContainer = imgWrapper.closest('div[class*="-ControlContainer"]');
         if (!mainContainer) return;
 
-        // 1. 設定左側包裝框（圖片+標題+按鈕）樣式
+        // 1. 強制讓左邊大灰框成為獨立的欄位外框
         const outerBox = imgWrapper.parentElement;
-        if (outerBox && outerBox !== mainContainer) {
-          if (!outerBox.classList.contains('image-field-left-group')) {
-            outerBox.classList.add('image-field-left-group');
-          }
+        if (outerBox && !outerBox.classList.contains('image-field-left-group')) {
+          outerBox.classList.add('image-field-left-group');
+        }
 
-          // 建立內部 圖片+按鈕 專用的橫向列容器
-          let innerContent = outerBox.querySelector('.image-field-inner-content');
-          if (!innerContent) {
-            innerContent = document.createElement('div');
-            innerContent.className = 'image-field-inner-content';
-            outerBox.appendChild(innerContent);
-          }
-
-          // 將圖片與按鈕放入內層容器中
-          if (imgWrapper.parentElement !== innerContent) {
-            innerContent.appendChild(imgWrapper);
-          }
-
-          const btnGroup = imgWrapper.nextElementSibling || outerBox.querySelector('div:not(.image-field-inner-content):not([class*="ImageWrapper"])');
-          if (btnGroup && btnGroup !== innerContent) {
-            btnGroup.classList.add('moved-btn-group');
-            innerContent.appendChild(btnGroup);
+        // 2. 尋找按鈕組並搬移到圖片右手邊
+        const btnGroup = imgWrapper.nextElementSibling;
+        if (btnGroup && !btnGroup.classList.contains('moved-btn-group')) {
+          btnGroup.classList.add('moved-btn-group');
+          if (imgWrapper.parentElement) {
+            imgWrapper.parentElement.appendChild(btnGroup);
           }
         }
 
-        // 2. 建立右側垂直堆疊專用的 Column 容器
+        // 3. 建立右側垂直堆疊專用的 Column 容器
         let rightColumn = mainContainer.querySelector('.focal-inputs-column');
         if (!rightColumn) {
           rightColumn = document.createElement('div');
@@ -190,7 +183,7 @@
           mainContainer.appendChild(rightColumn);
         }
 
-        // 3. 尋找 X 軸與 Y 軸並移入右側 Column
+        // 4. 尋找 X 軸與 Y 軸並移入右側 Column
         const allContainers = Array.from(document.querySelectorAll('div[class*="ControlContainer"]'));
         let xBox = null;
         let yBox = null;
