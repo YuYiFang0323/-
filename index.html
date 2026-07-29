@@ -68,9 +68,8 @@
       text-align: center;
       padding: 3rem 1.5rem;
       
-      /* 修改處：使用放在 assets/uploads/ 的 GIF 檔作為背景 */
       background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), 
-                  url('https://raw.githubusercontent.com/YuYiFang0323/MyWeb/main/assets/uploads/海綿寶寶.gif') center/cover no-repeat;
+                  url('https://raw.githubusercontent.com/YuYiFang0323/MyWeb/main/assets/uploads/您的檔名.gif') center/cover no-repeat;
       
       position: relative;
     }
@@ -155,7 +154,7 @@
       60% { transform: translate(-50%, -5px); }
     }
 
-    /* 主要內容區域：改為 952px 寬度 */
+    /* 主要內容區域：952px 寬度 */
     .container {
       max-width: 952px;
       margin: 0 auto;
@@ -203,13 +202,37 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       transition: transform 0.2s, box-shadow 0.2s;
       display: flex;
-      flex-direction: row; /* 關鍵：改為左右橫向 */
+      flex-direction: row; /* 左右橫向 */
       overflow: hidden;
       height: 270px; /* 卡片舒適高度 */
+      position: relative; /* 供右上角「更多內容」按鈕定位 */
     }
     .card:hover {
       transform: translateY(-4px);
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 置於第一張卡片右上角的「更多內容」按鈕 */
+    .btn-more-card {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.2rem;
+      z-index: 10;
+      color: #3b82f6;
+      border: 1px solid #3b82f6;
+      background-color: #ffffff;
+      padding: 0.35rem 0.85rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    .btn-more-card:hover {
+      background-color: #3b82f6;
+      color: #ffffff;
+      transform: translateY(-1px);
     }
 
     /* 左側封面圖片區塊 (佔約 38% 寬度) */
@@ -244,9 +267,10 @@
       color: #0f172a;
       margin-bottom: 0.8rem;
       line-height: 1.4;
+      padding-right: 5rem; /* 留出右上角按鈕空間，防止標題重疊 */
       display: -webkit-box;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 1; /* 限制顯示的行數，例如 1 行 */
+      -webkit-line-clamp: 1; /* 限制顯示 1 行 */
       overflow: hidden;
     }
     .card .tags-wrapper {
@@ -274,7 +298,7 @@
       word-break: break-all;
       display: -webkit-box;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 3; /* 限制顯示的行數，例如 3 行 */
+      -webkit-line-clamp: 3; /* 限制顯示 3 行 */
       overflow: hidden;
       text-align: justify;
     }
@@ -360,7 +384,7 @@
       font-size: 0.85rem;
     }
 
-    /* 手機版 (寬度 < 640px) 自動轉回豎向，確保不會壓縮 */
+    /* 手機版 (寬度 < 640px) 自動轉回豎向，確保內容不擠壓 */
     @media (max-width: 640px) {
       .hero-title { font-size: 2rem; }
       .hero-subtitle { font-size: 1.15rem; }
@@ -375,6 +399,13 @@
       }
       .card-body {
         width: 100%;
+      }
+      .card h3 {
+        padding-right: 0;
+      }
+      .btn-more-card {
+        top: 0.8rem;
+        right: 0.8rem;
       }
       .footer-container {
         flex-direction: column;
@@ -551,11 +582,13 @@
         }
 
         container.innerHTML = '';
-        for (const file of mdFiles) {
+        for (let i = 0; i < mdFiles.length; i++) {
+          const file = mdFiles[i];
           const rawRes = await fetch(file.download_url + '?t=' + new Date().getTime());
           const text = await rawRes.text();
           const data = parseFrontMatter(text);
-          container.innerHTML += renderFn(data);
+          const isFirst = (i === 0); // 判斷是否為該分類的第一張卡片
+          container.innerHTML += renderFn(data, isFirst);
         }
       } catch (err) {
         console.warn(`[${folder}] 讀取狀態:`, err);
@@ -573,7 +606,7 @@
       }
     }
 
-    function renderResearch(data) {
+    function renderResearch(data, isFirst) {
       const tags = data.tags ? data.tags.split(/[,;]/).map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
       const hasLink = isValidUrl(data.link);
       
@@ -585,8 +618,11 @@
         ? `<div class="card-cover-wrapper"><img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.parentElement.style.display='none'"></div>` 
         : '';
 
+      const moreBtnHtml = isFirst ? `<a href="#research" class="btn-more-card">更多內容</a>` : '';
+
       return `
         <div class="card">
+          ${moreBtnHtml}
           ${coverHtml}
           <div class="card-body">
             <div>
@@ -600,7 +636,7 @@
       `;
     }
 
-    function renderVideo(data) {
+    function renderVideo(data, isFirst) {
       const focalX = formatFocal(data.focal_x);
       const focalY = formatFocal(data.focal_y);
       let coverUrl = getImageUrl(data.cover);
@@ -614,8 +650,11 @@
         ? `<div class="card-cover-wrapper"><img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.parentElement.style.display='none'"></div>` 
         : '';
 
+      const moreBtnHtml = isFirst ? `<a href="#videos" class="btn-more-card">更多內容</a>` : '';
+
       return `
         <div class="card">
+          ${moreBtnHtml}
           ${coverHtml}
           <div class="card-body">
             <div>
@@ -628,7 +667,7 @@
       `;
     }
 
-    function renderProject(data) {
+    function renderProject(data, isFirst) {
       const focalX = formatFocal(data.focal_x);
       const focalY = formatFocal(data.focal_y);
       const coverUrl = getImageUrl(data.cover);
@@ -636,8 +675,11 @@
         ? `<div class="card-cover-wrapper"><img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.parentElement.style.display='none'"></div>` 
         : '';
 
+      const moreBtnHtml = isFirst ? `<a href="#plans" class="btn-more-card">更多內容</a>` : '';
+
       return `
         <div class="card">
+          ${moreBtnHtml}
           ${coverHtml}
           <div class="card-body">
             <div>
@@ -653,7 +695,7 @@
       `;
     }
 
-    function renderCompetition(data) {
+    function renderCompetition(data, isFirst) {
       const focalX = formatFocal(data.focal_x);
       const focalY = formatFocal(data.focal_y);
       const coverUrl = getImageUrl(data.cover);
@@ -661,8 +703,11 @@
         ? `<div class="card-cover-wrapper"><img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.parentElement.style.display='none'"></div>` 
         : '';
 
+      const moreBtnHtml = isFirst ? `<a href="#competitions" class="btn-more-card">更多內容</a>` : '';
+
       return `
         <div class="card">
+          ${moreBtnHtml}
           ${coverHtml}
           <div class="card-body">
             <div>
