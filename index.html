@@ -6,9 +6,7 @@
   <title>個人作品集 Portfolio</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html {
-      scroll-behavior: smooth; /* 平滑滾動 */
-    }
+    html { scroll-behavior: smooth; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       line-height: 1.6;
@@ -30,7 +28,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     nav {
-      max-width: 952px; /* 寬度對齊 952px */
+      max-width: 952px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
@@ -54,99 +52,41 @@
       font-weight: 500;
       transition: color 0.2s;
     }
-    .nav-links a:hover {
-      color: #3b82f6;
-    }
+    .nav-links a:hover { color: #3b82f6; }
 
-    /* === 全螢幕自我介紹區塊 (Hero Section) === */
+    /* 全螢幕自我介紹區塊 (Hero Section) */
     .hero {
-      min-height: calc(100vh - 65px); /* 扣除 Header 高度達到滿版 */
+      min-height: calc(100vh - 65px);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       text-align: center;
       padding: 3rem 1.5rem;
-      
       background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), 
                   url('https://raw.githubusercontent.com/YuYiFang0323/MyWeb/main/assets/uploads/您的檔名.gif') center/cover no-repeat;
-      
       position: relative;
     }
-    .hero-content {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    .hero-title {
-      font-size: 2.8rem;
-      font-weight: 800;
-      color: #0f172a;
-      margin-bottom: 1rem;
-      line-height: 1.2;
-    }
-    .hero-subtitle {
-      font-size: 1.35rem;
-      color: #3b82f6;
-      font-weight: 600;
-      margin-bottom: 1.2rem;
-    }
-    .hero-description {
-      font-size: 1.1rem;
-      color: #475569;
-      line-height: 1.8;
-      margin-bottom: 2rem;
-      text-align: justify;
-      text-justify: inter-ideograph;
-    }
-    .hero-btns {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
+    .hero-content { max-width: 800px; margin: 0 auto; }
+    .hero-title { font-size: 2.8rem; font-weight: 800; color: #0f172a; margin-bottom: 1rem; line-height: 1.2; }
+    .hero-subtitle { font-size: 1.35rem; color: #3b82f6; font-weight: 600; margin-bottom: 1.2rem; }
+    .hero-description { font-size: 1.1rem; color: #475569; line-height: 1.8; margin-bottom: 2rem; text-align: justify; }
+    .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
     .btn-primary {
-      background: #3b82f6;
-      color: #ffffff;
-      padding: 0.8rem 1.8rem;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: background 0.2s, transform 0.2s;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+      background: #3b82f6; color: #ffffff; padding: 0.8rem 1.8rem; border-radius: 8px; text-decoration: none; font-weight: 600;
+      transition: background 0.2s, transform 0.2s; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
     }
-    .btn-primary:hover {
-      background: #2563eb;
-      transform: translateY(-2px);
-    }
+    .btn-primary:hover { background: #2563eb; transform: translateY(-2px); }
     .btn-secondary {
-      background: #ffffff;
-      color: #334155;
-      border: 1px solid #cbd5e1;
-      padding: 0.8rem 1.8rem;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
+      background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 0.8rem 1.8rem; border-radius: 8px; text-decoration: none; font-weight: 600;
       transition: all 0.2s;
     }
-    .btn-secondary:hover {
-      background: #f8fafc;
-      border-color: #94a3b8;
-      transform: translateY(-2px);
-    }
-    /* 向下滾動指標動畫 */
+    .btn-secondary:hover { background: #f8fafc; border-color: #94a3b8; transform: translateY(-2px); }
+
     .scroll-indicator {
-      position: absolute;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      color: #94a3b8;
-      font-size: 0.85rem;
-      text-decoration: none;
-      animation: bounce 2s infinite;
+      position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      color: #94a3b8; font-size: 0.85rem; text-decoration: none; animation: bounce 2s infinite;
     }
     @keyframes bounce {
       0%, 20%, 50%, 80%, 100% { transform: translate(-50%, 0); }
@@ -154,7 +94,7 @@
       60% { transform: translate(-50%, -5px); }
     }
 
-    /* 主要內容區域：952px 寬度 */
+    /* 主要內容區域 */
     .container {
       max-width: 952px;
       margin: 0 auto;
@@ -162,10 +102,9 @@
       flex: 1;
     }
 
-    /* === 各區塊頂部 Header 排版（置右按鈕關鍵設定） === */
     section {
       margin-bottom: 4rem;
-      scroll-margin-top: 80px; /* 避免標題被固定導覽列遮擋 */
+      scroll-margin-top: 80px;
     }
 
     .section-header {
@@ -193,7 +132,7 @@
       border-radius: 2px;
     }
 
-    /* 綠色框框位置：置右的「更多內容」按鈕 */
+    /* 右上角「更多內容」按鈕 */
     .btn-section-more {
       position: absolute;
       right: 0;
@@ -210,14 +149,35 @@
       transition: all 0.2s ease;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
     }
-
     .btn-section-more:hover {
       background-color: #3b82f6;
       color: #ffffff;
       transform: translateY(-50%) translateY(-1px);
     }
 
-    /* 橫向卡片容器（單欄） */
+    /* 返回首頁按鈕（分類專屬頁面時顯示） */
+    .btn-back-home {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      background-color: #ffffff;
+      padding: 0.35rem 0.85rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: none;
+    }
+    .btn-back-home:hover {
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+
+    /* 卡片清單 */
     .grid {
       display: flex;
       flex-direction: column;
@@ -226,7 +186,7 @@
       text-align: left;
     }
 
-    /* 橫向長方形卡片 */
+    /* 卡片樣式 */
     .card {
       background: #ffffff;
       border-radius: 12px;
@@ -234,16 +194,15 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       transition: transform 0.2s, box-shadow 0.2s;
       display: flex;
-      flex-direction: row; /* 左右橫向 */
+      flex-direction: row;
       overflow: hidden;
-      height: 270px; /* 卡片舒適高度 */
+      height: 270px;
     }
     .card:hover {
       transform: translateY(-4px);
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
 
-    /* 左側封面圖片區塊 (佔約 38% 寬度) */
     .card-cover-wrapper {
       width: 38%;
       min-width: 260px;
@@ -260,7 +219,6 @@
       display: block;
     }
 
-    /* 右側內容區塊 */
     .card-body {
       padding: 1.5rem 1.8rem;
       display: flex;
@@ -277,7 +235,7 @@
       line-height: 1.4;
       display: -webkit-box;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 1; /* 限制顯示 1 行 */
+      -webkit-line-clamp: 1;
       overflow: hidden;
     }
     .card .tags-wrapper {
@@ -305,13 +263,13 @@
       word-break: break-all;
       display: -webkit-box;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 3; /* 限制顯示 3 行 */
+      -webkit-line-clamp: 3;
       overflow: hidden;
       text-align: justify;
     }
     .card a.btn {
       display: inline-block;
-      align-self: flex-start; /* 按鈕靠左下 */
+      align-self: flex-start;
       background: #3b82f6;
       color: #ffffff;
       padding: 0.5rem 1.2rem;
@@ -322,9 +280,7 @@
       transition: background 0.2s;
       margin-top: auto;
     }
-    .card a.btn:hover {
-      background: #2563eb;
-    }
+    .card a.btn:hover { background: #2563eb; }
 
     .empty-msg {
       text-align: center;
@@ -333,7 +289,7 @@
       padding: 2rem 0;
     }
 
-    /* 頁尾 Contact 區塊樣式 */
+    /* 頁尾 */
     footer {
       background: #1e293b;
       color: #f8fafc;
@@ -348,76 +304,29 @@
       justify-content: space-between;
       gap: 2rem;
     }
-    .footer-info h3 {
-      font-size: 1.4rem;
-      margin-bottom: 0.8rem;
-      color: #ffffff;
-    }
-    .footer-info p {
-      color: #94a3b8;
-      font-size: 0.95rem;
-      max-width: 400px;
-      line-height: 1.6;
-    }
-    .footer-contact {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-    .footer-contact h4 {
-      font-size: 1.1rem;
-      margin-bottom: 0.4rem;
-      color: #ffffff;
-    }
+    .footer-info h3 { font-size: 1.4rem; margin-bottom: 0.8rem; color: #ffffff; }
+    .footer-info p { color: #94a3b8; font-size: 0.95rem; max-width: 400px; line-height: 1.6; }
+    .footer-contact { display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-contact h4 { font-size: 1.1rem; margin-bottom: 0.4rem; color: #ffffff; }
     .footer-contact a {
-      color: #cbd5e1;
-      text-decoration: none;
-      font-size: 0.95rem;
-      transition: color 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      color: #cbd5e1; text-decoration: none; font-size: 0.95rem; transition: color 0.2s; display: flex; align-items: center; gap: 0.5rem;
     }
-    .footer-contact a:hover {
-      color: #60a5fa;
-    }
+    .footer-contact a:hover { color: #60a5fa; }
     .footer-bottom {
-      max-width: 952px;
-      margin: 2.5rem auto 0 auto;
-      padding-top: 1.5rem;
-      border-top: 1px solid #334155;
-      text-align: center;
-      color: #64748b;
-      font-size: 0.85rem;
+      max-width: 952px; margin: 2.5rem auto 0 auto; padding-top: 1.5rem; border-top: 1px solid #334155; text-align: center; color: #64748b; font-size: 0.85rem;
     }
 
-    /* 手機版 (寬度 < 640px) 排版適應 */
     @media (max-width: 640px) {
       .hero-title { font-size: 2rem; }
       .hero-subtitle { font-size: 1.15rem; }
       .hero-description { font-size: 1rem; text-align: left; }
-      .card {
-        flex-direction: column;
-        height: auto;
-      }
-      .card-cover-wrapper {
-        width: 100%;
-        height: 200px;
-      }
-      .card-body {
-        width: 100%;
-      }
-      .btn-section-more {
-        position: static;
-        transform: none;
-        margin-left: auto;
-      }
-      .section-header {
-        justify-content: space-between;
-      }
-      .footer-container {
-        flex-direction: column;
-      }
+      .card { flex-direction: column; height: auto; }
+      .card-cover-wrapper { width: 100%; height: 200px; }
+      .card-body { width: 100%; }
+      .btn-section-more { position: static; transform: none; }
+      .btn-back-home { position: static; transform: none; }
+      .section-header { justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+      .footer-container { flex-direction: column; }
     }
   </style>
 </head>
@@ -427,7 +336,7 @@
     <nav>
       <a href="#" class="logo">My Portfolio</a>
       <ul class="nav-links">
-        <li><a href="#about">關於我</a></li>
+        <li><a href="#">關於我</a></li>
         <li><a href="#research">研究成果</a></li>
         <li><a href="#videos">影音作品</a></li>
         <li><a href="#plans">計畫作品</a></li>
@@ -437,7 +346,7 @@
     </nav>
   </header>
 
-  <!-- 全螢幕自我介紹區塊 (Hero Section) -->
+  <!-- 全螢幕自我介紹區塊 -->
   <section id="about" class="hero">
     <div class="hero-content">
       <h1 class="hero-title">你好，我是 [您的名字 / Your Name]</h1>
@@ -459,39 +368,42 @@
   <div class="container">
     <section id="research">
       <div class="section-header">
+        <a href="#" class="btn-back-home">← 返回首頁</a>
         <h2>研究成果</h2>
-        <!-- 您可以在 href 修改點擊後的目標網址 -->
-        <a href="#research" class="btn-section-more">更多內容</a>
+        <a href="#research-more" class="btn-section-more">更多內容</a>
       </div>
       <div id="research-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
     </section>
 
     <section id="videos">
       <div class="section-header">
+        <a href="#" class="btn-back-home">← 返回首頁</a>
         <h2>影音作品</h2>
-        <a href="#videos" class="btn-section-more">更多內容</a>
+        <a href="#videos-more" class="btn-section-more">更多內容</a>
       </div>
       <div id="videos-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
     </section>
 
     <section id="plans">
       <div class="section-header">
+        <a href="#" class="btn-back-home">← 返回首頁</a>
         <h2>計畫作品</h2>
-        <a href="#plans" class="btn-section-more">更多內容</a>
+        <a href="#plans-more" class="btn-section-more">更多內容</a>
       </div>
       <div id="plans-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
     </section>
 
     <section id="competitions">
       <div class="section-header">
+        <a href="#" class="btn-back-home">← 返回首頁</a>
         <h2>競賽獲獎</h2>
-        <a href="#competitions" class="btn-section-more">更多內容</a>
+        <a href="#competitions-more" class="btn-section-more">更多內容</a>
       </div>
       <div id="competitions-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
     </section>
   </div>
 
-  <!-- 網頁尾巴：聯絡資訊頁尾 -->
+  <!-- 聯絡資訊頁尾 -->
   <footer id="contact">
     <div class="footer-container">
       <div class="footer-info">
@@ -515,7 +427,17 @@
     const REPO = "MyWeb"; 
     const BRANCH = "main";
 
-    // 取得 YouTube ID 的輔助函數
+    // 首頁時，每個分類最多顯示幾張卡片？（可自訂）
+    const HOME_LIMIT = 2; 
+
+    // 快取所有資料，避免重複向 GitHub 請求
+    const cachedData = {
+      research: [],
+      videos: [],
+      plans: [],
+      competitions: []
+    };
+
     function getYoutubeId(url) {
       if (!url) return null;
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -523,36 +445,25 @@
       return (match && match[2].length === 11) ? match[2] : null;
     }
 
-    // 轉譯圖片網址
     function getImageUrl(path) {
       if (!path) return '';
-      
       let cleanPath = String(path).trim().replace(/^['"]|['"]$/g, '');
-
       if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://') || cleanPath.startsWith('blob:')) {
         return cleanPath;
       }
-
       cleanPath = cleanPath.replace(/^\//, '').replace(/^public\//, '');
-
       if (cleanPath.startsWith('assets/') || cleanPath.startsWith('static/')) {
         return `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${cleanPath}`;
       }
-
       return `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/static/${cleanPath}`;
     }
 
-    // 格式化 XY 焦點數值
     function formatFocal(val) {
       if (val === undefined || val === null || val === '') return '50%';
       let strVal = String(val).trim();
-      if (!strVal.endsWith('%')) {
-        strVal += '%';
-      }
-      return strVal;
+      return strVal.endsWith('%') ? strVal : strVal + '%';
     }
 
-    // Front Matter 解析器
     function parseFrontMatter(text) {
       const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
       if (!match) return { description: text };
@@ -575,43 +486,28 @@
       if (body && !data.description) {
         data.description = body;
       }
-
       return data;
     }
 
-    async function loadDirectoryFiles(folder, containerId, renderFn) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-
+    async function loadCategoryData(folder) {
       try {
         const apiUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/content/${folder}`;
         const res = await fetch(apiUrl);
-
-        if (res.status === 404) {
-          container.innerHTML = '<p class="empty-msg">尚無內容，請至後台新增。</p>';
-          return;
-        }
-
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        if (!res.ok) return [];
 
         const files = await res.json();
         const mdFiles = files.filter(f => f.name.endsWith('.md'));
+        const list = [];
 
-        if (mdFiles.length === 0) {
-          container.innerHTML = '<p class="empty-msg">尚無內容，請至後台新增。</p>';
-          return;
-        }
-
-        container.innerHTML = '';
         for (const file of mdFiles) {
           const rawRes = await fetch(file.download_url + '?t=' + new Date().getTime());
           const text = await rawRes.text();
-          const data = parseFrontMatter(text);
-          container.innerHTML += renderFn(data);
+          list.push(parseFrontMatter(text));
         }
+        return list;
       } catch (err) {
-        console.warn(`[${folder}] 讀取狀態:`, err);
-        container.innerHTML = `<p class="empty-msg">尚無內容，請至後台新增。</p>`;
+        console.warn(`[${folder}] 讀取失敗:`, err);
+        return [];
       }
     }
 
@@ -625,13 +521,12 @@
       }
     }
 
-    function renderResearch(data) {
+    // 渲染卡片 HTML
+    function renderResearchCard(data) {
       const tags = data.tags ? data.tags.split(/[,;]/).map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
       const hasLink = isValidUrl(data.link);
-      
       const focalX = formatFocal(data.focal_x);
       const focalY = formatFocal(data.focal_y);
-      
       const coverUrl = getImageUrl(data.cover);
       const coverHtml = coverUrl 
         ? `<div class="card-cover-wrapper"><img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.parentElement.style.display='none'"></div>` 
@@ -652,11 +547,10 @@
       `;
     }
 
-    function renderVideo(data) {
+    function renderVideoCard(data) {
       const focalX = formatFocal(data.focal_x);
       const focalY = formatFocal(data.focal_y);
       let coverUrl = getImageUrl(data.cover);
-
       if (!coverUrl && data.youtube_url) {
         const ytId = getYoutubeId(data.youtube_url);
         if (ytId) coverUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
@@ -680,7 +574,7 @@
       `;
     }
 
-    function renderProject(data) {
+    function renderProjectCard(data) {
       const focalX = formatFocal(data.focal_x);
       const focalY = formatFocal(data.focal_y);
       const coverUrl = getImageUrl(data.cover);
@@ -705,7 +599,7 @@
       `;
     }
 
-    function renderCompetition(data) {
+    function renderCompetitionCard(data) {
       const focalX = formatFocal(data.focal_x);
       const focalY = formatFocal(data.focal_y);
       const coverUrl = getImageUrl(data.cover);
@@ -730,11 +624,100 @@
       `;
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      loadDirectoryFiles('research', 'research-list', renderResearch);
-      loadDirectoryFiles('videos', 'videos-list', renderVideo);
-      loadDirectoryFiles('plans', 'plans-list', renderProject);
-      loadDirectoryFiles('competitions', 'competitions-list', renderCompetition);
+    // 根據目前的 Hash 切換視圖（首頁 vs 專屬更多內容頁面）
+    function handleRoute() {
+      const hash = window.location.hash;
+      const hero = document.getElementById('about');
+      const sections = {
+        research: document.getElementById('research'),
+        videos: document.getElementById('videos'),
+        plans: document.getElementById('plans'),
+        competitions: document.getElementById('competitions')
+      };
+
+      const renderMap = {
+        research: renderResearchCard,
+        videos: renderVideoCard,
+        plans: renderProjectCard,
+        competitions: renderCompetitionCard
+      };
+
+      // 判斷是否為點擊「更多內容」頁面
+      const isMorePage = hash.endsWith('-more');
+      const targetCategory = isMorePage ? hash.replace('#', '').replace('-more', '') : null;
+
+      if (isMorePage && sections[targetCategory]) {
+        // === 模式 2：單一分類「更多內容」視圖 ===
+        if (hero) hero.style.display = 'none';
+
+        Object.keys(sections).forEach(key => {
+          if (key === targetCategory) {
+            sections[key].style.display = 'block';
+            
+            // 顯示「返回首頁」，隱藏「更多內容」
+            const backBtn = sections[key].querySelector('.btn-back-home');
+            const moreBtn = sections[key].querySelector('.btn-section-more');
+            if (backBtn) backBtn.style.display = 'inline-block';
+            if (moreBtn) moreBtn.style.display = 'none';
+
+            // 渲染「全部」卡片
+            const container = document.getElementById(`${key}-list`);
+            const items = cachedData[key];
+            if (items.length === 0) {
+              container.innerHTML = '<p class="empty-msg">尚無內容。</p>';
+            } else {
+              container.innerHTML = items.map(renderMap[key]).join('');
+            }
+          } else {
+            sections[key].style.display = 'none';
+          }
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      } else {
+        // === 模式 1：完整首頁視圖 ===
+        if (hero) hero.style.display = 'flex';
+
+        Object.keys(sections).forEach(key => {
+          sections[key].style.display = 'block';
+
+          // 隱藏「返回首頁」，顯示「更多內容」
+          const backBtn = sections[key].querySelector('.btn-back-home');
+          const moreBtn = sections[key].querySelector('.btn-section-more');
+          if (backBtn) backBtn.style.display = 'none';
+          if (moreBtn) moreBtn.style.display = 'inline-block';
+
+          // 只渲染限制數量的卡片 (HOME_LIMIT)
+          const container = document.getElementById(`${key}-list`);
+          const items = cachedData[key].slice(0, HOME_LIMIT);
+          if (cachedData[key].length === 0) {
+            container.innerHTML = '<p class="empty-msg">尚無內容。</p>';
+          } else {
+            container.innerHTML = items.map(renderMap[key]).join('');
+          }
+        });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 載入所有 GitHub 資料並快取
+      const [research, videos, plans, competitions] = await Promise.all([
+        loadCategoryData('research'),
+        loadCategoryData('videos'),
+        loadCategoryData('plans'),
+        loadCategoryData('competitions')
+      ]);
+
+      cachedData.research = research;
+      cachedData.videos = videos;
+      cachedData.plans = plans;
+      cachedData.competitions = competitions;
+
+      // 根據當前網址渲染頁面
+      handleRoute();
+
+      // 監聽網址 Hash 改變事件（使用者點擊按鈕或上一頁/下一頁時）
+      window.addEventListener('hashchange', handleRoute);
     });
   </script>
 </body>
