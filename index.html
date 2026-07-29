@@ -196,7 +196,7 @@
       display: flex;
       flex-direction: row;
       overflow: hidden;
-      height: 270px;
+      min-height: 270px;
     }
     .card:hover {
       transform: translateY(-4px);
@@ -235,15 +235,14 @@
       line-height: 1.4;
       display: -webkit-box;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 1;
+      -webkit-line-clamp: 2;
       overflow: hidden;
     }
     .card .tags-wrapper {
       margin-bottom: 0.8rem;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 1;
-      overflow: hidden;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
     }
     .card .tag {
       display: inline-block;
@@ -253,14 +252,12 @@
       border-radius: 4px;
       font-size: 0.82rem;
       font-weight: 500;
-      margin-right: 0.4rem;
-      margin-bottom: 0.4rem;
     }
     .card p {
       color: #475569;
       font-size: 0.95rem;
-      margin-bottom: 0.8rem;      
-      word-break: break-all;
+      margin-bottom: 0.8rem;     
+      word-break: break-word;
       display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 3;
@@ -323,8 +320,7 @@
       .card { flex-direction: column; height: auto; }
       .card-cover-wrapper { width: 100%; height: 200px; }
       .card-body { width: 100%; }
-      .btn-section-more { position: static; transform: none; }
-      .btn-back-home { position: static; transform: none; }
+      .btn-section-more, .btn-back-home { position: static; transform: none; }
       .section-header { justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
       .footer-container { flex-direction: column; }
     }
@@ -426,11 +422,8 @@
     const USERNAME = "YuYiFang0323"; 
     const REPO = "MyWeb"; 
     const BRANCH = "main";
-
-    // 首頁時，每個分類最多顯示幾張卡片？（可自訂）
     const HOME_LIMIT = 2; 
 
-    // 快取所有資料，避免重複向 GitHub 請求
     const cachedData = {
       research: [],
       videos: [],
@@ -464,9 +457,11 @@
       return strVal.endsWith('%') ? strVal : strVal + '%';
     }
 
+    // 優化後的 Front Matter 解析器
     function parseFrontMatter(text) {
       const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
       if (!match) return { description: text };
+      
       const yamlText = match[1];
       const data = {};
       
@@ -496,6 +491,8 @@
         if (!res.ok) return [];
 
         const files = await res.json();
+        if (!Array.isArray(files)) return [];
+
         const mdFiles = files.filter(f => f.name.endsWith('.md'));
         const list = [];
 
@@ -521,7 +518,6 @@
       }
     }
 
-    // 渲染卡片 HTML
     function renderResearchCard(data) {
       const tags = data.tags ? data.tags.split(/[,;]/).map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
       const hasLink = isValidUrl(data.link);
@@ -624,7 +620,6 @@
       `;
     }
 
-    // 根據目前的 Hash 切換視圖（首頁 vs 專屬更多內容頁面）
     function handleRoute() {
       const hash = window.location.hash;
       const hero = document.getElementById('about');
@@ -642,25 +637,21 @@
         competitions: renderCompetitionCard
       };
 
-      // 判斷是否為點擊「更多內容」頁面
       const isMorePage = hash.endsWith('-more');
       const targetCategory = isMorePage ? hash.replace('#', '').replace('-more', '') : null;
 
       if (isMorePage && sections[targetCategory]) {
-        // === 模式 2：單一分類「更多內容」視圖 ===
         if (hero) hero.style.display = 'none';
 
         Object.keys(sections).forEach(key => {
           if (key === targetCategory) {
             sections[key].style.display = 'block';
             
-            // 顯示「返回首頁」，隱藏「更多內容」
             const backBtn = sections[key].querySelector('.btn-back-home');
             const moreBtn = sections[key].querySelector('.btn-section-more');
             if (backBtn) backBtn.style.display = 'inline-block';
             if (moreBtn) moreBtn.style.display = 'none';
 
-            // 渲染「全部」卡片
             const container = document.getElementById(`${key}-list`);
             const items = cachedData[key];
             if (items.length === 0) {
@@ -675,19 +666,16 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
       } else {
-        // === 模式 1：完整首頁視圖 ===
         if (hero) hero.style.display = 'flex';
 
         Object.keys(sections).forEach(key => {
           sections[key].style.display = 'block';
 
-          // 隱藏「返回首頁」，顯示「更多內容」
           const backBtn = sections[key].querySelector('.btn-back-home');
           const moreBtn = sections[key].querySelector('.btn-section-more');
           if (backBtn) backBtn.style.display = 'none';
           if (moreBtn) moreBtn.style.display = 'inline-block';
 
-          // 只渲染限制數量的卡片 (HOME_LIMIT)
           const container = document.getElementById(`${key}-list`);
           const items = cachedData[key].slice(0, HOME_LIMIT);
           if (cachedData[key].length === 0) {
@@ -696,11 +684,16 @@
             container.innerHTML = items.map(renderMap[key]).join('');
           }
         });
+
+        // 若為特定錨點（如 #research），自動滾動至該處
+        if (hash && hash !== '#' && sections[hash.replace('#', '')]) {
+          const targetSection = sections[hash.replace('#', '')];
+          targetSection.scrollIntoView({ behavior: 'smooth' });
+        }
       }
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // 載入所有 GitHub 資料並快取
       const [research, videos, plans, competitions] = await Promise.all([
         loadCategoryData('research'),
         loadCategoryData('videos'),
@@ -713,10 +706,7 @@
       cachedData.plans = plans;
       cachedData.competitions = competitions;
 
-      // 根據當前網址渲染頁面
       handleRoute();
-
-      // 監聽網址 Hash 改變事件（使用者點擊按鈕或上一頁/下一頁時）
       window.addEventListener('hashchange', handleRoute);
     });
   </script>
