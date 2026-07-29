@@ -162,16 +162,24 @@
       flex: 1;
     }
 
-    /* 各區塊標題設計 */
+    /* === 各區塊頂部 Header 排版（置右按鈕關鍵設定） === */
     section {
       margin-bottom: 4rem;
-      text-align: center;
       scroll-margin-top: 80px; /* 避免標題被固定導覽列遮擋 */
     }
+
+    .section-header {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
     section h2 {
       font-size: 2rem;
       color: #1e293b;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0;
       display: inline-block;
       position: relative;
     }
@@ -183,6 +191,30 @@
       background: #3b82f6;
       margin: 8px auto 0 auto;
       border-radius: 2px;
+    }
+
+    /* 綠色框框位置：置右的「更多內容」按鈕 */
+    .btn-section-more {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #3b82f6;
+      border: 1px solid #3b82f6;
+      background-color: #ffffff;
+      padding: 0.35rem 0.85rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn-section-more:hover {
+      background-color: #3b82f6;
+      color: #ffffff;
+      transform: translateY(-50%) translateY(-1px);
     }
 
     /* 橫向卡片容器（單欄） */
@@ -205,34 +237,10 @@
       flex-direction: row; /* 左右橫向 */
       overflow: hidden;
       height: 270px; /* 卡片舒適高度 */
-      position: relative; /* 供右上角「更多內容」按鈕定位 */
     }
     .card:hover {
       transform: translateY(-4px);
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    }
-
-    /* 置於第一張卡片右上角的「更多內容」按鈕 */
-    .btn-more-card {
-      position: absolute;
-      top: 1.2rem;
-      right: 1.2rem;
-      z-index: 10;
-      color: #3b82f6;
-      border: 1px solid #3b82f6;
-      background-color: #ffffff;
-      padding: 0.35rem 0.85rem;
-      border-radius: 6px;
-      text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 500;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-    .btn-more-card:hover {
-      background-color: #3b82f6;
-      color: #ffffff;
-      transform: translateY(-1px);
     }
 
     /* 左側封面圖片區塊 (佔約 38% 寬度) */
@@ -267,7 +275,6 @@
       color: #0f172a;
       margin-bottom: 0.8rem;
       line-height: 1.4;
-      padding-right: 5rem; /* 留出右上角按鈕空間，防止標題重疊 */
       display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 1; /* 限制顯示 1 行 */
@@ -384,7 +391,7 @@
       font-size: 0.85rem;
     }
 
-    /* 手機版 (寬度 < 640px) 自動轉回豎向，確保內容不擠壓 */
+    /* 手機版 (寬度 < 640px) 排版適應 */
     @media (max-width: 640px) {
       .hero-title { font-size: 2rem; }
       .hero-subtitle { font-size: 1.15rem; }
@@ -400,12 +407,13 @@
       .card-body {
         width: 100%;
       }
-      .card h3 {
-        padding-right: 0;
+      .btn-section-more {
+        position: static;
+        transform: none;
+        margin-left: auto;
       }
-      .btn-more-card {
-        top: 0.8rem;
-        right: 0.8rem;
+      .section-header {
+        justify-content: space-between;
       }
       .footer-container {
         flex-direction: column;
@@ -450,22 +458,35 @@
 
   <div class="container">
     <section id="research">
-      <h2>研究成果</h2>
+      <div class="section-header">
+        <h2>研究成果</h2>
+        <!-- 您可以在 href 修改點擊後的目標網址 -->
+        <a href="#research" class="btn-section-more">更多內容</a>
+      </div>
       <div id="research-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
     </section>
 
     <section id="videos">
-      <h2>影音作品</h2>
+      <div class="section-header">
+        <h2>影音作品</h2>
+        <a href="#videos" class="btn-section-more">更多內容</a>
+      </div>
       <div id="videos-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
     </section>
 
     <section id="plans">
-      <h2>計畫作品</h2>
+      <div class="section-header">
+        <h2>計畫作品</h2>
+        <a href="#plans" class="btn-section-more">更多內容</a>
+      </div>
       <div id="plans-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
     </section>
 
     <section id="competitions">
-      <h2>競賽獲獎</h2>
+      <div class="section-header">
+        <h2>競賽獲獎</h2>
+        <a href="#competitions" class="btn-section-more">更多內容</a>
+      </div>
       <div id="competitions-list" class="grid"><p class="empty-msg">正在載入資料...</p></div>
     </section>
   </div>
@@ -582,13 +603,11 @@
         }
 
         container.innerHTML = '';
-        for (let i = 0; i < mdFiles.length; i++) {
-          const file = mdFiles[i];
+        for (const file of mdFiles) {
           const rawRes = await fetch(file.download_url + '?t=' + new Date().getTime());
           const text = await rawRes.text();
           const data = parseFrontMatter(text);
-          const isFirst = (i === 0); // 判斷是否為該分類的第一張卡片
-          container.innerHTML += renderFn(data, isFirst);
+          container.innerHTML += renderFn(data);
         }
       } catch (err) {
         console.warn(`[${folder}] 讀取狀態:`, err);
@@ -606,7 +625,7 @@
       }
     }
 
-    function renderResearch(data, isFirst) {
+    function renderResearch(data) {
       const tags = data.tags ? data.tags.split(/[,;]/).map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
       const hasLink = isValidUrl(data.link);
       
@@ -618,11 +637,8 @@
         ? `<div class="card-cover-wrapper"><img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.parentElement.style.display='none'"></div>` 
         : '';
 
-      const moreBtnHtml = isFirst ? `<a href="#research" class="btn-more-card">更多內容</a>` : '';
-
       return `
         <div class="card">
-          ${moreBtnHtml}
           ${coverHtml}
           <div class="card-body">
             <div>
@@ -636,7 +652,7 @@
       `;
     }
 
-    function renderVideo(data, isFirst) {
+    function renderVideo(data) {
       const focalX = formatFocal(data.focal_x);
       const focalY = formatFocal(data.focal_y);
       let coverUrl = getImageUrl(data.cover);
@@ -650,11 +666,8 @@
         ? `<div class="card-cover-wrapper"><img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.parentElement.style.display='none'"></div>` 
         : '';
 
-      const moreBtnHtml = isFirst ? `<a href="#videos" class="btn-more-card">更多內容</a>` : '';
-
       return `
         <div class="card">
-          ${moreBtnHtml}
           ${coverHtml}
           <div class="card-body">
             <div>
@@ -667,7 +680,7 @@
       `;
     }
 
-    function renderProject(data, isFirst) {
+    function renderProject(data) {
       const focalX = formatFocal(data.focal_x);
       const focalY = formatFocal(data.focal_y);
       const coverUrl = getImageUrl(data.cover);
@@ -675,11 +688,8 @@
         ? `<div class="card-cover-wrapper"><img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.parentElement.style.display='none'"></div>` 
         : '';
 
-      const moreBtnHtml = isFirst ? `<a href="#plans" class="btn-more-card">更多內容</a>` : '';
-
       return `
         <div class="card">
-          ${moreBtnHtml}
           ${coverHtml}
           <div class="card-body">
             <div>
@@ -695,7 +705,7 @@
       `;
     }
 
-    function renderCompetition(data, isFirst) {
+    function renderCompetition(data) {
       const focalX = formatFocal(data.focal_x);
       const focalY = formatFocal(data.focal_y);
       const coverUrl = getImageUrl(data.cover);
@@ -703,11 +713,8 @@
         ? `<div class="card-cover-wrapper"><img src="${coverUrl}" class="card-cover" style="object-position: ${focalX} ${focalY};" alt="封面" onerror="this.parentElement.style.display='none'"></div>` 
         : '';
 
-      const moreBtnHtml = isFirst ? `<a href="#competitions" class="btn-more-card">更多內容</a>` : '';
-
       return `
         <div class="card">
-          ${moreBtnHtml}
           ${coverHtml}
           <div class="card-body">
             <div>
