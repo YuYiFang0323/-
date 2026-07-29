@@ -1,0 +1,9 @@
+---
+cover: assets/uploads/海綿寶寶.gif
+focal_x: 50%
+focal_y: 50%
+title: Exploring Healthy and Happy Governance Strategies in Aged and
+  Super-Aged  Cities Using an Objective Aggregated Decision-Making Model
+tags: Super-aged society; Health happiness; Governance policies; IDOCRIW;  ARAS
+description: 545456jmoiqhjwqnqlknwqkl545456jmoiqhjwqnql545456jmoiqhjwqnql545456jmoiqhjwqnql545456jmoiqhjwqnql545456jmoiqhjwqnql
+---
